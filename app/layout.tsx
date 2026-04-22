@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { VT323, Caveat } from "next/font/google"; //font import
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Font pixel
+const fontPixel = VT323({
+  weight: "400",
+  variable: "--font-pixel",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Font calligrafic
+const fontCalligrafico = Caveat({
+  variable: "--font-calligrafic",
   subsets: ["latin"],
 });
 
@@ -25,9 +28,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // 4. Inserisci le variabili CSS dei font nel tag HTML
+      className={`${fontPixel.variable} ${fontCalligrafico.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      {/* 5. Imposta un font di default per tutta l'app (es. il font pixelato) */}
+      <body className="min-h-full flex flex-col font-[family-name:var(--font-pixel)]">{children}</body>
     </html>
   );
 }

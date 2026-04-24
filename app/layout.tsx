@@ -16,7 +16,7 @@ const fontCalligrafico = Caveat({
 });
 
 export const metadata: Metadata = {
-  title: "ChatSimulator(really good one)",
+  title: "ChatSimulator (really good one)",
   description: "Really good chat simulator, now with games too!",
 };
 

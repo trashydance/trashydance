@@ -1,0 +1,84 @@
+Il branch backend/login-42 è pronto.
+Ho chiuso le issue #4 #5 #6 (database SQLite + Prisma + NextAuth con OAuth 42 e login locale bcrypt). Fai un git pull e leggi il .env.example per le chiavi.
+
+
+Report: Infrastruttura Login (42 OAuth + Credentials) & Database
+
+Questo documento riassume il lavoro completato nel branch `backend/login-42`. L'obiettivo è allineare il team sull'infrastruttura backend creata e definire i prossimi passi per il frontend.
+
+Cosa è stato fatto (Lavoro Backend Completato)
+Abbiamo gettato le fondamenta sicure per l'autenticazione e il database.
+Nello specifico, abbiamo risolto queste tre Issue:
+#4 Aggiungi database: Configurato un database SQLite locale (`dev.db`).
+#5 Configura ORM: Installato e configurato Prisma.
+#6 Aggiungi modulo di autenticazione: Configurato NextAuth per gestire sia il login con l'Intra 42, sia la registrazione locale con Email/Password (completamente criptata).
+
+Dettagli Tecnici & Scelte di Sicurezza
+1. Database Provvisorio (SQLite): Usiamo SQLite per sviluppare senza bloccarci su Docker. Passare a PostgreSQL sarà una modifica di 1 riga in futuro.
+2. Schema Prisma (`prisma/schema.prisma`): Generate le tabelle `User`, `Account` e `Session`.
+3. Sicurezza Password (bcrypt): Nel rispetto dei requisiti del *subject*, le password del login locale non sono mai in chiaro. Ho implementato un'API `/api/auth/register` che usa `bcryptjs` per applicare *Salting* e *Hashing* irreversibile prima di salvare in DB.
+4. NextAuth (`app/api/auth/[...nextauth]/route.ts`): Implementato il `FortyTwoProvider` e il `CredentialsProvider` (per accedere con la password criptata appena descritta).
+5. Pagina Registrazione UI (`/register`): Creata una prima pagina in stile "Dark/Pixel" che chiama l'API di registrazione e gestisce gli errori.
+
+
+
+A. Pagina di Login Custom (`app/login/page.tsx`)
+Bisogna creare una bella interfaccia utente per il login (simile a `/register`) e rimpiazzare quella brutta di default di NextAuth.
+Bottone "Entra con 42": deve lanciare la funzione `signIn("42-school")` importata da `next-auth/react`.
+Form Email/Password: deve lanciare `signIn("credentials", { email: "...", password: "..." })`.
+
+B. Protezione delle Rotte (Middleware)
+Attualmente tutte le pagine sono pubbliche. Bisogna creare un file `middleware.ts` nella root del progetto per reindirizzare automaticamente alla pagina `/login` chiunque provi ad accedere a rotte protette (es. `/game`, `/profile`) senza essere autenticato.
+
+C. Stato Utente nella Navbar
+Nel `layout.tsx` (o in un componente `Navbar`), bisogna usare l'hook `useSession()` per mostrare la UI corretta:
+Se non sei loggato: mostrare i bottoni "Accedi" / "Registrati".
+Se sei loggato (`session.user` è pieno): mostrare l'avatar, il nome e il bottone per fare Log Out usando `signOut()`.
+
+Le prossime 4 cose da fare da qui in poi secondo me sono:
+
+1.login/page.tsx — crea la pagina login custom (stile dark come /register già esistente). Per il bottone 42 chiami signIn("42-school"), per il form email/password chiami signIn("credentials", { email, password }). Zero fetch manuali, ci pensa NextAuth.
+2.middleware.ts nella root — ti mando il file già pronto sotto, protegge /game /chat /profile dall'accesso non autenticato.
+3.layout.tsx o componente Navbar — usa useSession() per mostrare i bottoni giusti: se non loggato → "Accedi" / "Registrati", se loggato → avatar + nome + signOut().
+
+Nota su SQLite: è temporaneo per sviluppare senza Docker. Quando passiamo a PostgreSQL cambia solo 1 riga in schema.prisma e l'URL nel .env — nessun codice da riscrivere.
+
+bozza middleware:
+typescript// middleware.ts  ← va nella ROOT del progetto (stesso livello di package.json)
+import { withAuth } from 'next-auth/middleware';
+import { NextResponse } from 'next/server';
+
+export default withAuth(
+  function middleware(req) {
+    // Qui puoi aggiungere logica extra in futuro
+    // es. bloccare utenti con ruolo "banned"
+    // const token = req.nextauth.token;
+    // if (token?.role === 'banned') return NextResponse.redirect(new URL('/login', req.url));
+    return NextResponse.next();
+  },
+  {
+    callbacks: {
+      // authorized viene chiamato PRIMA di caricare la pagina
+      // se restituisce false → redirect automatico a /login
+      authorized: ({ token }) => !!token,
+    },
+  }
+);
+
+// Queste sono le rotte protette — tutte le altre restano pubbliche
+export const config = {
+  matcher: [
+    '/game/:path*',
+    '/chat/:path*',
+    '/profile/:path*',
+    '/api/users/:path*',
+    '/api/friends/:path*',
+    '/api/messages/:path*',
+  ],
+};
+
+FAQ:
+"Perché SQLite e non PostgreSQL subito?" → Prisma astrare il DB. Cambiare database in futuro è 1 riga nel schema.prisma + URL nel .env, zero altro codice da toccare.
+"Il form login deve fare una fetch manuale all'API?" → No. signIn("credentials", { email, password }) di NextAuth gestisce tutto: manda i dati al backend, riceve il cookie, ricarica la sessione.
+"Perché non mettere if (!session) in ogni pagina invece del middleware?" → Il middleware gira server-side prima ancora che la pagina venga renderizzata. È più sicuro (non espone mai il contenuto) e si scrive una volta sola per tutte le rotte.
+"Perché bcrypt per le password?" → Il subject lo richiede esplicitamente: nessuna password in chiaro. bcrypt applica salting + hashing irreversibile — anche se il DB venisse compromesso, le password non sarebbero leggibili.

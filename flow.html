@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ft_transcendence — Piano di Lavoro</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #e8e8f0;
+    --text2: #8888a8;
+    --text3: #4a4a6a;
+    --be: #1e3a5f;
+    --be-border: #378ADD;
+    --be-text: #85B7EB;
+    --fe: #0f3d2b;
+    --fe-border: #1D9E75;
+    --fe-text: #5DCAA5;
+    --accent: #7F77DD;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
+
+  .page { max-width: 860px; margin: 0 auto; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 28px;
+    margin-bottom: 40px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .12em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .subtitle { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .leg { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text2); }
+  .leg-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+  .points-bar {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .pt-badge {
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+  }
+
+  .pt-total {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  /* Timeline */
+  .timeline { position: relative; }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .phase { padding-left: 56px; margin-bottom: 32px; position: relative; }
+
+  .phase-dot {
+    position: absolute;
+    left: 8px;
+    top: 16px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    z-index: 1;
+  }
+
+  .phase-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .phase-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .phase-title { font-size: 15px; font-weight: 600; color: #fff; }
+  .phase-subtitle { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .phase-badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .lanes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .lane {
+    padding: 14px 18px;
+    border-right: 1px solid var(--border);
+  }
+
+  .lane:last-child { border-right: none; }
+
+  .lane-tag {
+    font-size: 9px;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: .1em;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .lane-title { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 6px; line-height: 1.4; }
+
+  .task-list { list-style: none; }
+
+  .task-list li {
+    font-size: 11px;
+    color: var(--text2);
+    padding: 3px 0 3px 14px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .task-list li::before {
+    content: '›';
+    position: absolute;
+    left: 2px;
+    color: var(--text3);
+  }
+
+  .task-list li code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0 4px;
+    color: var(--text);
+  }
+
+  .checkpoint {
+    margin: 0;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .cp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .cp-text {
+    font-size: 11px;
+    font-weight: 500;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: .04em;
+  }
+
+  .cp-label {
+    font-size: 10px;
+    color: var(--text3);
+    margin-right: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: .08em;
+  }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: gap;
+  }
+
+  @media (max-width: 600px) {
+    .lanes { grid-template-columns: 1fr; }
+    .lane { border-right: none; border-bottom: 1px solid var(--border); }
+    body { padding: 24px 16px 60px; }
+    h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="tag">42 ROMA LUISS</div>
+    <h1>ft_transcendence</h1>
+    <p class="subtitle">Chat progressiva con minigiochi multiplayer — Piano di sviluppo del team</p>
+
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="background:var(--be-border)"></div>Backend — Node/Next.js</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--fe-border)"></div>Frontend — React</div>
+      <div class="leg"><div class="leg-dot" style="background:#b91c1c;border-radius:50%"></div>Checkpoint obbligatorio</div>
+    </div>
+
+    <div class="points-bar">
+      <div class="pt-badge">Framework major · 2pt</div>
+      <div class="pt-badge">Real-time major · 2pt</div>
+      <div class="pt-badge">Interazione major · 2pt</div>
+      <div class="pt-badge">Web game major · 2pt</div>
+      <div class="pt-badge">Remote players major · 2pt</div>
+      <div class="pt-badge">Chat avanzata minor · 1pt</div>
+      <div class="pt-badge">User stats minor · 1pt</div>
+      <div class="pt-badge pt-total">TOTALE · 14pt</div>
+    </div>
+  </header>
+
+  <div class="timeline">
+
+    <!-- FASE 1 -->
+    <div class="phase">
+      <div class="phase-dot" style="background:#1e2030;border:1px solid #4a4a6a;color:var(--text2)">1</div>
+      <div class="phase-card">
+        <div class="phase-header">
+          <div>
+            <div class="phase-title">Sblocco iniziale</div>
+            <div class="phase-subtitle">Server funzionante, auth mock, prime pagine</div>
+          </div>
+          <div class="phase-badge" style="background:#1a1a1a;color:var(--text2);border:1px solid var(--border2)">Week 1</div>
+        </div>
+        <div class="lanes">
+          <div class="lane">
+            <div class="lane-tag" style="color:var(--be-text)">BACKEND</div>
+            <div class="lane-title">Setup server.ts + NextAuth mock</div>
+            <ul class="task-list">
+              <li>Crea <code>server.ts</code> con http + Next.js</li>
+              <li>Installa e configura <code>next-auth</code></li>
+              <li>CredentialsProvider finto (utente hardcoded)</li>
+              <li>Testa <code>/api/auth/session</code> risponde</li>
+              <li>Setup <code>docker-compose.yml</code> base</li>
+            </ul>
+          </div>
+          <div class="lane">
+            <div class="lane-tag" style="color:var(--fe-text)">FRONTEND</div>
+            <div class="lane-title">Pagina /login + layout app</div>
+            <ul class="task-list">
+              <li>Crea <code>app/login/page.tsx</code> con bottone</li>
+              <li>Crea <code>app/dashboard/page.tsx</code> placeholder</li>
+              <li><code>SessionProvider</code> in layout.tsx</li>
+              <li><code>useSession()</code> per mostrare nome</li>
+              <li>Navbar base con link alle sezioni</li>
+            </ul>
+          </div>
+        </div>
+        <div class="checkpoint">
+          <div class="cp-label">CHECKPOINT</div>
+          <div class="cp-dot" style="background:#7F77DD"></div>
+          <div class="cp-text" style="color:#AFA9EC">Login finto funzionante — redirect a dashboard</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FASE 2 -->
+    <div class="phase">
+      <div class="phase-dot" style="background:#1a1a24;border:1px solid var(--fe-border);color:var(--fe-text)">2</div>
+      <div class="phase-card">
+        <div class="phase-header">
+          <div>
+            <div class="phase-title">Database & Profili</div>
+            <div class="phase-subtitle">PostgreSQL + Prisma + User Management · 2pt</div>
+          </div>
+          <div class="phase-badge" style="background:#0f3d2b;color:var(--fe-text);border:1px solid var(--fe-border)">Week 1–2</div>
+        </div>
+        <div class="lanes">
+          <div class="lane">
+            <div class="lane-tag" style="color:var(--be-text)">BACKEND</div>
+            <div class="lane-title">Schema Prisma + API utenti</div>
+            <ul class="task-list">
+              <li>Scrivi <code>prisma/schema.prisma</code> (User, Match, Message, Friend)</li>
+              <li>Aggiungi postgres + redis in docker-compose</li>
+              <li>Crea <code>src/lib/prisma.ts</code> singleton</li>
+              <li>Route <code>/api/users/[id]</code> GET e PATCH</li>
+              <li>Route <code>/api/friends</code> GET, POST, DELETE</li>
+            </ul>
+          </div>
+          <div class="lane">
+            <div class="lane-tag" style="color:var(--fe-text)">FRONTEND</div>
+            <div class="lane-title">Pagina profilo + amicizie UI</div>
+            <ul class="task-list">
+              <li>Crea <code>app/profile/[id]/page.tsx</code></li>
+              <li>Hook <code>useUser(id)</code> → fetch /api/users/id</li>
+              <li>Form aggiorna username con PATCH</li>
+              <li>Upload avatar (base64 → PATCH)</li>
+              <li>Lista amici + bottone aggiungi</li>
+            </ul>
+          </div>
+        </div>
+        <div class="checkpoint">
+          <div class="cp-label">CHECKPOINT</div>
+          <div class="cp-dot" style="background:#1D9E75"></div>
+          <div class="cp-text" style="color:#5DCAA5">Profilo salvato su DB — aggiornamento visibile subito</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FASE 3 -->
+    <div class="phase">
+      <div class="phase-dot" style="background:#1e3a5f;border:1px solid var(--be-border);color:var(--be-text)">3</div>
+      <div class="phase-card">
+        <div class="phase-header">
+          <div>
+            <div class="phase-title">OAuth reale con 42 + Middleware</div>
+            <div class="phase-subtitle">Framework major · 2pt</div>
+          </div>
+          <div class="phase-badge" style="background:#1e3a5f;color:var(--be-text);border:1px solid var(--be-border)">Week 2</div>
+        </div>
+        <div class="lanes">
+          <div class="lane">
+            <div class="lane-tag" style="color:var(--be-text)">BACKEND</div>
+            <div class="lane-title">Provider 42 + upsert + protezione route</div>
+            <ul class="task-list">
+              <li>Registra app su <code>intra.42.fr → API</code></li>
+              <li>Aggiungi custom OAuth provider 42</li>
+              <li>Callback <code>signIn</code> con <code>prisma.user.upsert</code></li>
+              <li>Callback <code>jwt</code> + <code>session</code> → espone userId</li>
+              <li>Scrivi <code>middleware.ts</code> → protegge /chat /game /profile</li>
+            </ul>
+          </div>
+          <div class="lane">
+            <div class="lane-tag" style="color:var(--fe-text)">FRONTEND</div>
+            <div class="lane-title">Bottone 42 reale + types</div>
+            <ul class="task-list">
+              <li>Aggiorna login con <code>signIn('42-school')</code></li>
+              <li>Loading state durante redirect OAuth</li>
+              <li>Aggiorna <code>types/next-auth.d.ts</code> per session.user.id</li>
+              <li>Testa con ngrok in locale</li>
+              <li>Gestione errori login (account bannato ecc.)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="checkpoint">
+          <div class="cp-label">CHECKPOINT</div>
+          <div class="cp-dot" style="background:#D85A30"></div>
+          <div class="cp-text" style="color:#F0997B">Login reale con Intra 42 — profilo salvato automaticamente</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FASE 4 -->
+    <div class="phase">
+      <div class="phase-dot" style="background:#1e3a5f;border:1px solid #7F77DD;color:#AFA9EC">4</div>
+      <div class="phase-card">
+        <div class="phase-header">
+          <div>
+            <div class="phase-title">Chat real-time + Sistema amicizie</div>
+            <div class="phase-subtitle">Real-time major + Interazione major · 4pt</div>
+          </div>
+          <div class="phase-badge" style="background:#26215C;color:#AFA9EC;border:1px solid #7F77DD">Week 3</div>
+        </div>
+        <div class="lanes">
+          <div class="lane">
+            <div class="lane-tag" style="color:var(--be-text)">BACKEND</div>
+            <div class="lane-title">WebSocket server + rooms + persistenza</div>
+            <ul class="task-list">
+              <li>Aggiungi <code>WebSocketServer</code> in server.ts su <code>/ws</code></li>
+              <li>Rooms: <code>Map&lt;roomId, Set&lt;WebSocket&gt;&gt;</code></li>
+              <li>Salva ogni msg: <code>prisma.message.create</code></li>
+              <li>Route <code>/api/messages/[room]</code> per history</li>
+              <li>Redis pub-sub per notifiche (online/offline)</li>
+              <li>Sistema blocco utenti (messaggio non arriva)</li>
+            </ul>
+          </div>
+          <div class="lane">
+            <div class="lane-tag" style="color:var(--fe-text)">FRONTEND</div>
+            <div class="lane-title">Hook useSocket + UI chat completa</div>
+            <ul class="task-list">
+              <li>Scrivi <code>hooks/useSocket.ts</code></li>
+              <li>Componente <code>ChatWindow.tsx</code></li>
+              <li>Componente <code>MessageInput.tsx</code></li>
+              <li>Carica history da <code>/api/messages/[room]</code></li>
+              <li>Sidebar: lista amici online/offline</li>
+              <li>UI per bloccare/sbloccare utenti</li>
+            </ul>
+          </div>
+        </div>
+        <div class="checkpoint">
+          <div class="cp-label">CHECKPOINT</div>
+          <div class="cp-dot" style="background:#7F77DD"></div>
+          <div class="cp-text" style="color:#AFA9EC">Messaggi tra due browser — history persistente al reload</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FASE 5 -->
+    <div class="phase">
+      <div class="phase-dot" style="background:#2a1f0a;border:1px solid #BA7517;color:#EF9F27">5</div>
+      <div class="phase-card">
+        <div class="phase-header">
+          <div>
+            <div class="phase-title">Minigiochi nella chat</div>
+            <div class="phase-subtitle">Web game major + Remote players major + Chat avanzata minor · 5pt</div>
+          </div>
+          <div class="phase-badge" style="background:#2a1f0a;color:#EF9F27;border:1px solid #BA7517">Week 4</div>
+        </div>
+        <div class="lanes">
+          <div class="lane">
+            <div class="lane-tag" style="color:var(--be-text)">BACKEND</div>
+            <div class="lane-title">Game engine su WebSocket + inviti da chat</div>
+            <ul class="task-list">
+              <li>Room tipo <code>game:matchId</code> separata dalla chat</li>
+              <li>Game loop <code>setInterval 16ms</code> server-side</li>
+              <li>Fisica minigioco (posizioni, collisioni, punteggio)</li>
+              <li>Comando <code>/invite @utente gioco</code> nella chat</li>
+              <li>Broadcast stato gioco a ogni frame</li>
+              <li>Salva partita con <code>prisma.match.create</code></li>
+            </ul>
+          </div>
+          <div class="lane">
+            <div class="lane-tag" style="color:var(--fe-text)">FRONTEND</div>
+            <div class="lane-title">UI minigiochi inline + inviti</div>
+            <ul class="task-list">
+              <li>Componente <code>GameEmbed.tsx</code> (Canvas inline nella chat)</li>
+              <li>Hook <code>useGame(matchId)</code> che ascolta lo stato WS</li>
+              <li>Render campo, entità, punteggio con Canvas</li>
+              <li>Input tastiera/mouse → invia al server via WS</li>
+              <li>Notifica in-chat di invito a giocare</li>
+              <li>Schermata risultato con link profilo avversario</li>
+            </ul>
+          </div>
+        </div>
+        <div class="checkpoint">
+          <div class="cp-label">CHECKPOINT</div>
+          <div class="cp-dot" style="background:#BA7517"></div>
+          <div class="cp-text" style="color:#EF9F27">Partita completa avviata da chat — risultato salvato su DB</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FASE 6 -->
+    <div class="phase">
+      <div class="phase-dot" style="background:#0a1e1a;border:1px solid #1D9E75;color:#5DCAA5">6</div>
+      <div class="phase-card">
+        <div class="phase-header">
+          <div>
+            <div class="phase-title">Statistiche + PWA + Deploy</div>
+            <div class="phase-subtitle">User stats minor · 1pt + PWA + Docker finale</div>
+          </div>
+          <div class="phase-badge" style="background:#0f3d2b;color:var(--fe-text);border:1px solid var(--fe-border)">Week 5</div>
+        </div>
+        <div class="lanes">
+          <div class="lane">
+            <div class="lane-tag" style="color:var(--be-text)">BACKEND</div>
+            <div class="lane-title">Route stats + Docker produzione</div>
+            <ul class="task-list">
+              <li>Route <code>/api/stats/[userId]</code> → vittorie, sconfitte, ratio</li>
+              <li>Route <code>/api/leaderboard</code> → top utenti</li>
+              <li>Dockerfile ottimizzato per Next.js</li>
+              <li>Nginx reverse proxy per WS + HTTP</li>
+              <li>Variabili .env in produzione</li>
+            </ul>
+          </div>
+          <div class="lane">
+            <div class="lane-tag" style="color:var(--fe-text)">FRONTEND</div>
+            <div class="lane-title">Dashboard stats + PWA manifest</div>
+            <ul class="task-list">
+              <li>Grafici vittorie/sconfitte su profilo</li>
+              <li>Pagina <code>/leaderboard</code></li>
+              <li>Cronologia partite cliccabili</li>
+              <li><code>public/manifest.json</code> + icone PWA</li>
+              <li>Service worker con <code>next-pwa</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="checkpoint">
+          <div class="cp-label">CHECKPOINT FINALE</div>
+          <div class="cp-dot" style="background:#1D9E75"></div>
+          <div class="cp-text" style="color:#5DCAA5">App installabile su mobile — Docker compose up e tutto gira</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /timeline -->
+
+  <footer>
+    <span>ft_transcendence · 42 Roma Luiss · 14pt target</span>
+    <span>Next.js · React · WebSocket · Prisma · PostgreSQL · Redis</span>
+  </footer>
+
+</div>
+</body>
+</html>

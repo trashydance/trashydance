@@ -26,10 +26,49 @@ body {
 }
 
 @keyframes unstabile {
-  0%, 100% { transform: rotate(-5deg); }
-  50% { transform: rotate(5deg); }
+
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+
+  50% {
+    transform: rotate(5deg);
+  }
 }
 
 .animate-unstabile {
   animation: unstabile 4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+@keyframes rock {
+
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+.animate-rock {
+  animation: rock 4s ease-in-out infinite;
 }

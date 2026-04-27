@@ -9,7 +9,7 @@ export default function Button({ text }: { text: string }) {
 	return (
 		<button
 			onClick={() => setIsClicked(!isClicked)}
-			className={`relative isolate w-48 h-32 text-gray-800 transition-all active:scale-95 ${isClicked ? "brightness-110 scale-105" : "hover:brightness-105"
+			className={`relative isolate w-72 h-48 translate-x-[5%] text-gray-800 transition-all active:scale-95 ${isClicked ? "brightness-110 scale-105" : "hover:brightness-105"
 				}`}
 		>
 			<div className="relative flex w-full h-full items-center justify-center animate-unstabile">
@@ -21,7 +21,7 @@ export default function Button({ text }: { text: string }) {
 					priority
 					className="object-contain drop-shadow-md -z-10"
 				/>
-				<span className="z-10 mt-6 text-3xl font-bold font-[family-name:var(--font-pixel)]">
+				<span className="z-10 mt-8 text-5xl font-bold font-[family-name:var(--font-pixel)]">
 					{isClicked ? "Works" : text}
 				</span>
 			</div>

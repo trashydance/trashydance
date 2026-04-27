@@ -1,3 +1,4 @@
+```mermaid
 graph TD
     classDef be fill:#1e3a5f,stroke:#378ADD,color:#85B7EB
     classDef fe fill:#0f3d2b,stroke:#1D9E75,color:#5DCAA5
@@ -50,3 +51,4 @@ graph TD
         F6A[FE: grafici profilo + manifest PWA + service worker]:::fe
         B6 & F6A --> C6{{CHECKPOINT FINALE: Docker up + app installabile}}:::cp
     end
+```

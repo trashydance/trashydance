@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { VT323, Caveat } from "next/font/google"; //font import
+import { Caveat, VT323 } from "next/font/google"; //font import
 import "./globals.css";
 
 // Font pixel

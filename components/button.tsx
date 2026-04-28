@@ -9,8 +9,9 @@ export default function Button({ text }: { text: string }) {
 	return (
 		<button
 			onClick={() => setIsClicked(!isClicked)}
-			className={`relative isolate w-72 h-48 translate-x-[5%] text-gray-800 transition-all active:scale-95 ${isClicked ? "brightness-110 scale-105" : "hover:brightness-105"
-				}`}
+			className={`relative isolate w-72 h-48 translate-x-[5%] text-gray-800 transition-all active:scale-95 ${
+				isClicked ? "brightness-110 scale-105" : "hover:brightness-105"
+			}`}
 		>
 			<div className="relative flex w-full h-full items-center justify-center animate-unstabile">
 				<Image

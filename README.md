@@ -27,6 +27,8 @@
 
 ## Technical Stack
 
+- Next.js
+
 ## Database Schema
 
 ## Features List

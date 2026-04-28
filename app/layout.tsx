@@ -28,11 +28,15 @@ export default function RootLayout({
 	return (
 		<html
 			lang="en"
+			suppressHydrationWarning
 			// 4. Inserisci le variabili CSS dei font nel tag HTML
 			className={`${fontPixel.variable} ${fontCalligrafico.variable} h-full antialiased`}
 		>
 			{/* 5. Imposta un font di default per tutta l'app (es. il font pixelato) */}
-			<body className="min-h-full flex flex-col font-[family-name:var(--font-pixel)]">
+			<body
+				className="min-h-full flex flex-col font-[family-name:var(--font-pixel)]"
+				suppressHydrationWarning
+			>
 				{children}
 			</body>
 		</html>

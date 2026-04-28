@@ -10,6 +10,19 @@
 
 ## Team Information
 
+- edforte
+	- Technical Lead
+	- Developer
+- fmartusc
+	- Product Owner
+	- Developer
+- lrocca
+	- Project Manager
+	- Developer
+- vzashev
+	- Technical Lead
+	- Developer
+
 ## Project Management
 
 ## Technical Stack

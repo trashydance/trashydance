@@ -5,7 +5,9 @@
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
-		"start": "next start"
+		"start": "next start",
+		"lint": "biome check .",
+		"preinstall": "npx only-allow pnpm"
 	},
 	"dependencies": {
 		"next": "16.2.4",

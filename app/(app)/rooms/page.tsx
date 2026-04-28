@@ -3,8 +3,8 @@ export default function Page() {
 		<>
 			<h1>Rooms list</h1>
 			<a href="new">New Room</a>
-			<a href="test">Room "test"</a>
-			<a href="test">User "test"</a>
+			<a href="test">Room &quot;test&quot;</a>
+			<a href="test">User &quot;test&quot;</a>
 			<a href="/settings">Settings</a>
 		</>
 	);

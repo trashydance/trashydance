@@ -1,8 +1,10 @@
+import Link from "next/link";
+
 export default function Page() {
 	return (
 		<>
 			<h1>Room stats</h1>
-			<a href="..">Room &quot;test&quot;</a>
+			<Link href="..">Room &quot;test&quot;</Link>
 		</>
 	);
 }

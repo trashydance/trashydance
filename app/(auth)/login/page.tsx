@@ -1,9 +1,11 @@
+import Link from "next/link";
+
 export default function Page() {
 	return (
 		<>
 			<h1>Login</h1>
-			<a href="/register">Register</a>
-			<a href="/rooms">Rooms</a>
+			<Link href="/register">Register</Link>
+			<Link href="/rooms">Rooms</Link>
 		</>
 	);
 }

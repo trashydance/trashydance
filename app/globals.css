@@ -1,74 +1,71 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+	--background: #ffffff;
+	--foreground: #171717;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--font-sans: var(--font-geist-sans);
+	--font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+	:root {
+		--background: #0a0a0a;
+		--foreground: #ededed;
+	}
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+	background: var(--background);
+	color: var(--foreground);
+	font-family: Arial, Helvetica, sans-serif;
 }
 
 @keyframes unstabile {
+	0%,
+	100% {
+		transform: rotate(-5deg);
+	}
 
-  0%,
-  100% {
-    transform: rotate(-5deg);
-  }
-
-  50% {
-    transform: rotate(5deg);
-  }
+	50% {
+		transform: rotate(5deg);
+	}
 }
 
 .animate-unstabile {
-  animation: unstabile 4s ease-in-out infinite;
+	animation: unstabile 4s ease-in-out infinite;
 }
 
 @keyframes breathe {
+	0%,
+	100% {
+		transform: scale(1);
+	}
 
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.05);
-  }
+	50% {
+		transform: scale(1.05);
+	}
 }
 
 .animate-breathe {
-  animation: breathe 3s ease-in-out infinite;
+	animation: breathe 3s ease-in-out infinite;
 }
 
 @keyframes rock {
+	0%,
+	100% {
+		transform: rotate(-3deg);
+	}
 
-  0%,
-  100% {
-    transform: rotate(-3deg);
-  }
-
-  50% {
-    transform: rotate(3deg);
-  }
+	50% {
+		transform: rotate(3deg);
+	}
 }
 
 .animate-rock {
-  animation: rock 4s ease-in-out infinite;
+	animation: rock 4s ease-in-out infinite;
 }

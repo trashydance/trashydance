@@ -33,7 +33,7 @@ export default function RootLayout({
 		<html
 			lang="en"
 			// 4. Inserisci le variabili CSS dei font nel tag HTML
-			className={cn("h-full", "antialiased", fontHeading.variable, fontCalligrafico.variable, "font-sans", inter.variable)}
+			className={cn("h-full", "antialiased", fontHeading.variable, fontCalligrafico.variable, "font-sans", inter.variable, "dark")}
 		>
 			{/* 5. Imposta un font di default per tutta l'app (es. il font pixelato) */}
 			<body className="min-h-full flex flex-col font-[family-name:var(--font-pixel)]">

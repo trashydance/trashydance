@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Caveat, VT323, Inter } from "next/font/google"; //font import
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -37,7 +38,7 @@ export default function RootLayout({
 		>
 			{/* 5. Imposta un font di default per tutta l'app (es. il font pixelato) */}
 			<body className="min-h-full flex flex-col font-[family-name:var(--font-pixel)]">
-				{children}
+				<TooltipProvider>{children}</TooltipProvider>
 			</body>
 		</html>
 	);

@@ -5,6 +5,7 @@ export function AppIcon(props: React.SVGProps<SVGSVGElement>) {
 			viewBox="0 0 31.43 22.01"
 			{...props}
 		>
+			<title>ChatSimulator</title>
 			<defs>
 				<style>{`.cls-1{fill:#f6f6f6;}.cls-2{fill:#1d1d1b;}`}</style>
 			</defs>

@@ -4,8 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
-
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 // Font for headings (VT323)
 const fontHeading = VT323({
@@ -34,7 +33,15 @@ export default function RootLayout({
 		<html
 			lang="en"
 			// 4. Inserisci le variabili CSS dei font nel tag HTML
-			className={cn("h-full", "antialiased", fontHeading.variable, fontCalligrafico.variable, "font-sans", inter.variable, "dark")}
+			className={cn(
+				"h-full",
+				"antialiased",
+				fontHeading.variable,
+				fontCalligrafico.variable,
+				"font-sans",
+				inter.variable,
+				"dark",
+			)}
 		>
 			{/* 5. Imposta un font di default per tutta l'app (es. il font pixelato) */}
 			<body className="min-h-full flex flex-col font-[family-name:var(--font-pixel)]">

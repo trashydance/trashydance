@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { AppIcon } from "@/components/icons/app-icon";
+import { OAuthButton } from "@/components/oauth-button";
 import { Button } from "@/components/ui/button";
 import {
 	Field,

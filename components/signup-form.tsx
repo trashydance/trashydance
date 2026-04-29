@@ -1,6 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { AppIcon } from "@/components/icons/app-icon";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -9,9 +10,8 @@ import {
 	FieldLabel,
 	FieldSeparator,
 } from "@/components/ui/field";
-import { AppIcon } from "@/components/icons/app-icon";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export function SignupForm({
 	className,

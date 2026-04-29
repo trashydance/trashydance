@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
 	Breadcrumb,
@@ -44,15 +44,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 						</BreadcrumbList>
 					</Breadcrumb>
 				</header>
-				<div className="flex flex-1 flex-col gap-4 p-4">
-					{children}
-					{Array.from({ length: 24 }).map((_, index) => (
-						<div
-							key={index}
-							className="aspect-video h-12 w-full rounded-lg bg-muted/50"
-						/>
-					))}
-				</div>
+				<div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
 			</SidebarInset>
 		</SidebarProvider>
 	);

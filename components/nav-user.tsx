@@ -1,5 +1,13 @@
 "use client";
 
+import {
+	BadgeCheckIcon,
+	BellIcon,
+	ChevronsUpDownIcon,
+	CreditCardIcon,
+	LogOutIcon,
+	SparklesIcon,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
@@ -16,14 +24,6 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
-import {
-	ChevronsUpDownIcon,
-	SparklesIcon,
-	BadgeCheckIcon,
-	CreditCardIcon,
-	BellIcon,
-	LogOutIcon,
-} from "lucide-react";
 
 export function NavUser({
 	user,

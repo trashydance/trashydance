@@ -1,7 +1,15 @@
 "use client";
 
+import {
+	ArchiveXIcon,
+	FileIcon,
+	InboxIcon,
+	SendIcon,
+	TerminalIcon,
+	Trash2Icon,
+} from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
-
 import { NavUser } from "@/components/nav-user";
 import { Label } from "@/components/ui/label";
 import {
@@ -18,15 +26,6 @@ import {
 	useSidebar,
 } from "@/components/ui/sidebar";
 import { Switch } from "@/components/ui/switch";
-import {
-	InboxIcon,
-	FileIcon,
-	SendIcon,
-	ArchiveXIcon,
-	Trash2Icon,
-	TerminalIcon,
-} from "lucide-react";
-import Link from "next/link";
 
 // This is sample data
 const data = {
@@ -242,8 +241,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					<SidebarGroup className="px-0">
 						<SidebarGroupContent>
 							{mails.map((mail) => (
-								<a
-									href="#"
+								<Link
+									href="/rooms/test"
 									key={mail.email}
 									className="flex flex-col items-start gap-2 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
 								>
@@ -255,7 +254,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 									<span className="line-clamp-2 w-[260px] text-xs whitespace-break-spaces">
 										{mail.teaser}
 									</span>
-								</a>
+								</Link>
 							))}
 						</SidebarGroupContent>
 					</SidebarGroup>

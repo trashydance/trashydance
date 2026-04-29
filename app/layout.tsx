@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Caveat, VT323, Inter } from "next/font/google"; //font import
+import { Caveat, Inter, VT323 } from "next/font/google"; //font import
 import "./globals.css";
-import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 

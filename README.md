@@ -38,7 +38,13 @@ This project supports OAuth via 42 Intra.
 
 ## Technical Stack
 
+- Database: SQLite
 - Next.js
+- Libraries
+	- ORM: Drizzle
+	- Authentication: BetterAuth
+	- Forms: React Hook Form
+	- Validation: zod
 
 ## Database Schema
 

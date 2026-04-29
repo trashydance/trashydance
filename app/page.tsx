@@ -3,12 +3,7 @@ import Button from "../components/button";
 
 export default function Home() {
 	return (
-		<main
-			// bg-[url('/sfondo.jpg')] carica l'immagine dalla cartella public
-			// bg-cover fa in modo che copra tutto lo schermo senza deformarsi
-			// bg-center centra l'immagine
-			className="flex flex-col h-screen w-screen items-center justify-center bg-[url('/title.jpg')] bg-cover bg-center overflow-hidden"
-		>
+		<main className="flex flex-col h-screen w-screen items-center justify-center bg-[url('/title.jpg')] bg-cover bg-center overflow-hidden">
 			<div className="flex flex-col items-center justify-center relative w-full max-w-[1400px] px-8 z-10 transform -translate-x-4 md:-translate-x-8">
 				<div className="relative w-full flex justify-center">
 					<Image

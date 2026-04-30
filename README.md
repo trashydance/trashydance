@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+*This project has been created as part of the 42 curriculum by edforte, fmartusc, lrocca, vzashev*
 
-## Getting Started
+# Trashydance
 
-First, run the development server:
+## Description
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Instructions
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Resources
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Team Information
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- edforte
+	- Technical Lead
+	- Developer
+- fmartusc
+	- Product Owner
+	- Developer
+- lrocca
+	- Project Manager
+	- Developer
+- vzashev
+	- Technical Lead
+	- Developer
 
-## Learn More
+## Project Management
 
-To learn more about Next.js, take a look at the following resources:
+## Technical Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Full Stack Framework: Next.js
+- Styling: TailwindCSS
+- UI Components: ShadcnUI
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Database Schema
 
-## Deploy on Vercel
+## Features List
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Modules
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Status | Section   | Module                                           | Type    | Points |
+|:------:|-----------|--------------------------------------------------|---------|-------:|
+| OK     | Web       | Full-Stack framework                             | Major   |      2 |
+|        | Web       | Real-time features using WebSockets              | Major   |      2 |
+|        | Web       | User interactions (basic chat, profile, friends) | Major   |      2 |
+| OK     | Web       | ORM                                              | _Minor_ |      1 |
+| ?      | Web       | Custom design system                             | _Minor_ |      1 |
+|        | User Mgmt | Standard user management                         | Major   |      2 |
+|        | User Mgmt | Game statistics and match history                | _Minor_ |      1 |
+| OK     | User Mgmt | OAuth 2.0                                        | _Minor_ |      1 |
+|        | User Mgmt | 2 Factor Authentication                          | _Minor_ |      1 |
+|        | Gaming    | Web-based game                                   | Major   |      2 |
+|        | Gaming    | Remote players                                   | Major   |      2 |
+|        | Gaming    | Multiplayer game                                 | Major   |      2 |
+| ?      | Gaming    | Advanced chat features                           | _Minor_ |      1 |
+|        | **Total** |                                                  |         | **20** |
+
+## Individual Contributions

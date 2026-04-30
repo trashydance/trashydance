@@ -5,7 +5,6 @@ import {
 	FileIcon,
 	InboxIcon,
 	SendIcon,
-	TerminalIcon,
 	Trash2Icon,
 } from "lucide-react";
 import Link from "next/link";
@@ -26,6 +25,7 @@ import {
 	useSidebar,
 } from "@/components/ui/sidebar";
 import { Switch } from "@/components/ui/switch";
+import { AppIcon } from "./icons/app-icon";
 
 // This is sample data
 const data = {
@@ -176,7 +176,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 							<SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
 								<Link href="/rooms">
 									<div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-primary-foreground">
-										<TerminalIcon className="size-6!" />
+										<AppIcon className="size-6!" />
 									</div>
 								</Link>
 							</SidebarMenuButton>

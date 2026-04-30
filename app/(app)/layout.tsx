@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
@@ -8,6 +9,7 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
 	SidebarInset,
@@ -44,7 +46,21 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 						</BreadcrumbList>
 					</Breadcrumb>
 				</header>
-				<div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+				<div className="flex flex-1 flex-col gap-4 p-4">
+					{children}
+					<footer>
+						<Link href="/privacy">
+							<Button variant="link" size="xs">
+								Privacy
+							</Button>
+						</Link>
+						<Link href="/terms">
+							<Button variant="link" size="xs">
+								Terms
+							</Button>
+						</Link>
+					</footer>
+				</div>
 			</SidebarInset>
 		</SidebarProvider>
 	);

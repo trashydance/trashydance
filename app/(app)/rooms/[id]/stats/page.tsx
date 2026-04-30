@@ -4,7 +4,7 @@ export default function Page() {
 	return (
 		<>
 			<h1>Room stats</h1>
-			<Link href="..">Room &quot;test&quot;</Link>
+			<Link href="/rooms/test">Room &quot;test&quot;</Link>
 		</>
 	);
 }

@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/components/ui"]
+		"includes": ["**", "!**/components/ui", "!**/drizzle"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -17,6 +17,9 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true
+		},
+		"domains": {
+			"drizzle": "all"
 		}
 	},
 	"javascript": {

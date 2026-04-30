@@ -6,8 +6,11 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "biome check .",
-		"preinstall": "npx only-allow pnpm"
+		"check": "biome check",
+		"lint": "biome lint",
+		"format": "biome format",
+		"preinstall": "npx only-allow pnpm",
+		"prepare": "husky"
 	},
 	"dependencies": {
 		"class-variance-authority": "^0.7.1",
@@ -27,6 +30,7 @@
 		"@types/node": "^20",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
+		"husky": "^9.1.7",
 		"tailwindcss": "^4",
 		"typescript": "^5"
 	}

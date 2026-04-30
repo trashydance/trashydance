@@ -27,7 +27,9 @@
 
 ## Technical Stack
 
-- Next.js
+- Full Stack Framework: Next.js
+- Styling: TailwindCSS
+- UI Components: ShadcnUI
 
 ## Database Schema
 

@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
-import { Caveat, VT323 } from "next/font/google";
+import { Caveat, Inter, VT323 } from "next/font/google";
 import "./globals.css";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
-const fontPixel = VT323({
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+
+const fontHeading = VT323({
 	weight: "400",
-	variable: "--font-pixel",
+	variable: "--font-heading",
 	subsets: ["latin"],
 });
 
@@ -26,10 +30,18 @@ export default function RootLayout({
 	return (
 		<html
 			lang="en"
-			className={`${fontPixel.variable} ${fontCalligrafico.variable} h-full antialiased`}
+			className={cn(
+				"h-full",
+				"antialiased",
+				fontHeading.variable,
+				fontCalligrafico.variable,
+				"font-sans",
+				inter.variable,
+				"dark",
+			)}
 		>
 			<body className="min-h-full flex flex-col font-[family-name:var(--font-pixel)]">
-				{children}
+				<TooltipProvider>{children}</TooltipProvider>
 			</body>
 		</html>
 	);

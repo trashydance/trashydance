@@ -16,6 +16,7 @@
 - fmartusc
 	- Product Owner
 	- Developer
+	- Designer
 - lrocca
 	- Project Manager
 	- Developer

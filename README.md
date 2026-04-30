@@ -39,7 +39,9 @@ This project supports OAuth via 42 Intra.
 ## Technical Stack
 
 - Database: SQLite
-- Next.js
+- Full Stack Framework: Next.js
+- Styling: TailwindCSS
+- UI Components: ShadcnUI
 - Libraries
 	- ORM: Drizzle
 	- Authentication: BetterAuth

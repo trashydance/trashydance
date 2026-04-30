@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { Caveat, VT323 } from "next/font/google"; //font import
+import { Caveat, Inter, VT323 } from "next/font/google"; //font import
 import "./globals.css";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
-// Font pixel
-const fontPixel = VT323({
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+
+// Font for headings (VT323)
+const fontHeading = VT323({
 	weight: "400",
-	variable: "--font-pixel",
+	variable: "--font-heading",
 	subsets: ["latin"],
 });
 
@@ -29,11 +33,19 @@ export default function RootLayout({
 		<html
 			lang="en"
 			// 4. Inserisci le variabili CSS dei font nel tag HTML
-			className={`${fontPixel.variable} ${fontCalligrafico.variable} h-full antialiased`}
+			className={cn(
+				"h-full",
+				"antialiased",
+				fontHeading.variable,
+				fontCalligrafico.variable,
+				"font-sans",
+				inter.variable,
+				"dark",
+			)}
 		>
 			{/* 5. Imposta un font di default per tutta l'app (es. il font pixelato) */}
 			<body className="min-h-full flex flex-col font-[family-name:var(--font-pixel)]">
-				{children}
+				<TooltipProvider>{children}</TooltipProvider>
 			</body>
 		</html>
 	);

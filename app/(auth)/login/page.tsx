@@ -1,13 +1,13 @@
-import Link from "next/link";
-import { LoginForm } from "@/components/auth/login-form";
+import { LoginForm as AuthLoginForm } from "@/components/auth/login-form";
+import { LoginForm } from "@/components/login-form";
 
 export default function Page() {
 	return (
-		<>
-			<h1>Login</h1>
-			<LoginForm />
-			<Link href="/register">Register</Link>
-			<Link href="/rooms">Rooms</Link>
-		</>
+		<div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
+			<div className="w-full max-w-sm">
+				<AuthLoginForm />
+				<LoginForm />
+			</div>
+		</div>
 	);
 }

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
-import Header from "@/components/header";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -46,7 +45,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 					</Breadcrumb>
 				</header>
 				<div className="flex flex-1 flex-col gap-4 p-4">
-					<Header />
 					{children}
 				</div>
 			</SidebarInset>

@@ -31,6 +31,12 @@ const INITIAL_ROOMS = [
 	},
 ];
 
+const toSafeRoomPathSegment = (value: unknown) => {
+	const normalized = String(value ?? "").trim();
+	const strict = normalized.match(/^[A-Za-z0-9_-]+$/)?.[0] ?? "";
+	return encodeURIComponent(strict || "invalid-room");
+};
+
 export default function RoomsPage() {
 	const router = useRouter();
 	const [isCreating, setIsCreating] = useState(false);
@@ -203,7 +209,10 @@ export default function RoomsPage() {
 													asChild
 													className="w-full bg-pink-500 text-white border-2 border-black font-bold uppercase py-6 rounded-xl hover:bg-pink-600 shadow-[4px_4px_0_0_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
 												>
-													<Link href={`/rooms/${room.id}`} className="w-full">
+													<Link
+														href={`/rooms/${toSafeRoomPathSegment(room.id)}`}
+														className="w-full"
+													>
 														<span className="w-full block text-center">
 															Enter
 														</span>

@@ -27,6 +27,7 @@ This project supports OAuth via 42 Intra.
 - fmartusc
 	- Product Owner
 	- Developer
+	- Designer
 - lrocca
 	- Project Manager
 	- Developer

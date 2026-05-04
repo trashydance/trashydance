@@ -177,3 +177,31 @@
 .animate-rock {
 	animation: rock 4s ease-in-out infinite;
 }
+
+.custom-scroll {
+	scrollbar-width: thin;
+	scrollbar-color: black transparent;
+}
+
+.custom-scroll::-webkit-scrollbar {
+	width: 14px;
+	height: 14px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+	background: transparent;
+	border-left: 4px solid black;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+	border: 3px solid black;
+	border-radius: 20px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:vertical {
+	background-color: white;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:horizontal {
+	background-color: white;
+}

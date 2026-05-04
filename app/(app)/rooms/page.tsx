@@ -199,11 +199,14 @@ export default function RoomsPage() {
 
 											<DialogFooter className="flex gap-4 sm:justify-start">
 												{/* TODO Backend: Passare l'ID reale all'href per entrare nella pagina della specifica stanza */}
-												<Link href={`/rooms/${room.id}`} className="w-full">
-													<Button className="w-full bg-pink-500 text-white border-2 border-black font-bold uppercase py-6 rounded-xl hover:bg-pink-600 shadow-[4px_4px_0_0_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
+												<Button
+													asChild
+													className="w-full bg-pink-500 text-white border-2 border-black font-bold uppercase py-6 rounded-xl hover:bg-pink-600 shadow-[4px_4px_0_0_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
+												>
+													<Link href={`/rooms/${room.id}`} className="w-full">
 														Enter
-													</Button>
-												</Link>
+													</Link>
+												</Button>
 											</DialogFooter>
 										</div>
 

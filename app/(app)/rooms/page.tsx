@@ -15,6 +15,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { authClient } from "@/lib/auth-client";
 
 // TODO Backend: Sostituire con una fetch reale per prendere la lista delle stanze attive dal server.
 const INITIAL_ROOMS = [
@@ -42,10 +43,7 @@ export default function RoomsPage() {
 	const [isCreating, setIsCreating] = useState(false);
 	const [roomToDelete, setRoomToDelete] = useState<string | null>(null);
 	const [rooms, setRooms] = useState<typeof INITIAL_ROOMS>([]);
-	const [userProfile, setUserProfile] = useState({
-		username: "Username",
-		avatarColor: "#ffffff",
-	});
+	const { data: session } = authClient.useSession();
 
 	// Carica stanze da LocalStorage (Mock Backend)
 	useEffect(() => {
@@ -55,12 +53,6 @@ export default function RoomsPage() {
 		} else {
 			setRooms(INITIAL_ROOMS);
 			localStorage.setItem("trashydance_rooms", JSON.stringify(INITIAL_ROOMS));
-		}
-
-		// Carica profilo utente
-		const savedProfile = localStorage.getItem("trashydance_user_profile");
-		if (savedProfile) {
-			setUserProfile(JSON.parse(savedProfile));
 		}
 	}, []);
 
@@ -90,28 +82,27 @@ export default function RoomsPage() {
         TODO Backend: L'avatar e il nome utente devono essere presi dall'attuale sessione utente (Auth)
       */}
 			<div className="absolute top-4 left-4 sm:top-8 sm:left-8 z-10">
-				<Link href="/settings">
+				<Link href="/profile">
 					<div className="flex items-center gap-3 bg-white border-2 border-black text-black rounded-full px-4 py-2 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all cursor-pointer group">
 						<Avatar
 							className="h-10 w-10 border-2 border-black"
-							style={{ backgroundColor: userProfile.avatarColor }}
+							style={{ backgroundColor: "#fff" }}
 						>
 							<AvatarImage src="/avatars/shadcn.jpg" />
 							<AvatarFallback
 								className="text-black font-bold"
-								style={{ backgroundColor: userProfile.avatarColor }}
+								style={{ backgroundColor: "#fff" }}
 							>
-								{userProfile.username.substring(0, 2).toUpperCase()}
+								{session?.user.name.substring(0, 2).toUpperCase()}
 							</AvatarFallback>
 						</Avatar>
 						<span className="font-bold text-lg tracking-wider uppercase group-hover:text-pink-600 transition-colors">
-							{userProfile.username}
+							{session?.user.name}
 						</span>
 					</div>
 				</Link>
 			</div>
 
-			{}
 			<div className="absolute top-4 right-4 sm:top-8 sm:right-8 z-10">
 				<Link
 					href="/settings"

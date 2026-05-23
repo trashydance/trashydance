@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { genericOAuth } from "better-auth/plugins";
+import { genericOAuth, username } from "better-auth/plugins";
 import * as schema from "@/schema/auth";
 import { PROJECT_NAME } from "./constants";
 import db from "./db";
@@ -18,6 +18,11 @@ export const auth = betterAuth({
 	},
 
 	plugins: [
+		username({
+			minUsernameLength: 3,
+			maxUsernameLength: 20,
+			usernameValidator: (value) => /^[a-zA-Z0-9_]+$/.test(value),
+		}),
 		genericOAuth({
 			config: [
 				{

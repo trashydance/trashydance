@@ -1,1 +1,1 @@
-export const PROJECT_NAME = "ChatSimulator";
+export const PROJECT_NAME = "trashydance";

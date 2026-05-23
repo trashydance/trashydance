@@ -38,30 +38,14 @@ export function LoginForm({
 		const { error } = await authClient.signIn.email({
 			email: data.email,
 			password: data.password,
-			callbackURL: "/rooms",
+			callbackURL: "/home",
 		});
 
 		if (!error) {
 			return;
 		}
 
-		const errorMessage = error.message ?? "";
-
-		const userNotFoundError =
-			error.code === "USER_NOT_FOUND" ||
-			errorMessage.includes("User not found");
-		const invalidPasswordError =
-			error.code === "INVALID_PASSWORD" ||
-			error.code === "INVALID_EMAIL_OR_PASSWORD" ||
-			errorMessage.includes("invalid password");
-
-		if (userNotFoundError) {
-			setApiError({ email: "User not found" });
-		} else if (invalidPasswordError) {
-			setApiError({ password: "Invalid password" });
-		} else {
-			setApiError({ general: errorMessage || "An error occurred" });
-		}
+		setApiError({ general: "Invalid credentials" });
 	};
 
 	return (

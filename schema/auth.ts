@@ -1,5 +1,14 @@
 import { relations, sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	check,
+	index,
+	integer,
+	sqliteTable,
+	text,
+	uniqueIndex,
+} from "drizzle-orm/sqlite-core";
+
+// ─── User ────────────────────────────────────────────────────────────────────
 
 export const user = sqliteTable("user", {
 	id: text("id").primaryKey(),
@@ -9,14 +18,21 @@ export const user = sqliteTable("user", {
 		.default(false)
 		.notNull(),
 	image: text("image"),
+	username: text("username").notNull().unique(),
+	displayUsername: text("display_username"),
+	lastSeenAt: integer("last_seen_at", { mode: "timestamp_ms" }).default(
+		sql`(cast(unixepoch('subsecond') * 1000 as integer))`,
+	),
 	createdAt: integer("created_at", { mode: "timestamp_ms" })
 		.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
 		.notNull(),
 	updatedAt: integer("updated_at", { mode: "timestamp_ms" })
 		.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
-		.$onUpdate(() => /* @__PURE__ */ new Date())
+		.$onUpdate(() => new Date())
 		.notNull(),
 });
+
+// ─── Session ─────────────────────────────────────────────────────────────────
 
 export const session = sqliteTable(
 	"session",
@@ -28,7 +44,7 @@ export const session = sqliteTable(
 			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
 			.notNull(),
 		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.$onUpdate(() => new Date())
 			.notNull(),
 		ipAddress: text("ip_address"),
 		userAgent: text("user_agent"),
@@ -38,6 +54,8 @@ export const session = sqliteTable(
 	},
 	(table) => [index("session_userId_idx").on(table.userId)],
 );
+
+// ─── Account ─────────────────────────────────────────────────────────────────
 
 export const account = sqliteTable(
 	"account",
@@ -63,11 +81,13 @@ export const account = sqliteTable(
 			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
 			.notNull(),
 		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.$onUpdate(() => new Date())
 			.notNull(),
 	},
 	(table) => [index("account_userId_idx").on(table.userId)],
 );
+
+// ─── Verification ────────────────────────────────────────────────────────────
 
 export const verification = sqliteTable(
 	"verification",
@@ -81,15 +101,98 @@ export const verification = sqliteTable(
 			.notNull(),
 		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
 			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
-			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.$onUpdate(() => new Date())
 			.notNull(),
 	},
 	(table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+// ─── Follow ──────────────────────────────────────────────────────────────────
+
+export const follow = sqliteTable(
+	"follow",
+	{
+		id: text("id").primaryKey(),
+		followerId: text("follower_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		followedId: text("followed_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
+			sql`(cast(unixepoch('subsecond') * 1000 as integer))`,
+		),
+	},
+	(table) => [
+		uniqueIndex("follow_pair_idx").on(table.followerId, table.followedId),
+		index("follow_followedId_idx").on(table.followedId),
+		check(
+			"follow_no_self_follow",
+			sql`${table.followerId} != ${table.followedId}`,
+		),
+	],
+);
+
+// ─── Conversation ────────────────────────────────────────────────────────────
+
+export const conversation = sqliteTable(
+	"conversation",
+	{
+		id: text("id").primaryKey(),
+		userAId: text("user_a_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		userBId: text("user_b_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
+			sql`(cast(unixepoch('subsecond') * 1000 as integer))`,
+		),
+		lastMessageAt: integer("last_message_at", { mode: "timestamp_ms" }).default(
+			sql`(cast(unixepoch('subsecond') * 1000 as integer))`,
+		),
+	},
+	(table) => [
+		uniqueIndex("conversation_pair_idx").on(table.userAId, table.userBId),
+		index("conversation_lastMessageAt_idx").on(table.lastMessageAt),
+	],
+);
+
+// ─── Message ─────────────────────────────────────────────────────────────────
+
+export const message = sqliteTable(
+	"message",
+	{
+		id: text("id").primaryKey(),
+		conversationId: text("conversation_id")
+			.notNull()
+			.references(() => conversation.id, { onDelete: "cascade" }),
+		senderId: text("sender_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		body: text("body").notNull(),
+		createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
+			sql`(cast(unixepoch('subsecond') * 1000 as integer))`,
+		),
+	},
+	(table) => [
+		index("message_conversation_created_idx").on(
+			table.conversationId,
+			table.createdAt,
+		),
+	],
+);
+
+// ─── Relations ───────────────────────────────────────────────────────────────
+
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	accounts: many(account),
+	followsAsFollower: many(follow, { relationName: "follower" }),
+	followsAsFollowed: many(follow, { relationName: "followed" }),
+	conversationsAsA: many(conversation, { relationName: "userA" }),
+	conversationsAsB: many(conversation, { relationName: "userB" }),
+	sentMessages: many(message, { relationName: "sender" }),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -103,5 +206,47 @@ export const accountRelations = relations(account, ({ one }) => ({
 	user: one(user, {
 		fields: [account.userId],
 		references: [user.id],
+	}),
+}));
+
+export const followRelations = relations(follow, ({ one }) => ({
+	follower: one(user, {
+		fields: [follow.followerId],
+		references: [user.id],
+		relationName: "follower",
+	}),
+	followed: one(user, {
+		fields: [follow.followedId],
+		references: [user.id],
+		relationName: "followed",
+	}),
+}));
+
+export const conversationRelations = relations(
+	conversation,
+	({ one, many }) => ({
+		userA: one(user, {
+			fields: [conversation.userAId],
+			references: [user.id],
+			relationName: "userA",
+		}),
+		userB: one(user, {
+			fields: [conversation.userBId],
+			references: [user.id],
+			relationName: "userB",
+		}),
+		messages: many(message),
+	}),
+);
+
+export const messageRelations = relations(message, ({ one }) => ({
+	conversation: one(conversation, {
+		fields: [message.conversationId],
+		references: [conversation.id],
+	}),
+	sender: one(user, {
+		fields: [message.senderId],
+		references: [user.id],
+		relationName: "sender",
 	}),
 }));

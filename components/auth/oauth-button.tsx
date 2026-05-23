@@ -19,7 +19,7 @@ export function OAuthButton({ setApiError, disabled }: OAuthButtonProps) {
 
 		const { error } = await authClient.signIn.oauth2({
 			providerId: "42",
-			callbackURL: "/rooms",
+			callbackURL: "/home",
 		});
 
 		if (error) {

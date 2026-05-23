@@ -8,6 +8,13 @@
       "when": 1777408857743,
       "tag": "0000_naive_spyke",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1779562258930,
+      "tag": "0001_fluffy_sandman",
+      "breakpoints": true
     }
   ]
 }

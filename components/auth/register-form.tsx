@@ -38,8 +38,9 @@ export function RegisterForm({
 		const { error } = await authClient.signUp.email({
 			email: data.email,
 			password: data.password,
-			name: data.email.split("@")[0],
-			callbackURL: "/rooms",
+			username: data.username,
+			name: data.username,
+			callbackURL: "/home",
 		});
 
 		if (!error) {
@@ -82,6 +83,22 @@ export function RegisterForm({
 							{apiError.general}
 						</div>
 					)}
+
+					<Field>
+						<FieldLabel htmlFor="username">Username</FieldLabel>
+						<Input
+							{...register("username")}
+							id="username"
+							type="text"
+							placeholder="cool_username"
+							disabled={isSubmitting}
+						/>
+						{(errors.username || apiError.username) && (
+							<p className="text-xs text-red-600">
+								{errors.username?.message || apiError.username}
+							</p>
+						)}
+					</Field>
 
 					<Field>
 						<FieldLabel htmlFor="email">Email</FieldLabel>

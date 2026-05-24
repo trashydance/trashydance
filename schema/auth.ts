@@ -18,8 +18,11 @@ export const user = sqliteTable("user", {
 		.default(false)
 		.notNull(),
 	image: text("image"),
-	username: text("username").notNull().unique(),
+	username: text("username").unique(),
 	displayUsername: text("display_username"),
+	twoFactorEnabled: integer("two_factor_enabled", { mode: "boolean" }).default(
+		false,
+	),
 	lastSeenAt: integer("last_seen_at", { mode: "timestamp_ms" }).default(
 		sql`(cast(unixepoch('subsecond') * 1000 as integer))`,
 	),
@@ -107,28 +110,54 @@ export const verification = sqliteTable(
 	(table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-// ─── Follow ──────────────────────────────────────────────────────────────────
+// ─── Two Factor ─────────────────────────────────────────────────────────────
 
-export const follow = sqliteTable(
-	"follow",
+export const twoFactor = sqliteTable(
+	"two_factor",
 	{
 		id: text("id").primaryKey(),
-		followerId: text("follower_id")
+		secret: text("secret").notNull(),
+		backupCodes: text("backup_codes").notNull(),
+		userId: text("user_id")
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
-		followedId: text("followed_id")
+		verified: integer("verified", { mode: "boolean" }).default(true),
+	},
+	(table) => [
+		index("two_factor_secret_idx").on(table.secret),
+		index("two_factor_userId_idx").on(table.userId),
+	],
+);
+
+// ─── Friend Request ─────────────────────────────────────────────────────────
+
+export const friendRequest = sqliteTable(
+	"friend_request",
+	{
+		id: text("id").primaryKey(),
+		senderId: text("sender_id")
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
+		receiverId: text("receiver_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		status: text("status", { enum: ["pending", "accepted", "rejected"] })
+			.notNull()
+			.default("pending"),
 		createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
 			sql`(cast(unixepoch('subsecond') * 1000 as integer))`,
 		),
+		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.$onUpdate(() => new Date()),
 	},
 	(table) => [
-		uniqueIndex("follow_pair_idx").on(table.followerId, table.followedId),
-		index("follow_followedId_idx").on(table.followedId),
+		uniqueIndex("friend_request_pair_idx").on(table.senderId, table.receiverId),
+		index("friend_request_receiverId_idx").on(table.receiverId),
+		index("friend_request_status_idx").on(table.status),
 		check(
-			"follow_no_self_follow",
-			sql`${table.followerId} != ${table.followedId}`,
+			"friend_request_no_self",
+			sql`${table.senderId} != ${table.receiverId}`,
 		),
 	],
 );
@@ -151,6 +180,8 @@ export const conversation = sqliteTable(
 		lastMessageAt: integer("last_message_at", { mode: "timestamp_ms" }).default(
 			sql`(cast(unixepoch('subsecond') * 1000 as integer))`,
 		),
+		userALastReadAt: integer("user_a_last_read_at", { mode: "timestamp_ms" }),
+		userBLastReadAt: integer("user_b_last_read_at", { mode: "timestamp_ms" }),
 	},
 	(table) => [
 		uniqueIndex("conversation_pair_idx").on(table.userAId, table.userBId),
@@ -170,7 +201,11 @@ export const message = sqliteTable(
 		senderId: text("sender_id")
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
-		body: text("body").notNull(),
+		body: text("body"),
+		fileName: text("file_name"),
+		fileUrl: text("file_url"),
+		fileType: text("file_type"),
+		fileSize: integer("file_size"),
 		createdAt: integer("created_at", { mode: "timestamp_ms" }).default(
 			sql`(cast(unixepoch('subsecond') * 1000 as integer))`,
 		),
@@ -188,8 +223,9 @@ export const message = sqliteTable(
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	accounts: many(account),
-	followsAsFollower: many(follow, { relationName: "follower" }),
-	followsAsFollowed: many(follow, { relationName: "followed" }),
+	twoFactors: many(twoFactor),
+	sentFriendRequests: many(friendRequest, { relationName: "sender" }),
+	receivedFriendRequests: many(friendRequest, { relationName: "receiver" }),
 	conversationsAsA: many(conversation, { relationName: "userA" }),
 	conversationsAsB: many(conversation, { relationName: "userB" }),
 	sentMessages: many(message, { relationName: "sender" }),
@@ -209,16 +245,23 @@ export const accountRelations = relations(account, ({ one }) => ({
 	}),
 }));
 
-export const followRelations = relations(follow, ({ one }) => ({
-	follower: one(user, {
-		fields: [follow.followerId],
+export const twoFactorRelations = relations(twoFactor, ({ one }) => ({
+	user: one(user, {
+		fields: [twoFactor.userId],
 		references: [user.id],
-		relationName: "follower",
 	}),
-	followed: one(user, {
-		fields: [follow.followedId],
+}));
+
+export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
+	sender: one(user, {
+		fields: [friendRequest.senderId],
 		references: [user.id],
-		relationName: "followed",
+		relationName: "sender",
+	}),
+	receiver: one(user, {
+		fields: [friendRequest.receiverId],
+		references: [user.id],
+		relationName: "receiver",
 	}),
 }));
 

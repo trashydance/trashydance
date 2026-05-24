@@ -21,10 +21,17 @@ export function useChatList() {
 		try {
 			const res = await fetch("/api/conversations");
 			if (res.ok) {
-				const data: Conversation[] = await res.json();
-				const friends = data.filter((c) => c.isFollowing);
-				const others = data.filter((c) => !c.isFollowing);
-				setConversations({ friends, others });
+				const data = await res.json();
+				if (Array.isArray(data)) {
+					const friends = data.filter((c: Conversation) => c.isFriend);
+					const others = data.filter((c: Conversation) => !c.isFriend);
+					setConversations({ friends, others });
+				} else {
+					setConversations({
+						friends: data.friends ?? [],
+						others: data.others ?? [],
+					});
+				}
 			}
 		} catch {
 			// Silently fail; user can reload
@@ -35,6 +42,11 @@ export function useChatList() {
 
 	useEffect(() => {
 		fetchConversations();
+		function onFocus() {
+			fetchConversations();
+		}
+		window.addEventListener("focus", onFocus);
+		return () => window.removeEventListener("focus", onFocus);
 	}, [fetchConversations]);
 
 	useEffect(() => {
@@ -50,25 +62,29 @@ export function useChatList() {
 				const allConvos = [...prev.friends, ...prev.others];
 				const idx = allConvos.findIndex((c) => c.id === data.conversationId);
 				if (idx === -1) {
-					// New conversation from someone unknown, refetch
 					fetchConversations();
 					return prev;
 				}
 
+				const conv = allConvos[idx];
+				const prevUnread =
+					(conv as Conversation & { unreadCount?: number }).unreadCount ?? 0;
+
 				const updated = {
-					...allConvos[idx],
+					...conv,
 					lastMessage: {
 						body: data.body,
 						createdAt: data.createdAt,
 						senderId: data.senderId,
 					},
+					unreadCount: prevUnread + 1,
 				};
 
 				const rest = allConvos.filter((c) => c.id !== data.conversationId);
 				const all = [updated, ...rest];
 				return {
-					friends: all.filter((c) => c.isFollowing),
-					others: all.filter((c) => !c.isFollowing),
+					friends: all.filter((c) => c.isFriend),
+					others: all.filter((c) => !c.isFriend),
 				};
 			});
 		}
@@ -79,5 +95,5 @@ export function useChatList() {
 		};
 	}, [socket, fetchConversations]);
 
-	return { conversations, isLoading };
+	return { conversations, isLoading, refetch: fetchConversations };
 }

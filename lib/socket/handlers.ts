@@ -1,8 +1,10 @@
 import { and, eq, or } from "drizzle-orm";
 import type { Server as SocketIOServer } from "socket.io";
 import db from "@/lib/db";
+import { getFriendIds } from "@/lib/friend-helpers";
+import { getNotificationCount } from "@/lib/notification-helpers";
 import { messageSchema } from "@/lib/validation/schemas";
-import { conversation, follow, message, user } from "@/schema/auth";
+import { conversation, message, user } from "@/schema/auth";
 import { socketAuthMiddleware } from "./auth";
 import { presence } from "./presence";
 
@@ -15,6 +17,7 @@ export function setupSocketHandlers(io: SocketIOServer): void {
 
 	io.on("connection", (socket) => {
 		const userId: string = socket.data.userId;
+		console.log(`[socket] connected: ${userId} (${socket.id})`);
 
 		// ── Presence: user comes online ────────────────────────────────
 		const justCameOnline = presence.addSocket(userId, socket.id);
@@ -29,11 +32,28 @@ export function setupSocketHandlers(io: SocketIOServer): void {
 				try {
 					const parsed = messageSchema.safeParse(payload);
 					if (!parsed.success) {
+						console.log(
+							"[socket] message:send validation failed:",
+							JSON.stringify(parsed.error.flatten()),
+							"payload:",
+							JSON.stringify(payload),
+						);
 						ack?.({ error: "Invalid message" });
 						return;
 					}
+					console.log(
+						"[socket] message:send parsed:",
+						JSON.stringify(parsed.data),
+					);
 
-					const data = payload as { conversationId?: string; body?: string };
+					const data = payload as {
+						conversationId?: string;
+						body?: string;
+						fileName?: string;
+						fileUrl?: string;
+						fileType?: string;
+						fileSize?: number;
+					};
 					const conversationId =
 						typeof data.conversationId === "string" ? data.conversationId : "";
 
@@ -72,7 +92,11 @@ export function setupSocketHandlers(io: SocketIOServer): void {
 								id: messageId,
 								conversationId,
 								senderId: userId,
-								body: parsed.data.body,
+								body: parsed.data.body || "",
+								fileName: parsed.data.fileName ?? null,
+								fileUrl: parsed.data.fileUrl ?? null,
+								fileType: parsed.data.fileType ?? null,
+								fileSize: parsed.data.fileSize ?? null,
 								createdAt: now,
 							})
 							.run();
@@ -87,21 +111,27 @@ export function setupSocketHandlers(io: SocketIOServer): void {
 						id: messageId,
 						conversationId,
 						senderId: userId,
-						body: parsed.data.body,
+						body: parsed.data.body || "",
+						fileName: parsed.data.fileName,
+						fileUrl: parsed.data.fileUrl,
+						fileType: parsed.data.fileType,
+						fileSize: parsed.data.fileSize,
 						createdAt: now.getTime(),
 					};
 
-					// Emit to both participants
+					// Emit only to the partner (sender gets the message via ack)
 					const partnerId =
 						conv.userAId === userId ? conv.userBId : conv.userAId;
 
-					// Emit to sender's sockets
-					for (const sid of presence.getSocketIds(userId)) {
+					const partnerSockets = presence.getSocketIds(partnerId);
+					for (const sid of partnerSockets) {
 						io.to(sid).emit("message:new", newMessage);
 					}
-					// Emit to partner's sockets
-					for (const sid of presence.getSocketIds(partnerId)) {
-						io.to(sid).emit("message:new", newMessage);
+
+					// Emit notification:count to the receiver (partner)
+					const partnerCounts = getNotificationCount(partnerId);
+					for (const sid of partnerSockets) {
+						io.to(sid).emit("notification:count", partnerCounts);
 					}
 
 					ack?.({ ok: true, message: newMessage });
@@ -151,22 +181,18 @@ export function setupSocketHandlers(io: SocketIOServer): void {
 }
 
 /**
- * Broadcast a presence update to all followers of the given user.
+ * Broadcast a presence update to all friends of the given user.
  */
 function broadcastPresence(
 	io: SocketIOServer,
 	userId: string,
 	status: "online" | "offline",
 ): void {
-	// Find all users who follow this user (they want to know when userId comes online/offline)
-	const followers = db
-		.select({ followerId: follow.followerId })
-		.from(follow)
-		.where(eq(follow.followedId, userId))
-		.all();
+	// Find all friends of this user (accepted friend requests in either direction)
+	const friendIds = getFriendIds(userId);
 
-	for (const { followerId } of followers) {
-		for (const sid of presence.getSocketIds(followerId)) {
+	for (const friendId of friendIds) {
+		for (const sid of presence.getSocketIds(friendId)) {
 			io.to(sid).emit("presence:update", { userId, status });
 		}
 	}

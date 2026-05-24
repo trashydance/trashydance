@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
 					.from(user)
 					.where(
 						and(
-							like(user.username, pattern),
+							or(like(user.username, pattern), like(user.name, pattern)),
 							or(...partnerIds.map((pid) => eq(user.id, pid))),
 						),
 					)
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
 			id: m.id,
 			conversationId: m.conversationId,
 			senderId: m.senderId,
-			body: m.body,
+			body: m.body ?? "",
 			createdAt: m.createdAt?.getTime() ?? null,
 			sender: {
 				name: m.senderName,

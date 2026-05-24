@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { User } from "@/lib/types";
+import type { FriendStatus, User } from "@/lib/types";
 
 interface SearchResult extends User {
-	isFollowing: boolean;
+	friendStatus: FriendStatus;
 }
 
 export function useSearch() {
@@ -36,7 +36,19 @@ export function useSearch() {
 			);
 			if (res.ok) {
 				const data = await res.json();
-				setResults(data.users ?? []);
+				const friends = (data.friends ?? data.following ?? []).map(
+					(u: User) => ({
+						...u,
+						friendStatus: "friends" as FriendStatus,
+					}),
+				);
+				const others = (data.others ?? data.notFollowing ?? []).map(
+					(u: User) => ({
+						...u,
+						friendStatus: "none" as FriendStatus,
+					}),
+				);
+				setResults([...friends, ...others]);
 			}
 		} catch (err) {
 			if (err instanceof DOMException && err.name === "AbortError") {

@@ -14,7 +14,10 @@ export function getSocket(): Socket {
 			path: "/socket.io",
 			transports: ["websocket", "polling"],
 			autoConnect: true,
+			reconnectionAttempts: 5,
+			reconnectionDelay: 2000,
 		});
+		socket.on("connect_error", () => {});
 	}
 	return socket;
 }

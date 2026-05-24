@@ -4,44 +4,41 @@ import { useEffect, useState } from "react";
 import { useSocket } from "./use-socket";
 
 export function usePresence(userIds: string[]) {
-	const { socket } = useSocket();
+	const { socket, isConnected } = useSocket();
 	const [onlineUsers, setOnlineUsers] = useState<Map<string, boolean>>(
 		new Map(),
 	);
 
 	useEffect(() => {
-		if (!socket || userIds.length === 0) return;
+		if (!socket || !isConnected || userIds.length === 0) return;
 
-		socket.emit("presence:subscribe", userIds);
-
-		function handlePresenceUpdate(data: { userId: string; online: boolean }) {
-			setOnlineUsers((prev) => {
-				const next = new Map(prev);
-				next.set(data.userId, data.online);
-				return next;
-			});
-		}
-
-		function handlePresenceBulk(
-			data: Array<{ userId: string; online: boolean }>,
-		) {
-			setOnlineUsers((prev) => {
-				const next = new Map(prev);
-				for (const entry of data) {
-					next.set(entry.userId, entry.online);
+		function handleSnapshot(data: Record<string, string>) {
+			setOnlineUsers(() => {
+				const next = new Map<string, boolean>();
+				for (const [uid, status] of Object.entries(data)) {
+					next.set(uid, status === "online");
 				}
 				return next;
 			});
 		}
 
-		socket.on("presence:update", handlePresenceUpdate);
-		socket.on("presence:bulk", handlePresenceBulk);
+		function handleUpdate(data: { userId: string; status: string }) {
+			setOnlineUsers((prev) => {
+				const next = new Map(prev);
+				next.set(data.userId, data.status === "online");
+				return next;
+			});
+		}
+
+		socket.on("presence:snapshot", handleSnapshot);
+		socket.on("presence:update", handleUpdate);
+		socket.emit("presence:subscribe", { userIds });
 
 		return () => {
-			socket.off("presence:update", handlePresenceUpdate);
-			socket.off("presence:bulk", handlePresenceBulk);
+			socket.off("presence:snapshot", handleSnapshot);
+			socket.off("presence:update", handleUpdate);
 		};
-	}, [socket, userIds]);
+	}, [socket, isConnected, userIds.length, userIds]);
 
 	return onlineUsers;
 }

@@ -3,7 +3,7 @@
 import { CalendarDays, Pencil } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { FollowToggle } from "@/components/feature/follow-toggle";
+import { FriendRequestButton } from "@/components/feature/friend-request-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,7 +33,7 @@ export default function ProfilePage() {
 		async function fetchProfile() {
 			setIsLoading(true);
 			try {
-				const res = await fetch(`/api/users/${params.username}`);
+				const res = await fetch(`/api/profile/${params.username}`);
 				if (res.ok) {
 					const data = await res.json();
 					setProfile(data);
@@ -51,7 +51,7 @@ export default function ProfilePage() {
 	const handleSaveImage = useCallback(async () => {
 		setSaving(true);
 		try {
-			const res = await fetch("/api/users/me", {
+			const res = await fetch("/api/profile", {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ image: imageUrl || null }),
@@ -77,7 +77,6 @@ export default function ProfilePage() {
 				<Skeleton className="h-4 w-60" />
 				<div className="flex gap-8">
 					<Skeleton className="h-12 w-20" />
-					<Skeleton className="h-12 w-20" />
 				</div>
 			</div>
 		);
@@ -92,7 +91,8 @@ export default function ProfilePage() {
 		);
 	}
 
-	const initials = profile.username.slice(0, 2).toUpperCase();
+	const displayName = profile.username || profile.name;
+	const initials = displayName.slice(0, 2).toUpperCase();
 	const joinDate = new Date(profile.createdAt).toLocaleDateString("en-US", {
 		month: "long",
 		year: "numeric",
@@ -106,14 +106,14 @@ export default function ProfilePage() {
 					className="size-24 border-2 border-foreground shadow-[4px_4px_0px_0px] shadow-foreground"
 				>
 					{profile.image && (
-						<AvatarImage src={profile.image} alt={profile.username} />
+						<AvatarImage src={profile.image} alt={displayName} />
 					)}
 					<AvatarFallback className="text-2xl">{initials}</AvatarFallback>
 				</Avatar>
 			</div>
 
 			<div className="text-center">
-				<h1 className="font-heading text-2xl font-bold">{profile.username}</h1>
+				<h1 className="font-heading text-2xl font-bold">{displayName}</h1>
 				{profile.name !== profile.username && (
 					<p className="text-muted-foreground">{profile.name}</p>
 				)}
@@ -123,19 +123,11 @@ export default function ProfilePage() {
 				</div>
 			</div>
 
-			<div className="flex gap-8">
-				<div className="text-center">
-					<span className="block font-heading text-xl font-bold">
-						{profile.followerCount}
-					</span>
-					<span className="text-xs text-muted-foreground">Followers</span>
-				</div>
-				<div className="text-center">
-					<span className="block font-heading text-xl font-bold">
-						{profile.followingCount}
-					</span>
-					<span className="text-xs text-muted-foreground">Following</span>
-				</div>
+			<div className="text-center">
+				<span className="block font-heading text-xl font-bold">
+					{profile.friendCount}
+				</span>
+				<span className="text-xs text-muted-foreground">Friends</span>
 			</div>
 
 			{profile.isOwnProfile ? (
@@ -166,9 +158,10 @@ export default function ProfilePage() {
 					</DialogContent>
 				</Dialog>
 			) : (
-				<FollowToggle
-					userId={profile.username}
-					initialIsFollowing={profile.isFollowedByMe}
+				<FriendRequestButton
+					userId={displayName}
+					initialStatus={profile.friendStatus}
+					requestId={profile.friendRequestId}
 				/>
 			)}
 		</div>

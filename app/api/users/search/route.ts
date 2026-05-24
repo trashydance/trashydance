@@ -1,14 +1,15 @@
-import { and, eq, like, ne, or } from "drizzle-orm";
+import { and, like, ne, or } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { getAuthSession } from "@/lib/auth-session";
 import db from "@/lib/db";
+import { getFriendIds } from "@/lib/friend-helpers";
 import { searchQuerySchema } from "@/lib/validation/schemas";
-import { follow, user } from "@/schema/auth";
+import { user } from "@/schema/auth";
 
 /**
  * GET /api/users/search?q=...
  * Search users by username (case-insensitive LIKE).
- * Returns results grouped by follow status. Excludes the current user.
+ * Returns results grouped by friend status. Excludes the current user.
  */
 export async function GET(request: NextRequest) {
 	const session = await getAuthSession();
@@ -27,42 +28,47 @@ export async function GET(request: NextRequest) {
 	}
 
 	const { q } = parsed.data;
-	const pattern = `%${q}%`;
 
-	// Search users by username, case-insensitive
-	const users = db
-		.select({
-			id: user.id,
-			name: user.name,
-			username: user.username,
-			image: user.image,
-		})
-		.from(user)
-		.where(and(like(user.username, pattern), ne(user.id, userId)))
-		.limit(50)
-		.all();
+	// If no query, return all users; otherwise filter by name/username
+	const users = q.trim()
+		? db
+				.select({
+					id: user.id,
+					name: user.name,
+					username: user.username,
+					image: user.image,
+				})
+				.from(user)
+				.where(
+					and(
+						ne(user.id, userId),
+						or(like(user.username, `%${q}%`), like(user.name, `%${q}%`)),
+					),
+				)
+				.limit(50)
+				.all()
+		: db
+				.select({
+					id: user.id,
+					name: user.name,
+					username: user.username,
+					image: user.image,
+				})
+				.from(user)
+				.where(ne(user.id, userId))
+				.limit(50)
+				.all();
 
 	if (users.length === 0) {
-		return Response.json({ following: [], notFollowing: [] });
+		return Response.json({ friends: [], others: [] });
 	}
 
-	// Check follow status for all found users
-	const userIds = users.map((u) => u.id);
-	const myFollows = db
-		.select({ followedId: follow.followedId })
-		.from(follow)
-		.where(
-			and(
-				eq(follow.followerId, userId),
-				or(...userIds.map((uid) => eq(follow.followedId, uid))),
-			),
-		)
-		.all();
+	// Get friend IDs (accepted friend requests)
+	const friendIdList = getFriendIds(userId);
+	const friendSet = new Set(friendIdList);
 
-	const followedSet = new Set(myFollows.map((f) => f.followedId));
+	const friends = users.filter((u) => friendSet.has(u.id));
+	const others = users.filter((u) => !friendSet.has(u.id));
 
-	const following = users.filter((u) => followedSet.has(u.id));
-	const notFollowing = users.filter((u) => !followedSet.has(u.id));
-
-	return Response.json({ following, notFollowing });
+	return Response.json({ friends, others });
 }

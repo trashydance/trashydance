@@ -20,12 +20,13 @@ export function useChat(conversationId: string) {
 					`/api/conversations/${conversationId}/messages?limit=50`,
 				);
 				if (res.ok) {
-					const data: Message[] = await res.json();
-					setMessages(data);
-					if (data.length > 0) {
-						cursorRef.current = data[0].id;
+					const json = await res.json();
+					const data: Message[] = json.messages ?? json;
+					setMessages(data.reverse());
+					setHasMore(json.hasMore ?? data.length === 50);
+					if (json.nextCursor) {
+						cursorRef.current = json.nextCursor;
 					}
-					setHasMore(data.length === 50);
 				}
 			} catch {
 				// Silently fail
@@ -69,12 +70,15 @@ export function useChat(conversationId: string) {
 				`/api/conversations/${conversationId}/messages?${params.toString()}`,
 			);
 			if (res.ok) {
-				const data: Message[] = await res.json();
+				const json = await res.json();
+				const data: Message[] = json.messages ?? json;
 				if (data.length > 0) {
-					cursorRef.current = data[0].id;
-					setMessages((prev) => [...data, ...prev]);
+					setMessages((prev) => [...data.reverse(), ...prev]);
 				}
-				setHasMore(data.length === 50);
+				setHasMore(json.hasMore ?? data.length === 50);
+				if (json.nextCursor) {
+					cursorRef.current = json.nextCursor;
+				}
 			}
 		} catch {
 			// Silently fail
@@ -82,18 +86,73 @@ export function useChat(conversationId: string) {
 	}, [conversationId, hasMore, isLoading]);
 
 	const sendMessage = useCallback(
-		async (body: string) => {
+		async (
+			body: string,
+			fileInfo?: {
+				fileName: string;
+				fileUrl: string;
+				fileType: string;
+				fileSize: number;
+			},
+		) => {
 			const tempId = `temp-${crypto.randomUUID()}`;
 			const optimisticMessage: Message = {
 				id: tempId,
 				conversationId,
-				senderId: "", // Will be filled by the caller
+				senderId: "",
 				body,
 				createdAt: new Date().toISOString(),
 				status: "sending",
+				...(fileInfo && {
+					fileName: fileInfo.fileName,
+					fileUrl: fileInfo.fileUrl,
+					fileType: fileInfo.fileType,
+					fileSize: fileInfo.fileSize,
+				}),
 			};
 
 			setMessages((prev) => [...prev, optimisticMessage]);
+
+			// Mark chat as read since user is actively viewing it
+			fetch(`/api/conversations/${conversationId}/read`, {
+				method: "POST",
+			}).catch(() => {});
+
+			const payload = {
+				conversationId,
+				body,
+				...(fileInfo && {
+					fileName: fileInfo.fileName,
+					fileUrl: fileInfo.fileUrl,
+					fileType: fileInfo.fileType,
+					fileSize: fileInfo.fileSize,
+				}),
+			};
+
+			if (socket?.connected) {
+				socket.emit(
+					"message:send",
+					payload,
+					(res: { ok?: boolean; message?: Message; error?: string }) => {
+						if (res?.ok && res.message) {
+							setMessages((prev) =>
+								prev.map((m) =>
+									m.id === tempId
+										? { ...(res.message as Message), status: "sent" as const }
+										: m,
+								),
+							);
+						} else {
+							setMessages((prev) =>
+								prev.map((m) =>
+									m.id === tempId ? { ...m, status: "error" as const } : m,
+								),
+							);
+						}
+					},
+				);
+				return;
+			}
 
 			try {
 				const res = await fetch(
@@ -101,7 +160,7 @@ export function useChat(conversationId: string) {
 					{
 						method: "POST",
 						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ body }),
+						body: JSON.stringify(payload),
 					},
 				);
 
@@ -127,7 +186,7 @@ export function useChat(conversationId: string) {
 				);
 			}
 		},
-		[conversationId],
+		[conversationId, socket],
 	);
 
 	const retryMessage = useCallback(
@@ -135,7 +194,16 @@ export function useChat(conversationId: string) {
 			const msg = messages.find((m) => m.id === messageId);
 			if (msg?.status === "error") {
 				setMessages((prev) => prev.filter((m) => m.id !== messageId));
-				sendMessage(msg.body);
+				const fileInfo =
+					msg.fileName && msg.fileUrl && msg.fileType && msg.fileSize
+						? {
+								fileName: msg.fileName,
+								fileUrl: msg.fileUrl,
+								fileType: msg.fileType,
+								fileSize: msg.fileSize,
+							}
+						: undefined;
+				sendMessage(msg.body, fileInfo);
 			}
 		},
 		[messages, sendMessage],

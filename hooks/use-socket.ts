@@ -12,9 +12,14 @@ export function useSocket() {
 	useEffect(() => {
 		if (!globalSocket) {
 			globalSocket = io({
-				path: "/api/socket",
+				path: "/socket.io",
+				transports: ["polling", "websocket"],
 				autoConnect: true,
+				withCredentials: true,
+				reconnectionAttempts: 5,
+				reconnectionDelay: 2000,
 			});
+			globalSocket.on("connect_error", () => {});
 		}
 
 		const socket = globalSocket;

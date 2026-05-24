@@ -1,30 +1,41 @@
 import { z } from "zod";
 
 /** Message body validation */
-export const messageSchema = z.object({
-	body: z
-		.string()
-		.min(1, "Message cannot be empty")
-		.max(2000, "Message cannot exceed 2000 characters")
-		.transform((v) => v.trim()),
-});
+export const messageSchema = z
+	.object({
+		body: z
+			.string()
+			.max(2000, "Message cannot exceed 2000 characters")
+			.transform((v) => v.trim())
+			.optional()
+			.default(""),
+		fileName: z.string().optional(),
+		fileUrl: z.string().optional(),
+		fileType: z.string().optional(),
+		fileSize: z.number().optional(),
+	})
+	.refine((data) => data.body.length > 0 || data.fileUrl, {
+		message: "Message must have text or a file attachment",
+	});
 
 /** Create or get an existing conversation */
 export const createConversationSchema = z.object({
 	otherUserId: z.string().min(1, "User ID is required"),
 });
 
-/** Follow a user */
-export const followSchema = z.object({
-	followedId: z.string().min(1, "User ID is required"),
+/** Send a friend request */
+export const friendRequestSchema = z.object({
+	receiverId: z.string().min(1),
+});
+
+/** Accept or reject a friend request */
+export const friendRequestActionSchema = z.object({
+	action: z.enum(["accept", "reject"]),
 });
 
 /** Search query */
 export const searchQuerySchema = z.object({
-	q: z
-		.string()
-		.min(1, "Search query is required")
-		.max(100, "Search query is too long"),
+	q: z.string().max(100, "Search query is too long").default(""),
 });
 
 /** Registration */
@@ -64,7 +75,10 @@ export const updateProfileSchema = z.object({
 
 export type MessageInput = z.infer<typeof messageSchema>;
 export type CreateConversationInput = z.infer<typeof createConversationSchema>;
-export type FollowInput = z.infer<typeof followSchema>;
+export type FriendRequestInput = z.infer<typeof friendRequestSchema>;
+export type FriendRequestActionInput = z.infer<
+	typeof friendRequestActionSchema
+>;
 export type SearchQueryInput = z.infer<typeof searchQuerySchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;

@@ -1,13 +1,14 @@
-import { and, desc, eq, or } from "drizzle-orm";
+import { and, count, desc, eq, gt, or } from "drizzle-orm";
 import { getAuthSession } from "@/lib/auth-session";
 import db from "@/lib/db";
+import { getFriendIds } from "@/lib/friend-helpers";
 import { createConversationSchema } from "@/lib/validation/schemas";
-import { conversation, follow, message, user } from "@/schema/auth";
+import { conversation, message, user } from "@/schema/auth";
 
 /**
  * GET /api/conversations
  * List all conversations for the current user, ordered by lastMessageAt DESC.
- * Includes partner info, last message preview, and whether the user follows the partner.
+ * Includes partner info, last message preview, and whether the partner is a friend.
  */
 export async function GET() {
 	const session = await getAuthSession();
@@ -24,6 +25,8 @@ export async function GET() {
 			userBId: conversation.userBId,
 			createdAt: conversation.createdAt,
 			lastMessageAt: conversation.lastMessageAt,
+			userALastReadAt: conversation.userALastReadAt,
+			userBLastReadAt: conversation.userBLastReadAt,
 		})
 		.from(conversation)
 		.where(
@@ -55,19 +58,9 @@ export async function GET() {
 
 	const partnerMap = new Map(partners.map((p) => [p.id, p]));
 
-	// Fetch follow status (who I follow)
-	const myFollows = db
-		.select({ followedId: follow.followedId })
-		.from(follow)
-		.where(
-			and(
-				eq(follow.followerId, userId),
-				or(...partnerIds.map((pid) => eq(follow.followedId, pid))),
-			),
-		)
-		.all();
-
-	const followedSet = new Set(myFollows.map((f) => f.followedId));
+	// Get friend IDs (accepted friend requests)
+	const friendIds = getFriendIds(userId);
+	const friendSet = new Set(friendIds);
 
 	// Fetch last message for each conversation using a subquery approach
 	const lastMessages = db
@@ -85,7 +78,7 @@ export async function GET() {
 	// Group by conversationId, take the first (latest) for each
 	const lastMessageMap = new Map<
 		string,
-		{ body: string; senderId: string; createdAt: Date | null }
+		{ body: string | null; senderId: string; createdAt: Date | null }
 	>();
 	for (const msg of lastMessages) {
 		if (!lastMessageMap.has(msg.conversationId)) {
@@ -101,7 +94,23 @@ export async function GET() {
 		const partnerId = c.userAId === userId ? c.userBId : c.userAId;
 		const partner = partnerMap.get(partnerId);
 		const lastMsg = lastMessageMap.get(c.id);
-		const isFollowed = followedSet.has(partnerId);
+		const isFriend = friendSet.has(partnerId);
+		const lastReadAt =
+			c.userAId === userId ? c.userALastReadAt : c.userBLastReadAt;
+
+		const unreadConditions = [
+			eq(message.conversationId, c.id),
+			eq(message.senderId, partnerId),
+		];
+		if (lastReadAt) {
+			unreadConditions.push(gt(message.createdAt, lastReadAt));
+		}
+		const unreadResult = db
+			.select({ value: count() })
+			.from(message)
+			.where(and(...unreadConditions))
+			.get();
+		const unreadCount = unreadResult?.value ?? 0;
 
 		return {
 			id: c.id,
@@ -115,18 +124,19 @@ export async function GET() {
 				: null,
 			lastMessage: lastMsg
 				? {
-						body: lastMsg.body,
+						body: lastMsg.body ?? "",
 						senderId: lastMsg.senderId,
 						createdAt: lastMsg.createdAt?.getTime() ?? null,
 					}
 				: null,
 			lastMessageAt: c.lastMessageAt?.getTime() ?? null,
-			isFollowed,
+			isFriend,
+			unreadCount,
 		};
 	});
 
 	for (const item of results) {
-		if (item.isFollowed) {
+		if (item.isFriend) {
 			friends.push(item);
 		} else {
 			others.push(item);

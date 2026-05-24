@@ -13,6 +13,7 @@ export async function socketAuthMiddleware(
 	try {
 		const cookieHeader = socket.handshake.headers.cookie;
 		if (!cookieHeader) {
+			console.log("[socket-auth] rejected: no cookie header");
 			return next(new Error("Authentication required"));
 		}
 
@@ -22,13 +23,16 @@ export async function socketAuthMiddleware(
 
 		const sessionResult = await auth.api.getSession({ headers });
 		if (!sessionResult?.session || !sessionResult?.user) {
+			console.log("[socket-auth] rejected: invalid session");
 			return next(new Error("Invalid session"));
 		}
+		console.log(`[socket-auth] authenticated: ${sessionResult.user.id}`);
 
 		socket.data.userId = sessionResult.user.id;
 		socket.data.user = sessionResult.user;
 		next();
-	} catch {
+	} catch (err) {
+		console.log("[socket-auth] error:", err);
 		next(new Error("Authentication failed"));
 	}
 }

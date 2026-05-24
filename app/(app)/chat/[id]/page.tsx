@@ -7,12 +7,14 @@ import { MessageBubble } from "@/components/feature/message-bubble";
 import { MessageInput } from "@/components/feature/message-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChat } from "@/hooks/use-chat";
+import type { FriendStatus } from "@/lib/types";
 
 interface ConversationMeta {
 	partnerId: string;
 	partnerUsername: string;
 	partnerImage: string | null;
-	isFollowing: boolean;
+	friendStatus: FriendStatus;
+	friendRequestId?: string;
 	currentUserId: string;
 }
 
@@ -42,7 +44,8 @@ export default function ChatPage() {
 						partnerId: data.partner.id,
 						partnerUsername: data.partner.username,
 						partnerImage: data.partner.image,
-						isFollowing: data.isFollowing,
+						friendStatus: data.friendStatus ?? "none",
+						friendRequestId: data.friendRequestId,
 						currentUserId: data.currentUserId,
 					});
 				}
@@ -53,25 +56,61 @@ export default function ChatPage() {
 		fetchMeta();
 	}, [conversationId]);
 
-	// Scroll to bottom on new messages
+	// Mark chat as read when the page opens
 	useEffect(() => {
-		if (messages.length > 0) {
-			messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+		fetch(`/api/conversations/${conversationId}/read`, {
+			method: "POST",
+		}).catch(() => {});
+	}, [conversationId]);
+
+	const hasScrolledToHighlight = useRef(false);
+	const prevMessageCount = useRef(0);
+
+	// Scroll to bottom on NEW messages (not initial load with highlight)
+	useEffect(() => {
+		if (highlightMessageId && !hasScrolledToHighlight.current) return;
+		if (
+			messages.length > prevMessageCount.current &&
+			prevMessageCount.current > 0
+		) {
+			requestAnimationFrame(() => {
+				const el = containerRef.current;
+				if (el) el.scrollTop = el.scrollHeight;
+			});
 		}
-	}, [messages]);
+		if (
+			!highlightMessageId &&
+			messages.length > 0 &&
+			prevMessageCount.current === 0
+		) {
+			requestAnimationFrame(() => {
+				const el = containerRef.current;
+				if (el) el.scrollTop = el.scrollHeight;
+			});
+		}
+		prevMessageCount.current = messages.length;
+	}, [messages, highlightMessageId]);
 
 	// Scroll to highlighted message
 	useEffect(() => {
-		if (highlightMessageId && !isLoading) {
-			setHighlightActive(true);
-			const timer = setTimeout(() => setHighlightActive(false), 2000);
+		if (!highlightMessageId || isLoading || hasScrolledToHighlight.current)
+			return;
+		const target = messages.find((m) => m.id === highlightMessageId);
+		if (!target) return;
+
+		hasScrolledToHighlight.current = true;
+		setHighlightActive(true);
+
+		requestAnimationFrame(() => {
 			highlightedRef.current?.scrollIntoView({
 				behavior: "smooth",
 				block: "center",
 			});
-			return () => clearTimeout(timer);
-		}
-	}, [highlightMessageId, isLoading]);
+		});
+
+		const timer = setTimeout(() => setHighlightActive(false), 3000);
+		return () => clearTimeout(timer);
+	}, [highlightMessageId, isLoading, messages]);
 
 	// Scroll-to-load-more
 	const handleScroll = useCallback(() => {
@@ -104,7 +143,8 @@ export default function ChatPage() {
 				partnerId={meta.partnerId}
 				partnerUsername={meta.partnerUsername}
 				partnerImage={meta.partnerImage}
-				isFollowing={meta.isFollowing}
+				friendStatus={meta.friendStatus}
+				friendRequestId={meta.friendRequestId}
 			/>
 
 			<div
@@ -135,7 +175,7 @@ export default function ChatPage() {
 								ref={msg.id === highlightMessageId ? highlightedRef : undefined}
 								className={
 									isHighlighted
-										? "rounded-md ring-2 ring-primary animate-pulse"
+										? "rounded-md ring-3 ring-primary bg-primary/10 transition-all duration-500"
 										: undefined
 								}
 							>
@@ -149,6 +189,10 @@ export default function ChatPage() {
 											? () => retryMessage(msg.id)
 											: undefined
 									}
+									fileName={msg.fileName}
+									fileUrl={msg.fileUrl}
+									fileType={msg.fileType}
+									fileSize={msg.fileSize}
 								/>
 							</div>
 						);
@@ -158,7 +202,7 @@ export default function ChatPage() {
 			</div>
 
 			<div className="border-t-2 border-foreground bg-card px-4 py-3">
-				<MessageInput onSend={sendMessage} />
+				<MessageInput onSend={sendMessage} conversationId={conversationId} />
 			</div>
 		</div>
 	);

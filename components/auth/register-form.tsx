@@ -2,6 +2,7 @@
 
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { OAuthButton } from "@/components/auth/oauth-button";
@@ -23,6 +24,7 @@ export function RegisterForm({
 	className,
 	...props
 }: React.ComponentProps<"div">) {
+	const router = useRouter();
 	const [apiError, setApiError] = useState<Record<string, string>>({});
 	const {
 		register,
@@ -38,12 +40,12 @@ export function RegisterForm({
 		const { error } = await authClient.signUp.email({
 			email: data.email,
 			password: data.password,
-			username: data.username,
-			name: data.username,
+			name: data.email.split("@")[0],
 			callbackURL: "/home",
 		});
 
 		if (!error) {
+			router.push("/home");
 			return;
 		}
 
@@ -83,22 +85,6 @@ export function RegisterForm({
 							{apiError.general}
 						</div>
 					)}
-
-					<Field>
-						<FieldLabel htmlFor="username">Username</FieldLabel>
-						<Input
-							{...register("username")}
-							id="username"
-							type="text"
-							placeholder="cool_username"
-							disabled={isSubmitting}
-						/>
-						{(errors.username || apiError.username) && (
-							<p className="text-xs text-red-600">
-								{errors.username?.message || apiError.username}
-							</p>
-						)}
-					</Field>
 
 					<Field>
 						<FieldLabel htmlFor="email">Email</FieldLabel>

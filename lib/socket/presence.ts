@@ -49,4 +49,12 @@ class PresenceRegistry {
 	}
 }
 
-export const presence = new PresenceRegistry();
+declare global {
+	var __presenceRegistry: PresenceRegistry | undefined;
+}
+
+if (!globalThis.__presenceRegistry) {
+	globalThis.__presenceRegistry = new PresenceRegistry();
+}
+
+export const presence = globalThis.__presenceRegistry;

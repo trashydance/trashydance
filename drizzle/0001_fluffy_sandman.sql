@@ -33,7 +33,7 @@ CREATE TABLE `message` (
 );
 --> statement-breakpoint
 CREATE INDEX `message_conversation_created_idx` ON `message` (`conversation_id`,`created_at`);--> statement-breakpoint
-ALTER TABLE `user` ADD `username` text NOT NULL;--> statement-breakpoint
+ALTER TABLE `user` ADD `username` text;--> statement-breakpoint
 ALTER TABLE `user` ADD `display_username` text;--> statement-breakpoint
 ALTER TABLE `user` ADD `last_seen_at` integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer));--> statement-breakpoint
 CREATE UNIQUE INDEX `user_username_unique` ON `user` (`username`);

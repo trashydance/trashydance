@@ -15,6 +15,27 @@
       "when": 1779562258930,
       "tag": "0001_fluffy_sandman",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1779600000000,
+      "tag": "0002_friend_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1779700000000,
+      "tag": "0003_file_uploads",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1779800000000,
+      "tag": "0004_two_factor",
+      "breakpoints": true
     }
   ]
 }

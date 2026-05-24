@@ -1,6 +1,12 @@
+export type FriendStatus =
+	| "none"
+	| "pending_sent"
+	| "pending_received"
+	| "friends";
+
 export interface User {
 	id: string;
-	username: string;
+	username: string | null;
 	name: string;
 	email: string;
 	image: string | null;
@@ -11,7 +17,7 @@ export interface Conversation {
 	id: string;
 	partner: {
 		id: string;
-		username: string;
+		username: string | null;
 		name: string;
 		image: string | null;
 	};
@@ -20,7 +26,7 @@ export interface Conversation {
 		createdAt: string;
 		senderId: string;
 	} | null;
-	isFollowing: boolean;
+	isFriend: boolean;
 }
 
 export interface Message {
@@ -30,10 +36,14 @@ export interface Message {
 	body: string;
 	createdAt: string;
 	status?: "sending" | "sent" | "error";
+	fileName?: string;
+	fileUrl?: string;
+	fileType?: string;
+	fileSize?: number;
 }
 
 export interface SearchResults {
-	users: Array<User & { isFollowing: boolean }>;
+	users: Array<User & { friendStatus: FriendStatus }>;
 	messages: Array<
 		Message & { conversationId: string; partnerUsername: string }
 	>;
@@ -44,7 +54,7 @@ export interface Profile {
 	name: string;
 	image: string | null;
 	createdAt: string;
-	followerCount: number;
-	followingCount: number;
-	isFollowedByMe: boolean;
+	friendCount: number;
+	friendStatus: FriendStatus;
+	friendRequestId?: string;
 }

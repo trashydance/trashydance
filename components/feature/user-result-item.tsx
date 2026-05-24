@@ -2,13 +2,14 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import type { FriendStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface UserResultItemProps {
-	username: string;
+	username: string | null;
 	name: string;
 	image: string | null;
-	isFollowing: boolean;
+	friendStatus?: FriendStatus;
 	onClick: () => void;
 	className?: string;
 }
@@ -17,11 +18,12 @@ export function UserResultItem({
 	username,
 	name,
 	image,
-	isFollowing,
+	friendStatus,
 	onClick,
 	className,
 }: UserResultItemProps) {
-	const initials = username.slice(0, 2).toUpperCase();
+	const displayName = username || name;
+	const initials = displayName.slice(0, 2).toUpperCase();
 
 	return (
 		<button
@@ -33,16 +35,22 @@ export function UserResultItem({
 			)}
 		>
 			<Avatar>
-				{image && <AvatarImage src={image} alt={username} />}
+				{image && <AvatarImage src={image} alt={displayName} />}
 				<AvatarFallback>{initials}</AvatarFallback>
 			</Avatar>
 			<div className="min-w-0 flex-1">
-				<span className="font-heading text-sm font-semibold">{username}</span>
-				{name !== username && (
+				<span className="font-heading text-sm font-semibold">
+					{displayName}
+				</span>
+				{name !== displayName && (
 					<p className="truncate text-xs text-muted-foreground">{name}</p>
 				)}
 			</div>
-			{isFollowing && <Badge variant="secondary">Following</Badge>}
+			{friendStatus === "friends" && <Badge variant="secondary">Friend</Badge>}
+			{(friendStatus === "pending_sent" ||
+				friendStatus === "pending_received") && (
+				<Badge variant="outline">Pending</Badge>
+			)}
 		</button>
 	);
 }

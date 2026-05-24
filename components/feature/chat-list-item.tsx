@@ -7,7 +7,7 @@ import { cn, formatRelativeTime, truncateText } from "@/lib/utils";
 import { OnlineIndicator } from "./online-indicator";
 
 interface ChatListItemProps {
-	conversation: Conversation;
+	conversation: Conversation & { unreadCount?: number };
 	isOnline?: boolean;
 	showOnlineIndicator?: boolean;
 }
@@ -18,7 +18,9 @@ export function ChatListItem({
 	showOnlineIndicator = false,
 }: ChatListItemProps) {
 	const { partner, lastMessage } = conversation;
-	const initials = partner.username.slice(0, 2).toUpperCase();
+	const unread = conversation.unreadCount ?? 0;
+	const displayName = partner.username || partner.name;
+	const initials = displayName.slice(0, 2).toUpperCase();
 
 	return (
 		<Link
@@ -30,7 +32,7 @@ export function ChatListItem({
 			<div className="relative shrink-0">
 				<Avatar>
 					{partner.image && (
-						<AvatarImage src={partner.image} alt={partner.username} />
+						<AvatarImage src={partner.image} alt={displayName} />
 					)}
 					<AvatarFallback>{initials}</AvatarFallback>
 				</Avatar>
@@ -39,7 +41,7 @@ export function ChatListItem({
 			<div className="min-w-0 flex-1">
 				<div className="flex items-center justify-between gap-2">
 					<span className="font-heading text-sm font-semibold truncate">
-						{partner.username}
+						{displayName}
 					</span>
 					{lastMessage && (
 						<span className="shrink-0 text-xs text-muted-foreground">
@@ -53,6 +55,11 @@ export function ChatListItem({
 					</p>
 				)}
 			</div>
+			{unread > 0 && (
+				<span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+					{unread > 99 ? "99+" : unread}
+				</span>
+			)}
 		</Link>
 	);
 }

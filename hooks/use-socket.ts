@@ -48,5 +48,18 @@ export function useSocket() {
 		};
 	}, []);
 
+	useEffect(() => {
+		if (!socketRef.current) return;
+		function handleDisconnect() {
+			if (globalSocket?.disconnected) {
+				globalSocket = null;
+			}
+		}
+		socketRef.current.on("disconnect", handleDisconnect);
+		return () => {
+			socketRef.current?.off("disconnect", handleDisconnect);
+		};
+	}, []);
+
 	return { socket: socketRef.current, isConnected };
 }

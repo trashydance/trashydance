@@ -66,9 +66,12 @@ export default function ChatPage() {
 	const hasScrolledToHighlight = useRef(false);
 	const prevMessageCount = useRef(0);
 
-	// Scroll to bottom on NEW messages (not initial load with highlight)
+	// Scroll to bottom — skip entirely when navigating to a specific message
 	useEffect(() => {
-		if (highlightMessageId && !hasScrolledToHighlight.current) return;
+		if (highlightMessageId) {
+			prevMessageCount.current = messages.length;
+			return;
+		}
 		if (
 			messages.length > prevMessageCount.current &&
 			prevMessageCount.current > 0
@@ -78,11 +81,7 @@ export default function ChatPage() {
 				if (el) el.scrollTop = el.scrollHeight;
 			});
 		}
-		if (
-			!highlightMessageId &&
-			messages.length > 0 &&
-			prevMessageCount.current === 0
-		) {
+		if (messages.length > 0 && prevMessageCount.current === 0) {
 			requestAnimationFrame(() => {
 				const el = containerRef.current;
 				if (el) el.scrollTop = el.scrollHeight;
@@ -91,26 +90,31 @@ export default function ChatPage() {
 		prevMessageCount.current = messages.length;
 	}, [messages, highlightMessageId]);
 
-	// Scroll to highlighted message
+	// Scroll to highlighted message — load older messages if needed
 	useEffect(() => {
 		if (!highlightMessageId || isLoading || hasScrolledToHighlight.current)
 			return;
 		const target = messages.find((m) => m.id === highlightMessageId);
-		if (!target) return;
+		if (!target) {
+			if (hasMore) loadMore();
+			return;
+		}
 
 		hasScrolledToHighlight.current = true;
 		setHighlightActive(true);
 
 		requestAnimationFrame(() => {
-			highlightedRef.current?.scrollIntoView({
-				behavior: "smooth",
-				block: "center",
+			requestAnimationFrame(() => {
+				highlightedRef.current?.scrollIntoView({
+					behavior: "smooth",
+					block: "center",
+				});
 			});
 		});
 
 		const timer = setTimeout(() => setHighlightActive(false), 3000);
 		return () => clearTimeout(timer);
-	}, [highlightMessageId, isLoading, messages]);
+	}, [highlightMessageId, isLoading, messages, hasMore, loadMore]);
 
 	// Scroll-to-load-more
 	const handleScroll = useCallback(() => {

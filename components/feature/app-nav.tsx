@@ -14,15 +14,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { NotificationBadge } from "@/components/feature/notification-badge";
 import { useNotificationCount } from "@/hooks/use-notification-count";
+import { useSocket } from "@/hooks/use-socket";
 import { useTheme } from "@/hooks/use-theme";
 import { authClient } from "@/lib/auth-client";
 
 export function AppNav() {
 	const router = useRouter();
 	const { theme, toggleTheme } = useTheme();
-	const { pendingRequests, unreadChats } = useNotificationCount();
+	const { pendingRequests } = useNotificationCount();
+	const { socket } = useSocket();
 
 	const handleLogout = async () => {
+		socket?.disconnect();
 		await authClient.signOut();
 		router.push("/login");
 	};

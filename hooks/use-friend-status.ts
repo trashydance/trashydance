@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { SocketEvent } from "@/lib/constants";
 import type { FriendStatus } from "@/lib/types";
 import { useSocket } from "./use-socket";
 
@@ -40,9 +41,9 @@ export function useFriendStatus(
 			}
 		}
 
-		socket.on("friend-request:update", handleUpdate);
+		socket.on(SocketEvent.FRIEND_REQUEST_UPDATE, handleUpdate);
 		return () => {
-			socket.off("friend-request:update", handleUpdate);
+			socket.off(SocketEvent.FRIEND_REQUEST_UPDATE, handleUpdate);
 		};
 	}, [socket, userId, onStatusChange]);
 

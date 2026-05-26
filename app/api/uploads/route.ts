@@ -1,88 +1,69 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { and, eq, or } from "drizzle-orm";
-import { getAuthSession } from "@/lib/auth-session";
-import db from "@/lib/db";
-import { conversation } from "@/schema/auth";
+import {
+	badRequest,
+	notFound,
+	requireAuth,
+	unauthorized,
+} from "@/lib/api-helpers";
+import { ALLOWED_MIME_TYPES_SET, MAX_FILE_SIZE } from "@/lib/constants";
+import { findConversationForParticipant } from "@/lib/conversation-helpers";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAGIC_BYTES: Record<string, number[]> = {
+	"image/jpeg": [0xff, 0xd8, 0xff],
+	"image/png": [0x89, 0x50, 0x4e, 0x47],
+	"image/gif": [0x47, 0x49, 0x46, 0x38],
+	"image/webp": [0x52, 0x49, 0x46, 0x46],
+	"application/pdf": [0x25, 0x50, 0x44, 0x46],
+};
 
-const ALLOWED_MIME_TYPES = new Set([
-	"image/jpeg",
-	"image/png",
-	"image/gif",
-	"image/webp",
-	"video/mp4",
-	"video/webm",
-	"application/pdf",
-	"application/msword",
-	"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-	"application/vnd.ms-excel",
-	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-	"application/vnd.ms-powerpoint",
-	"application/vnd.openxmlformats-officedocument.presentationml.presentation",
-]);
+function validateMagicBytes(buffer: Buffer, mimeType: string): boolean {
+	const expected = MAGIC_BYTES[mimeType];
+	if (!expected) return true;
+	if (buffer.length < expected.length) return false;
+	return expected.every((byte, i) => buffer[i] === byte);
+}
 
 export async function POST(request: Request) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 
 	const formData = await request.formData();
 	const file = formData.get("file");
 	const conversationId = formData.get("conversationId");
 
 	if (!(file instanceof File)) {
-		return Response.json({ error: "No file provided" }, { status: 400 });
+		return badRequest("No file provided");
 	}
 
 	if (typeof conversationId !== "string" || !conversationId) {
-		return Response.json(
-			{ error: "conversationId is required" },
-			{ status: 400 },
-		);
+		return badRequest("conversationId is required");
 	}
 
-	// Validate file size
 	if (file.size > MAX_FILE_SIZE) {
-		return Response.json(
-			{ error: "File size exceeds 10MB limit" },
-			{ status: 400 },
-		);
+		return badRequest("File size exceeds 10MB limit");
 	}
 
-	// Validate MIME type
-	if (!ALLOWED_MIME_TYPES.has(file.type)) {
-		return Response.json({ error: "File type not allowed" }, { status: 400 });
+	if (!ALLOWED_MIME_TYPES_SET.has(file.type)) {
+		return badRequest("File type not allowed");
 	}
 
-	// Verify user is a participant
-	const conv = db
-		.select()
-		.from(conversation)
-		.where(
-			and(
-				eq(conversation.id, conversationId),
-				or(eq(conversation.userAId, userId), eq(conversation.userBId, userId)),
-			),
-		)
-		.get();
+	const conv = findConversationForParticipant(conversationId, userId);
+	if (!conv) return notFound("Conversation");
 
-	if (!conv) {
-		return Response.json({ error: "Conversation not found" }, { status: 404 });
+	const buffer = Buffer.from(await file.arrayBuffer());
+
+	if (!validateMagicBytes(buffer, file.type)) {
+		return badRequest("File content does not match declared type");
 	}
 
-	// Save file to disk
 	const uuid = crypto.randomUUID();
 	const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
 	const storedName = `${uuid}-${safeFileName}`;
 	const uploadDir = join(process.cwd(), "data", "uploads", conversationId);
 
 	mkdirSync(uploadDir, { recursive: true });
-
-	const buffer = Buffer.from(await file.arrayBuffer());
 	writeFileSync(join(uploadDir, storedName), buffer);
 
 	const fileUrl = `/api/uploads/${conversationId}/${storedName}`;

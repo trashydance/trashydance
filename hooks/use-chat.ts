@@ -1,17 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { SocketEvent } from "@/lib/constants";
 import type { Message } from "@/lib/types";
 import { useSocket } from "./use-socket";
 
 export function useChat(conversationId: string) {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isLoadingMore, setIsLoadingMore] = useState(false);
 	const [hasMore, setHasMore] = useState(true);
 	const cursorRef = useRef<string | null>(null);
 	const { socket } = useSocket();
 
-	// Load initial messages
 	useEffect(() => {
 		async function loadInitial() {
 			setIsLoading(true);
@@ -38,29 +39,28 @@ export function useChat(conversationId: string) {
 		loadInitial();
 	}, [conversationId]);
 
-	// Listen for incoming messages
 	useEffect(() => {
 		if (!socket) return;
 
 		function handleIncoming(message: Message) {
 			if (message.conversationId === conversationId) {
 				setMessages((prev) => {
-					// Prevent duplicates
 					if (prev.some((m) => m.id === message.id)) return prev;
 					return [...prev, message];
 				});
 			}
 		}
 
-		socket.on("message:new", handleIncoming);
+		socket.on(SocketEvent.MESSAGE_NEW, handleIncoming);
 		return () => {
-			socket.off("message:new", handleIncoming);
+			socket.off(SocketEvent.MESSAGE_NEW, handleIncoming);
 		};
 	}, [socket, conversationId]);
 
 	const loadMore = useCallback(async () => {
-		if (!hasMore || isLoading) return;
+		if (!hasMore || isLoading || isLoadingMore) return;
 
+		setIsLoadingMore(true);
 		try {
 			const params = new URLSearchParams({ limit: "50" });
 			if (cursorRef.current) {
@@ -82,8 +82,10 @@ export function useChat(conversationId: string) {
 			}
 		} catch {
 			// Silently fail
+		} finally {
+			setIsLoadingMore(false);
 		}
-	}, [conversationId, hasMore, isLoading]);
+	}, [conversationId, hasMore, isLoading, isLoadingMore]);
 
 	const sendMessage = useCallback(
 		async (
@@ -113,7 +115,6 @@ export function useChat(conversationId: string) {
 
 			setMessages((prev) => [...prev, optimisticMessage]);
 
-			// Mark chat as read since user is actively viewing it
 			fetch(`/api/conversations/${conversationId}/read`, {
 				method: "POST",
 			}).catch(() => {});
@@ -131,7 +132,7 @@ export function useChat(conversationId: string) {
 
 			if (socket?.connected) {
 				socket.emit(
-					"message:send",
+					SocketEvent.MESSAGE_SEND,
 					payload,
 					(res: { ok?: boolean; message?: Message; error?: string }) => {
 						if (res?.ok && res.message) {
@@ -215,6 +216,7 @@ export function useChat(conversationId: string) {
 		retryMessage,
 		loadMore,
 		isLoading,
+		isLoadingMore,
 		hasMore,
 	};
 }

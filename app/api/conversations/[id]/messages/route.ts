@@ -1,7 +1,18 @@
-import { and, desc, eq, lt, or } from "drizzle-orm";
+import { and, desc, eq, lt } from "drizzle-orm";
 import type { NextRequest } from "next/server";
-import { getAuthSession } from "@/lib/auth-session";
+import {
+	badRequest,
+	notFound,
+	requireAuth,
+	unauthorized,
+} from "@/lib/api-helpers";
+import { SocketEvent } from "@/lib/constants";
+import {
+	findConversationForParticipant,
+	getPartnerId,
+} from "@/lib/conversation-helpers";
 import db from "@/lib/db";
+import { emitNotificationCount } from "@/lib/socket/handlers";
 import { getIO } from "@/lib/socket/io-instance";
 import { presence } from "@/lib/socket/presence";
 import {
@@ -10,51 +21,26 @@ import {
 } from "@/lib/validation/schemas";
 import { conversation, message, user } from "@/schema/auth";
 
-/**
- * GET /api/conversations/[id]/messages
- * Paginated messages for a conversation, ordered by createdAt DESC.
- * Query params: ?cursor=<timestamp_ms>&limit=50
- */
 export async function GET(
 	request: NextRequest,
 	{ params }: { params: Promise<{ id: string }> },
 ) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 	const { id: conversationId } = await params;
 
-	// Verify the user is a participant of this conversation
-	const conv = db
-		.select()
-		.from(conversation)
-		.where(
-			and(
-				eq(conversation.id, conversationId),
-				or(eq(conversation.userAId, userId), eq(conversation.userBId, userId)),
-			),
-		)
-		.get();
+	const conv = findConversationForParticipant(conversationId, userId);
+	if (!conv) return notFound("Conversation");
 
-	if (!conv) {
-		return Response.json({ error: "Conversation not found" }, { status: 404 });
-	}
-
-	// Parse pagination params
 	const searchParams = Object.fromEntries(request.nextUrl.searchParams);
 	const pagination = cursorPaginationSchema.safeParse(searchParams);
 	if (!pagination.success) {
-		return Response.json(
-			{ error: "Invalid pagination params" },
-			{ status: 400 },
-		);
+		return badRequest("Invalid pagination params");
 	}
 
 	const { cursor, limit } = pagination.data;
 
-	// Build conditions
 	const conditions = [eq(message.conversationId, conversationId)];
 	if (cursor !== undefined) {
 		conditions.push(lt(message.createdAt, new Date(cursor)));
@@ -79,7 +65,7 @@ export async function GET(
 		.innerJoin(user, eq(message.senderId, user.id))
 		.where(and(...conditions))
 		.orderBy(desc(message.createdAt))
-		.limit(limit + 1) // Fetch one extra to determine if there are more
+		.limit(limit + 1)
 		.all();
 
 	const hasMore = messages.length > limit;
@@ -116,32 +102,18 @@ export async function POST(
 	request: Request,
 	{ params }: { params: Promise<{ id: string }> },
 ) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 	const { id: conversationId } = await params;
 
-	const conv = db
-		.select()
-		.from(conversation)
-		.where(
-			and(
-				eq(conversation.id, conversationId),
-				or(eq(conversation.userAId, userId), eq(conversation.userBId, userId)),
-			),
-		)
-		.get();
-
-	if (!conv) {
-		return Response.json({ error: "Conversation not found" }, { status: 404 });
-	}
+	const conv = findConversationForParticipant(conversationId, userId);
+	if (!conv) return notFound("Conversation");
 
 	const body: unknown = await request.json();
 	const parsed = messageSchema.safeParse(body);
 	if (!parsed.success) {
-		return Response.json({ error: "Invalid message" }, { status: 400 });
+		return badRequest("Invalid message");
 	}
 
 	const newId = crypto.randomUUID();
@@ -180,10 +152,11 @@ export async function POST(
 
 	const io = getIO();
 	if (io) {
-		const partnerId = conv.userAId === userId ? conv.userBId : conv.userAId;
+		const partnerId = getPartnerId(conv, userId);
 		for (const sid of presence.getSocketIds(partnerId)) {
-			io.to(sid).emit("message:new", newMessage);
+			io.to(sid).emit(SocketEvent.MESSAGE_NEW, newMessage);
 		}
+		emitNotificationCount(io, partnerId);
 	}
 
 	return Response.json(newMessage, { status: 201 });

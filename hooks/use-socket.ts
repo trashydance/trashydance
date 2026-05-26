@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { io, type Socket } from "socket.io-client";
+import {
+	SOCKET_RECONNECTION_ATTEMPTS,
+	SOCKET_RECONNECTION_DELAY,
+} from "@/lib/constants";
 
 let globalSocket: Socket | null = null;
 
@@ -16,8 +20,8 @@ export function useSocket() {
 				transports: ["polling", "websocket"],
 				autoConnect: true,
 				withCredentials: true,
-				reconnectionAttempts: 5,
-				reconnectionDelay: 2000,
+				reconnectionAttempts: SOCKET_RECONNECTION_ATTEMPTS,
+				reconnectionDelay: SOCKET_RECONNECTION_DELAY,
 			});
 			globalSocket.on("connect_error", () => {});
 		}

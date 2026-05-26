@@ -52,7 +52,10 @@ export interface SearchResults {
 export interface Profile {
 	username: string;
 	name: string;
+	lastName: string | null;
+	bio: string | null;
 	image: string | null;
+	intraLogin: string | null;
 	createdAt: string;
 	friendCount: number;
 	friendStatus: FriendStatus;

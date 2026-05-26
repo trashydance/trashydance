@@ -20,6 +20,9 @@ export const user = sqliteTable("user", {
 	image: text("image"),
 	username: text("username").unique(),
 	displayUsername: text("display_username"),
+	lastName: text("last_name"),
+	bio: text("bio"),
+	intraLogin: text("intra_login"),
 	twoFactorEnabled: integer("two_factor_enabled", { mode: "boolean" }).default(
 		false,
 	),

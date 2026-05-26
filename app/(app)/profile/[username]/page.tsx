@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Pencil } from "lucide-react";
+import { CalendarDays, ExternalLink, Pencil, Users } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { FriendRequestButton } from "@/components/feature/friend-request-button";
@@ -16,7 +16,9 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import type { Profile } from "@/lib/types";
 
 export default function ProfilePage() {
@@ -25,9 +27,13 @@ export default function ProfilePage() {
 		(Profile & { isOwnProfile: boolean }) | null
 	>(null);
 	const [isLoading, setIsLoading] = useState(true);
-	const [imageUrl, setImageUrl] = useState("");
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [saving, setSaving] = useState(false);
+
+	const [editName, setEditName] = useState("");
+	const [editLastName, setEditLastName] = useState("");
+	const [editBio, setEditBio] = useState("");
+	const [editImage, setEditImage] = useState("");
 
 	useEffect(() => {
 		async function fetchProfile() {
@@ -37,7 +43,6 @@ export default function ProfilePage() {
 				if (res.ok) {
 					const data = await res.json();
 					setProfile(data);
-					setImageUrl(data.image ?? "");
 				}
 			} catch {
 				// Silently fail
@@ -48,17 +53,39 @@ export default function ProfilePage() {
 		fetchProfile();
 	}, [params.username]);
 
-	const handleSaveImage = useCallback(async () => {
+	const openEdit = useCallback(() => {
+		if (!profile) return;
+		setEditName(profile.name);
+		setEditLastName(profile.lastName ?? "");
+		setEditBio(profile.bio ?? "");
+		setEditImage(profile.image ?? "");
+		setDialogOpen(true);
+	}, [profile]);
+
+	const handleSave = useCallback(async () => {
 		setSaving(true);
 		try {
 			const res = await fetch("/api/profile", {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ image: imageUrl || null }),
+				body: JSON.stringify({
+					name: editName,
+					lastName: editLastName || null,
+					bio: editBio || null,
+					image: editImage || null,
+				}),
 			});
 			if (res.ok) {
 				setProfile((prev) =>
-					prev ? { ...prev, image: imageUrl || null } : prev,
+					prev
+						? {
+								...prev,
+								name: editName,
+								lastName: editLastName || null,
+								bio: editBio || null,
+								image: editImage || null,
+							}
+						: prev,
 				);
 				setDialogOpen(false);
 			}
@@ -67,7 +94,7 @@ export default function ProfilePage() {
 		} finally {
 			setSaving(false);
 		}
-	}, [imageUrl]);
+	}, [editName, editLastName, editBio, editImage]);
 
 	if (isLoading) {
 		return (
@@ -92,6 +119,7 @@ export default function ProfilePage() {
 	}
 
 	const displayName = profile.username || profile.name;
+	const fullName = [profile.name, profile.lastName].filter(Boolean).join(" ");
 	const initials = displayName.slice(0, 2).toUpperCase();
 	const joinDate = new Date(profile.createdAt).toLocaleDateString("en-US", {
 		month: "long",
@@ -103,7 +131,7 @@ export default function ProfilePage() {
 			<div className="relative">
 				<Avatar
 					size="lg"
-					className="size-24 border-2 border-foreground shadow-[4px_4px_0px_0px] shadow-foreground"
+					className="size-24 border-2 border-border shadow-[4px_4px_0px_0px] shadow-border"
 				>
 					{profile.image && (
 						<AvatarImage src={profile.image} alt={displayName} />
@@ -114,44 +142,115 @@ export default function ProfilePage() {
 
 			<div className="text-center">
 				<h1 className="font-heading text-2xl font-bold">{displayName}</h1>
-				{profile.name !== profile.username && (
-					<p className="text-muted-foreground">{profile.name}</p>
+				{fullName !== displayName && (
+					<p className="text-muted-foreground">{fullName}</p>
 				)}
-				<div className="mt-1 flex items-center justify-center gap-1 text-sm text-muted-foreground">
-					<CalendarDays className="size-3.5" />
-					<span>Joined {joinDate}</span>
+				{profile.bio && (
+					<p className="mx-auto mt-2 max-w-sm text-sm">{profile.bio}</p>
+				)}
+			</div>
+
+			<div className="flex items-center gap-6">
+				<div className="text-center">
+					<span className="flex items-center gap-1 font-heading text-xl font-bold">
+						<Users className="size-4" />
+						{profile.friendCount}
+					</span>
+					<span className="text-xs text-muted-foreground">Friends</span>
+				</div>
+				<div className="text-center">
+					<div className="flex items-center gap-1 text-sm text-muted-foreground">
+						<CalendarDays className="size-3.5" />
+						<span>Joined {joinDate}</span>
+					</div>
 				</div>
 			</div>
 
-			<div className="text-center">
-				<span className="block font-heading text-xl font-bold">
-					{profile.friendCount}
-				</span>
-				<span className="text-xs text-muted-foreground">Friends</span>
-			</div>
+			{profile.intraLogin && (
+				<a
+					href={`https://profile.intra.42.fr/users/${profile.intraLogin}`}
+					target="_blank"
+					rel="noopener noreferrer"
+					className="flex items-center gap-2 rounded-md border-2 border-border bg-background px-4 py-2 text-sm font-medium shadow-shadow transition-all hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none"
+				>
+					<span>42 Intra</span>
+					<ExternalLink className="size-3.5" />
+				</a>
+			)}
 
 			{profile.isOwnProfile ? (
 				<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 					<DialogTrigger asChild>
-						<Button variant="outline">
+						<Button variant="outline" onClick={openEdit}>
 							<Pencil className="size-4" />
 							Edit profile
 						</Button>
 					</DialogTrigger>
 					<DialogContent>
 						<DialogHeader>
-							<DialogTitle>Edit profile picture</DialogTitle>
+							<DialogTitle>Edit profile</DialogTitle>
 							<DialogDescription>
-								Enter a URL for your profile image.
+								Update your profile information. Username and email cannot be
+								changed.
 							</DialogDescription>
 						</DialogHeader>
-						<Input
-							value={imageUrl}
-							onChange={(e) => setImageUrl(e.target.value)}
-							placeholder="https://example.com/avatar.jpg"
-						/>
+						<div className="space-y-4">
+							<div>
+								<Label>Username</Label>
+								<Input value={profile.username} disabled className="mt-1" />
+							</div>
+							<div className="grid grid-cols-2 gap-3">
+								<div>
+									<Label htmlFor="edit-name">First name</Label>
+									<Input
+										id="edit-name"
+										value={editName}
+										onChange={(e) => setEditName(e.target.value)}
+										placeholder="Your first name"
+										className="mt-1"
+										maxLength={50}
+									/>
+								</div>
+								<div>
+									<Label htmlFor="edit-lastname">Last name</Label>
+									<Input
+										id="edit-lastname"
+										value={editLastName}
+										onChange={(e) => setEditLastName(e.target.value)}
+										placeholder="Your last name"
+										className="mt-1"
+										maxLength={50}
+									/>
+								</div>
+							</div>
+							<div>
+								<Label htmlFor="edit-bio">Bio</Label>
+								<Textarea
+									id="edit-bio"
+									value={editBio}
+									onChange={(e) => setEditBio(e.target.value)}
+									placeholder="Tell us about yourself..."
+									className="mt-1"
+									maxLength={200}
+									rows={3}
+								/>
+								<span className="mt-1 block text-right text-xs text-muted-foreground">
+									{editBio.length}/200
+								</span>
+							</div>
+							<div>
+								<Label htmlFor="edit-image">Profile picture URL</Label>
+								<Input
+									id="edit-image"
+									value={editImage}
+									onChange={(e) => setEditImage(e.target.value)}
+									placeholder="https://example.com/avatar.jpg"
+									className="mt-1"
+								/>
+							</div>
+						</div>
 						<DialogFooter>
-							<Button onClick={handleSaveImage} disabled={saving}>
+							<Button onClick={handleSave} disabled={saving || !editName.trim()}>
 								{saving ? "Saving..." : "Save"}
 							</Button>
 						</DialogFooter>

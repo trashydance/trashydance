@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	EllipsisVertical,
 	Home,
 	LogOut,
 	Moon,
@@ -13,6 +14,13 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { NotificationBadge } from "@/components/feature/notification-badge";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useNotificationCount } from "@/hooks/use-notification-count";
 import { useSocket } from "@/hooks/use-socket";
 import { useTheme } from "@/hooks/use-theme";
@@ -34,24 +42,24 @@ export function AppNav() {
 		<nav className="flex items-center gap-1">
 			<Link
 				href="/home"
-				className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
+				className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-muted"
 			>
 				<Home className="size-4" />
 				<span className="hidden sm:inline">Home</span>
 			</Link>
 			<Link
 				href="/search"
-				className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
+				className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-muted"
 			>
 				<Search className="size-4" />
 				<span className="hidden sm:inline">Search</span>
 			</Link>
 			<Link
-				href="/requests"
-				className="relative inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
+				href="/friends"
+				className="relative inline-flex items-center gap-1.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-muted"
 			>
 				<Users className="size-4" />
-				<span className="hidden sm:inline">Requests</span>
+				<span className="hidden sm:inline">Friends</span>
 				{pendingRequests > 0 && (
 					<NotificationBadge
 						count={pendingRequests}
@@ -59,41 +67,55 @@ export function AppNav() {
 					/>
 				)}
 			</Link>
-			<Link
-				href="/profile/me"
-				className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
-			>
-				<User className="size-4" />
-				<span className="hidden sm:inline">Profile</span>
-			</Link>
-			<Link
-				href="/settings"
-				className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
-			>
-				<Settings className="size-4" />
-				<span className="hidden sm:inline">Settings</span>
-			</Link>
-			<button
-				type="button"
-				onClick={toggleTheme}
-				className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
-				aria-label="Toggle theme"
-			>
-				{theme === "dark" ? (
-					<Sun className="size-4" />
-				) : (
-					<Moon className="size-4" />
-				)}
-			</button>
-			<button
-				type="button"
-				onClick={handleLogout}
-				className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
-				aria-label="Log out"
-			>
-				<LogOut className="size-4" />
-				<span className="hidden sm:inline">Logout</span>
-			</button>
+
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<button
+						type="button"
+						className="ml-1 inline-flex size-8 items-center justify-center rounded-base text-sm"
+						aria-label="Menu"
+					>
+						<EllipsisVertical className="size-4" />
+					</button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end" className="w-44">
+					<DropdownMenuItem asChild>
+						<Link href="/profile/me" className="flex items-center gap-2">
+							<User className="size-4" />
+							Profile
+						</Link>
+					</DropdownMenuItem>
+					<DropdownMenuItem asChild>
+						<Link href="/settings" className="flex items-center gap-2">
+							<Settings className="size-4" />
+							Settings
+						</Link>
+					</DropdownMenuItem>
+					<DropdownMenuItem
+						onSelect={(e) => {
+							e.preventDefault();
+							toggleTheme();
+						}}
+						className="flex items-center gap-2"
+					>
+						{theme === "dark" ? (
+							<Sun className="size-4" />
+						) : (
+							<Moon className="size-4" />
+						)}
+						{theme === "dark" ? "Light mode" : "Dark mode"}
+					</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem
+						variant="destructive"
+						onClick={handleLogout}
+						className="flex items-center gap-2"
+					>
+						<LogOut className="size-4" />
+						Logout
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
 		</nav>
 	);
 }

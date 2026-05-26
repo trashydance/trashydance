@@ -1,23 +1,21 @@
-import { and, count, desc, eq, gt, or } from "drizzle-orm";
-import { getAuthSession } from "@/lib/auth-session";
+import { and, count, desc, eq, gt, or, sql } from "drizzle-orm";
+import {
+	badRequest,
+	notFound,
+	requireAuth,
+	unauthorized,
+} from "@/lib/api-helpers";
+import { getPartnerId, getUserLastReadAt } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
 import { getFriendIds } from "@/lib/friend-helpers";
 import { createConversationSchema } from "@/lib/validation/schemas";
 import { conversation, message, user } from "@/schema/auth";
 
-/**
- * GET /api/conversations
- * List all conversations for the current user, ordered by lastMessageAt DESC.
- * Includes partner info, last message preview, and whether the partner is a friend.
- */
 export async function GET() {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 
-	// Fetch all conversations where the current user is a participant
 	const conversations = db
 		.select({
 			id: conversation.id,
@@ -35,16 +33,12 @@ export async function GET() {
 		.orderBy(desc(conversation.lastMessageAt))
 		.all();
 
-	// Get partner IDs
-	const partnerIds = conversations.map((c) =>
-		c.userAId === userId ? c.userBId : c.userAId,
-	);
+	const partnerIds = conversations.map((c) => getPartnerId(c, userId));
 
 	if (partnerIds.length === 0) {
 		return Response.json({ friends: [], others: [] });
 	}
 
-	// Fetch partner user info
 	const partners = db
 		.select({
 			id: user.id,
@@ -58,11 +52,12 @@ export async function GET() {
 
 	const partnerMap = new Map(partners.map((p) => [p.id, p]));
 
-	// Get friend IDs (accepted friend requests)
 	const friendIds = getFriendIds(userId);
 	const friendSet = new Set(friendIds);
 
-	// Fetch last message for each conversation using a subquery approach
+	const conversationIds = conversations.map((c) => c.id);
+
+	// Single query: last message per conversation via correlated subquery
 	const lastMessages = db
 		.select({
 			conversationId: message.conversationId,
@@ -71,46 +66,55 @@ export async function GET() {
 			createdAt: message.createdAt,
 		})
 		.from(message)
-		.where(or(...conversations.map((c) => eq(message.conversationId, c.id))))
-		.orderBy(desc(message.createdAt))
+		.where(
+			and(
+				or(...conversationIds.map((cid) => eq(message.conversationId, cid))),
+				sql`${message.createdAt} = (
+					SELECT MAX(m2.created_at) FROM message m2
+					WHERE m2.conversation_id = ${message.conversationId}
+				)`,
+			),
+		)
 		.all();
 
-	// Group by conversationId, take the first (latest) for each
-	const lastMessageMap = new Map<
-		string,
-		{ body: string | null; senderId: string; createdAt: Date | null }
-	>();
-	for (const msg of lastMessages) {
-		if (!lastMessageMap.has(msg.conversationId)) {
-			lastMessageMap.set(msg.conversationId, msg);
-		}
-	}
+	const lastMessageMap = new Map(
+		lastMessages.map((m) => [m.conversationId, m]),
+	);
 
-	// Build results
-	const friends: typeof results = [];
-	const others: typeof results = [];
-
-	const results = conversations.map((c) => {
-		const partnerId = c.userAId === userId ? c.userBId : c.userAId;
-		const partner = partnerMap.get(partnerId);
-		const lastMsg = lastMessageMap.get(c.id);
-		const isFriend = friendSet.has(partnerId);
-		const lastReadAt =
-			c.userAId === userId ? c.userALastReadAt : c.userBLastReadAt;
-
-		const unreadConditions = [
+	// Single query: unread counts for ALL conversations at once
+	const unreadConditions = conversations.map((c) => {
+		const partnerId = getPartnerId(c, userId);
+		const lastReadAt = getUserLastReadAt(c, userId);
+		const conds = [
 			eq(message.conversationId, c.id),
 			eq(message.senderId, partnerId),
 		];
 		if (lastReadAt) {
-			unreadConditions.push(gt(message.createdAt, lastReadAt));
+			conds.push(gt(message.createdAt, lastReadAt));
 		}
-		const unreadResult = db
-			.select({ value: count() })
-			.from(message)
-			.where(and(...unreadConditions))
-			.get();
-		const unreadCount = unreadResult?.value ?? 0;
+		return and(...conds);
+	});
+
+	const unreadResults = db
+		.select({
+			conversationId: message.conversationId,
+			value: count(),
+		})
+		.from(message)
+		.where(or(...unreadConditions))
+		.groupBy(message.conversationId)
+		.all();
+
+	const unreadMap = new Map(
+		unreadResults.map((r) => [r.conversationId, r.value]),
+	);
+
+	const results = conversations.map((c) => {
+		const partnerId = getPartnerId(c, userId);
+		const partner = partnerMap.get(partnerId);
+		const lastMsg = lastMessageMap.get(c.id);
+		const isFriend = friendSet.has(partnerId);
+		const unreadCount = unreadMap.get(c.id) ?? 0;
 
 		return {
 			id: c.id,
@@ -135,49 +139,31 @@ export async function GET() {
 		};
 	});
 
-	for (const item of results) {
-		if (item.isFriend) {
-			friends.push(item);
-		} else {
-			others.push(item);
-		}
-	}
+	const friends = results.filter((item) => item.isFriend);
+	const others = results.filter(
+		(item) => !item.isFriend && item.lastMessage !== null,
+	);
 
 	return Response.json({ friends, others });
 }
 
-/**
- * POST /api/conversations
- * Create or get an existing conversation with another user.
- * Body: { otherUserId: string }
- * Normalizes participant order: userAId = min(id1, id2), userBId = max(id1, id2).
- */
 export async function POST(request: Request) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 
 	const body: unknown = await request.json();
 	const parsed = createConversationSchema.safeParse(body);
 	if (!parsed.success) {
-		return Response.json(
-			{ error: "Invalid input", details: parsed.error.flatten() },
-			{ status: 400 },
-		);
+		return badRequest("Invalid input", parsed.error.flatten());
 	}
 
 	const { otherUserId } = parsed.data;
 
 	if (otherUserId === userId) {
-		return Response.json(
-			{ error: "Cannot create a conversation with yourself" },
-			{ status: 400 },
-		);
+		return badRequest("Cannot create a conversation with yourself");
 	}
 
-	// Verify the other user exists
 	const otherUser = db
 		.select({
 			id: user.id,
@@ -190,14 +176,12 @@ export async function POST(request: Request) {
 		.get();
 
 	if (!otherUser) {
-		return Response.json({ error: "User not found" }, { status: 404 });
+		return notFound("User");
 	}
 
-	// Normalize order
 	const userAId = userId < otherUserId ? userId : otherUserId;
 	const userBId = userId < otherUserId ? otherUserId : userId;
 
-	// Try to find existing conversation
 	const existing = db
 		.select()
 		.from(conversation)
@@ -216,7 +200,6 @@ export async function POST(request: Request) {
 		});
 	}
 
-	// Create new conversation
 	const newId = crypto.randomUUID();
 	const now = new Date();
 

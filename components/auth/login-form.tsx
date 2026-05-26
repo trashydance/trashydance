@@ -3,9 +3,10 @@
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { OAuthButton } from "@/components/auth/oauth-button";
+import { TwoFactorVerify } from "@/components/auth/two-factor-verify";
 import { AppIcon } from "@/components/icons/app-icon";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,11 +26,12 @@ export function LoginForm({
 	...props
 }: React.ComponentProps<"div">) {
 	const router = useRouter();
-	const [apiError, setApiError] = useState<Record<string, string>>({});
+	const [apiError, setApiError] = useState<{
+		username?: string;
+		password?: string;
+		general?: string;
+	}>({});
 	const [twoFactorRequired, setTwoFactorRequired] = useState(false);
-	const [totpCode, setTotpCode] = useState("");
-	const [verifying2FA, setVerifying2FA] = useState(false);
-	const totpInputRef = useRef<HTMLInputElement>(null);
 	const {
 		register,
 		handleSubmit,
@@ -41,8 +43,8 @@ export function LoginForm({
 	const onSubmit = async (data: LoginFormInput) => {
 		setApiError({});
 
-		const result = await authClient.signIn.email({
-			email: data.email,
+		const result = await authClient.signIn.username({
+			username: data.username,
 			password: data.password,
 		});
 
@@ -53,7 +55,6 @@ export function LoginForm({
 
 		if (responseData?.twoFactorRedirect) {
 			setTwoFactorRequired(true);
-			setTimeout(() => totpInputRef.current?.focus(), 100);
 			return;
 		}
 
@@ -73,7 +74,7 @@ export function LoginForm({
 			errorMessage.includes("invalid password");
 
 		if (userNotFoundError) {
-			setApiError({ email: "User not found" });
+			setApiError({ username: "User not found" });
 		} else if (invalidPasswordError) {
 			setApiError({ password: "Invalid password" });
 		} else {
@@ -81,105 +82,16 @@ export function LoginForm({
 		}
 	};
 
-	const handleVerifyTotp = async () => {
-		setApiError({});
-		setVerifying2FA(true);
-
-		try {
-			const { error } = await authClient.twoFactor.verifyTotp({
-				code: totpCode,
-			});
-
-			if (!error) {
-				router.push("/home");
-				return;
-			}
-
-			setApiError({
-				totp:
-					error.code === "INVALID_CODE"
-						? "Invalid code. Please try again."
-						: (error.message ?? "Verification failed"),
-			});
-			setTotpCode("");
-		} finally {
-			setVerifying2FA(false);
-		}
-	};
-
 	if (twoFactorRequired) {
 		return (
-			<div className={cn("flex flex-col gap-6", className)} {...props}>
-				<div className="flex flex-col items-center gap-2 text-center">
-					<Link
-						href="/"
-						className="flex flex-col items-center gap-2 font-medium"
-					>
-						<div className="flex size-8 items-center justify-center rounded-md">
-							<AppIcon className="size-6" />
-						</div>
-						<span className="sr-only">ChatSimulator</span>
-					</Link>
-					<h1 className="text-xl font-bold">Two-Factor Authentication</h1>
-					<FieldDescription>
-						Enter the 6-digit code from your authenticator app.
-					</FieldDescription>
-				</div>
-
-				{apiError.totp && (
-					<div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-						{apiError.totp}
-					</div>
-				)}
-
-				<div className="flex flex-col gap-4">
-					<Field>
-						<FieldLabel htmlFor="totp-code">Verification Code</FieldLabel>
-						<Input
-							ref={totpInputRef}
-							id="totp-code"
-							type="text"
-							inputMode="numeric"
-							autoComplete="one-time-code"
-							maxLength={6}
-							placeholder="000000"
-							value={totpCode}
-							onChange={(e) =>
-								setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))
-							}
-							onKeyDown={(e) => {
-								if (e.key === "Enter" && totpCode.length === 6) {
-									handleVerifyTotp();
-								}
-							}}
-							disabled={verifying2FA}
-							className="text-center text-lg tracking-widest"
-						/>
-					</Field>
-
-					<Button
-						type="button"
-						onClick={handleVerifyTotp}
-						disabled={totpCode.length !== 6 || verifying2FA}
-						className="w-full"
-					>
-						{verifying2FA ? "Verifying..." : "Verify"}
-					</Button>
-
-					<Button
-						type="button"
-						variant="outline"
-						onClick={() => {
-							setTwoFactorRequired(false);
-							setTotpCode("");
-							setApiError({});
-						}}
-						className="w-full"
-					>
-						Back to login
-					</Button>
-				</div>
-			</div>
+			<TwoFactorVerify
+				className={className}
+				onSuccess={() => router.push("/home")}
+				onBack={() => {
+					setTwoFactorRequired(false);
+					setApiError({});
+				}}
+			/>
 		);
 	}
 
@@ -210,17 +122,18 @@ export function LoginForm({
 					)}
 
 					<Field>
-						<FieldLabel htmlFor="email">Email</FieldLabel>
+						<FieldLabel htmlFor="username">Username</FieldLabel>
 						<Input
-							{...register("email")}
-							id="email"
-							type="email"
-							placeholder="m@example.com"
+							{...register("username")}
+							id="username"
+							type="text"
+							placeholder="Your username"
+							autoComplete="username"
 							disabled={isSubmitting}
 						/>
-						{(errors.email || apiError.email) && (
+						{(errors.username || apiError.username) && (
 							<p className="text-xs text-red-600">
-								{errors.email?.message || apiError.email}
+								{errors.username?.message || apiError.username}
 							</p>
 						)}
 					</Field>

@@ -1,15 +1,12 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from "react";
 import { IntraIcon } from "@/components/icons/42-intra";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { authClient } from "@/lib/auth-client";
 
-type ApiErrorState = Record<string, string>;
-
 interface OAuthButtonProps {
-	setApiError: Dispatch<SetStateAction<ApiErrorState>>;
+	setApiError: (errors: { general?: string }) => void;
 	disabled?: boolean;
 }
 

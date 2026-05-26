@@ -1,37 +1,41 @@
 import { eq } from "drizzle-orm";
-import { getAuthSession } from "@/lib/auth-session";
+import { badRequest, requireAuth, unauthorized } from "@/lib/api-helpers";
 import db from "@/lib/db";
 import { updateProfileSchema } from "@/lib/validation/schemas";
 import { user } from "@/schema/auth";
 
-/**
- * PATCH /api/profile
- * Update the current user's profile.
- * Body: { image?: string }
- */
 export async function PATCH(request: Request) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 
 	const body: unknown = await request.json();
 	const parsed = updateProfileSchema.safeParse(body);
 	if (!parsed.success) {
-		return Response.json(
-			{ error: "Invalid input", details: parsed.error.flatten() },
-			{ status: 400 },
-		);
+		return badRequest("Invalid input", parsed.error.flatten());
 	}
 
-	const updates: Record<string, string> = {};
+	const updates: Partial<{
+		image: string;
+		name: string;
+		lastName: string;
+		bio: string;
+	}> = {};
 	if (parsed.data.image !== undefined) {
 		updates.image = parsed.data.image;
 	}
+	if (parsed.data.name !== undefined) {
+		updates.name = parsed.data.name;
+	}
+	if (parsed.data.lastName !== undefined) {
+		updates.lastName = parsed.data.lastName;
+	}
+	if (parsed.data.bio !== undefined) {
+		updates.bio = parsed.data.bio;
+	}
 
 	if (Object.keys(updates).length === 0) {
-		return Response.json({ error: "No fields to update" }, { status: 400 });
+		return badRequest("No fields to update");
 	}
 
 	db.update(user).set(updates).where(eq(user.id, userId)).run();

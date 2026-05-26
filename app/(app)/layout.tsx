@@ -8,8 +8,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 	return (
 		<ToastProvider>
 			<div className="flex min-h-svh flex-col">
-				<header className="sticky top-0 z-40 border-b-2 border-foreground bg-background">
-					<div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-4">
+				<header className="sticky top-0 z-40 border-b-2 border-border bg-background">
+					<div className="flex h-14 items-center justify-between px-4 sm:px-6">
 						<Link
 							href="/home"
 							className="flex items-center gap-2 font-heading text-lg font-bold"
@@ -25,7 +25,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 					{children}
 				</main>
 
-				<footer className="border-t-2 border-foreground bg-background">
+				<footer className="border-t-2 border-border bg-background">
 					<div className="mx-auto flex max-w-2xl items-center justify-center gap-4 px-4 py-3">
 						<Link
 							href="/privacy"

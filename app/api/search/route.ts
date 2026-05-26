@@ -1,30 +1,20 @@
 import { and, desc, eq, like, or } from "drizzle-orm";
 import type { NextRequest } from "next/server";
-import { getAuthSession } from "@/lib/auth-session";
+import { badRequest, requireAuth, unauthorized } from "@/lib/api-helpers";
+import { getPartnerId } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
 import { searchQuerySchema } from "@/lib/validation/schemas";
 import { conversation, message, user } from "@/schema/auth";
 
-/**
- * GET /api/search?q=...
- * Global search across the user's conversations:
- * - Users: by username among conversation partners
- * - Messages: by body content in user's conversations
- */
 export async function GET(request: NextRequest) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 
 	const searchParams = Object.fromEntries(request.nextUrl.searchParams);
 	const parsed = searchQuerySchema.safeParse(searchParams);
 	if (!parsed.success) {
-		return Response.json(
-			{ error: "Invalid search query", details: parsed.error.flatten() },
-			{ status: 400 },
-		);
+		return badRequest("Invalid search query", parsed.error.flatten());
 	}
 
 	const { q } = parsed.data;
@@ -49,11 +39,7 @@ export async function GET(request: NextRequest) {
 
 	// Get partner IDs
 	const partnerIds = [
-		...new Set(
-			myConversations.map((c) =>
-				c.userAId === userId ? c.userBId : c.userAId,
-			),
-		),
+		...new Set(myConversations.map((c) => getPartnerId(c, userId))),
 	];
 	const convIds = myConversations.map((c) => c.id);
 
@@ -70,7 +56,11 @@ export async function GET(request: NextRequest) {
 					.from(user)
 					.where(
 						and(
-							or(like(user.username, pattern), like(user.name, pattern)),
+							or(
+								like(user.username, pattern),
+								like(user.name, pattern),
+								like(user.lastName, pattern),
+							),
 							or(...partnerIds.map((pid) => eq(user.id, pid))),
 						),
 					)

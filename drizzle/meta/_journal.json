@@ -36,6 +36,13 @@
       "when": 1779800000000,
       "tag": "0004_two_factor",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1779900000000,
+      "tag": "0005_profile_fields",
+      "breakpoints": true
     }
   ]
 }

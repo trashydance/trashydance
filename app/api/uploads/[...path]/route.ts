@@ -1,9 +1,12 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { and, eq, or } from "drizzle-orm";
-import { getAuthSession } from "@/lib/auth-session";
-import db from "@/lib/db";
-import { conversation } from "@/schema/auth";
+import {
+	badRequest,
+	notFound,
+	requireAuth,
+	unauthorized,
+} from "@/lib/api-helpers";
+import { findConversationForParticipant } from "@/lib/conversation-helpers";
 
 const MIME_TYPES: Record<string, string> = {
 	".jpg": "image/jpeg",
@@ -28,41 +31,25 @@ export async function GET(
 	_request: Request,
 	{ params }: { params: Promise<{ path: string[] }> },
 ) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 
 	const { path } = await params;
 
 	if (!path || path.length < 2) {
-		return Response.json({ error: "Invalid path" }, { status: 400 });
+		return badRequest("Invalid path");
 	}
 
 	const conversationId = path[0];
 	const fileName = path.slice(1).join("/");
 
-	// Prevent directory traversal
 	if (fileName.includes("..") || conversationId.includes("..")) {
-		return Response.json({ error: "Invalid path" }, { status: 400 });
+		return badRequest("Invalid path");
 	}
 
-	// Verify user is a participant
-	const conv = db
-		.select()
-		.from(conversation)
-		.where(
-			and(
-				eq(conversation.id, conversationId),
-				or(eq(conversation.userAId, userId), eq(conversation.userBId, userId)),
-			),
-		)
-		.get();
-
-	if (!conv) {
-		return Response.json({ error: "Conversation not found" }, { status: 404 });
-	}
+	const conv = findConversationForParticipant(conversationId, userId);
+	if (!conv) return notFound("Conversation");
 
 	const filePath = join(
 		process.cwd(),
@@ -72,18 +59,14 @@ export async function GET(
 		fileName,
 	);
 
-	if (!existsSync(filePath)) {
-		return Response.json({ error: "File not found" }, { status: 404 });
-	}
+	if (!existsSync(filePath)) return notFound("File");
 
 	const stat = statSync(filePath);
 	const fileBuffer = readFileSync(filePath);
 
-	// Determine content type from extension
 	const ext = `.${fileName.split(".").pop()?.toLowerCase() ?? ""}`;
 	const contentType = MIME_TYPES[ext] ?? "application/octet-stream";
 
-	// Extract original filename (strip uuid- prefix)
 	const originalName = fileName.replace(/^[a-f0-9-]+-/, "");
 
 	return new Response(fileBuffer, {

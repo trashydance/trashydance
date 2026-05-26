@@ -1,5 +1,11 @@
 import { eq } from "drizzle-orm";
-import { getAuthSession } from "@/lib/auth-session";
+import {
+	forbidden,
+	notFound,
+	requireAuth,
+	unauthorized,
+} from "@/lib/api-helpers";
+import { getPartnerId } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
 import { getFriendRequestInfo } from "@/lib/friend-helpers";
 import { conversation, user } from "@/schema/auth";
@@ -8,11 +14,9 @@ export async function GET(
 	_request: Request,
 	{ params }: { params: Promise<{ id: string }> },
 ) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 	const { id } = await params;
 
 	const conv = db
@@ -21,15 +25,13 @@ export async function GET(
 		.where(eq(conversation.id, id))
 		.get();
 
-	if (!conv) {
-		return Response.json({ error: "Not found" }, { status: 404 });
-	}
+	if (!conv) return notFound("Conversation");
 
 	if (conv.userAId !== userId && conv.userBId !== userId) {
-		return Response.json({ error: "Forbidden" }, { status: 403 });
+		return forbidden();
 	}
 
-	const partnerId = conv.userAId === userId ? conv.userBId : conv.userAId;
+	const partnerId = getPartnerId(conv, userId);
 
 	const partner = db
 		.select({

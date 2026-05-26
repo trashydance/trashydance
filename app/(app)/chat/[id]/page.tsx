@@ -7,6 +7,7 @@ import { MessageBubble } from "@/components/feature/message-bubble";
 import { MessageInput } from "@/components/feature/message-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChat } from "@/hooks/use-chat";
+import { HIGHLIGHT_DURATION_MS } from "@/lib/constants";
 import type { FriendStatus } from "@/lib/types";
 
 interface ConversationMeta {
@@ -24,8 +25,15 @@ export default function ChatPage() {
 	const highlightMessageId = searchParams.get("messageId");
 
 	const conversationId = params.id;
-	const { messages, sendMessage, retryMessage, loadMore, isLoading, hasMore } =
-		useChat(conversationId);
+	const {
+		messages,
+		sendMessage,
+		retryMessage,
+		loadMore,
+		isLoading,
+		isLoadingMore,
+		hasMore,
+	} = useChat(conversationId);
 
 	const [meta, setMeta] = useState<ConversationMeta | null>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -33,7 +41,6 @@ export default function ChatPage() {
 	const highlightedRef = useRef<HTMLDivElement>(null);
 	const [highlightActive, setHighlightActive] = useState(false);
 
-	// Fetch conversation metadata
 	useEffect(() => {
 		async function fetchMeta() {
 			try {
@@ -56,7 +63,6 @@ export default function ChatPage() {
 		fetchMeta();
 	}, [conversationId]);
 
-	// Mark chat as read when the page opens
 	useEffect(() => {
 		fetch(`/api/conversations/${conversationId}/read`, {
 			method: "POST",
@@ -66,13 +72,18 @@ export default function ChatPage() {
 	const hasScrolledToHighlight = useRef(false);
 	const prevMessageCount = useRef(0);
 
-	// Scroll to bottom — skip entirely when navigating to a specific message
+	// Scroll to bottom for new messages (skip when navigating to a highlighted message)
 	useEffect(() => {
 		if (highlightMessageId) {
 			prevMessageCount.current = messages.length;
 			return;
 		}
-		if (
+		if (messages.length > 0 && prevMessageCount.current === 0) {
+			requestAnimationFrame(() => {
+				const el = containerRef.current;
+				if (el) el.scrollTop = el.scrollHeight;
+			});
+		} else if (
 			messages.length > prevMessageCount.current &&
 			prevMessageCount.current > 0
 		) {
@@ -81,19 +92,14 @@ export default function ChatPage() {
 				if (el) el.scrollTop = el.scrollHeight;
 			});
 		}
-		if (messages.length > 0 && prevMessageCount.current === 0) {
-			requestAnimationFrame(() => {
-				const el = containerRef.current;
-				if (el) el.scrollTop = el.scrollHeight;
-			});
-		}
 		prevMessageCount.current = messages.length;
 	}, [messages, highlightMessageId]);
 
-	// Scroll to highlighted message — load older messages if needed
+	// Scroll to highlighted message — load older pages until found
 	useEffect(() => {
-		if (!highlightMessageId || isLoading || hasScrolledToHighlight.current)
-			return;
+		if (!highlightMessageId || hasScrolledToHighlight.current) return;
+		if (isLoading || isLoadingMore) return;
+
 		const target = messages.find((m) => m.id === highlightMessageId);
 		if (!target) {
 			if (hasMore) loadMore();
@@ -103,26 +109,33 @@ export default function ChatPage() {
 		hasScrolledToHighlight.current = true;
 		setHighlightActive(true);
 
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				highlightedRef.current?.scrollIntoView({
-					behavior: "smooth",
-					block: "center",
-				});
+		setTimeout(() => {
+			highlightedRef.current?.scrollIntoView({
+				behavior: "instant",
+				block: "center",
 			});
-		});
+		}, 50);
 
-		const timer = setTimeout(() => setHighlightActive(false), 3000);
+		const timer = setTimeout(
+			() => setHighlightActive(false),
+			HIGHLIGHT_DURATION_MS,
+		);
 		return () => clearTimeout(timer);
-	}, [highlightMessageId, isLoading, messages, hasMore, loadMore]);
+	}, [
+		highlightMessageId,
+		isLoading,
+		isLoadingMore,
+		messages,
+		hasMore,
+		loadMore,
+	]);
 
-	// Scroll-to-load-more
 	const handleScroll = useCallback(() => {
 		const el = containerRef.current;
-		if (el && el.scrollTop === 0 && hasMore && !isLoading) {
+		if (el && el.scrollTop === 0 && hasMore && !isLoading && !isLoadingMore) {
 			loadMore();
 		}
-	}, [hasMore, isLoading, loadMore]);
+	}, [hasMore, isLoading, isLoadingMore, loadMore]);
 
 	if (!meta) {
 		return (
@@ -156,7 +169,7 @@ export default function ChatPage() {
 				onScroll={handleScroll}
 				className="custom-scroll flex-1 overflow-y-auto px-4 py-4"
 			>
-				{isLoading && (
+				{(isLoading || isLoadingMore) && (
 					<div className="mb-4 space-y-2">
 						{Array.from({ length: 3 }).map((_, i) => (
 							<Skeleton
@@ -169,7 +182,9 @@ export default function ChatPage() {
 
 				<div className="space-y-3">
 					{messages.map((msg) => {
-						const isSelf = msg.senderId === meta.currentUserId;
+						const isSelf =
+							msg.senderId === meta.currentUserId ||
+							msg.id.startsWith("temp-");
 						const isHighlighted =
 							highlightActive && msg.id === highlightMessageId;
 
@@ -205,7 +220,7 @@ export default function ChatPage() {
 				<div ref={messagesEndRef} />
 			</div>
 
-			<div className="border-t-2 border-foreground bg-card px-4 py-3">
+			<div className="border-t-2 border-border bg-background px-4 py-3">
 				<MessageInput onSend={sendMessage} conversationId={conversationId} />
 			</div>
 		</div>

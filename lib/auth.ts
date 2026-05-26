@@ -37,8 +37,11 @@ export const auth = betterAuth({
 							updatedAt: profile.updated_at,
 							email: profile.email,
 							emailVerified: true,
-							name: profile.usual_full_name,
+							name: profile.first_name || profile.usual_full_name,
+							lastName: profile.last_name || null,
+							username: profile.login,
 							image: profile.image?.link,
+							intraLogin: profile.login,
 						};
 					},
 				},

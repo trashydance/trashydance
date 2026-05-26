@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { SocketEvent } from "@/lib/constants";
 import { useSocket } from "./use-socket";
 
 interface NotificationCount {
@@ -57,13 +58,13 @@ export function useNotificationCount() {
 			}));
 		}
 
-		socket.on("notification:count", handleCountUpdate);
-		socket.on("friend-request:new", handleNewFriendRequest);
+		socket.on(SocketEvent.NOTIFICATION_COUNT, handleCountUpdate);
+		socket.on(SocketEvent.FRIEND_REQUEST_NEW, handleNewFriendRequest);
 		socket.on("friend-request:accepted", handleFriendRequestAccepted);
 
 		return () => {
-			socket.off("notification:count", handleCountUpdate);
-			socket.off("friend-request:new", handleNewFriendRequest);
+			socket.off(SocketEvent.NOTIFICATION_COUNT, handleCountUpdate);
+			socket.off(SocketEvent.FRIEND_REQUEST_NEW, handleNewFriendRequest);
 			socket.off("friend-request:accepted", handleFriendRequestAccepted);
 		};
 	}, [socket]);

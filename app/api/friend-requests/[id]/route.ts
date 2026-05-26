@@ -1,35 +1,32 @@
 import { eq } from "drizzle-orm";
-import { getAuthSession } from "@/lib/auth-session";
+import {
+	badRequest,
+	forbidden,
+	notFound,
+	requireAuth,
+	unauthorized,
+} from "@/lib/api-helpers";
+import { SocketEvent } from "@/lib/constants";
 import db from "@/lib/db";
-import { getNotificationCount } from "@/lib/notification-helpers";
+import { emitNotificationCount } from "@/lib/socket/handlers";
 import { getIO } from "@/lib/socket/io-instance";
 import { presence } from "@/lib/socket/presence";
 import { friendRequestActionSchema } from "@/lib/validation/schemas";
 import { friendRequest } from "@/schema/auth";
 
-/**
- * PATCH /api/friend-requests/[id]
- * Accept or reject a friend request. Body: { action: "accept" | "reject" }
- * Only the receiver can accept/reject.
- */
 export async function PATCH(
 	request: Request,
 	{ params }: { params: Promise<{ id: string }> },
 ) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 	const { id } = await params;
 
 	const body: unknown = await request.json();
 	const parsed = friendRequestActionSchema.safeParse(body);
 	if (!parsed.success) {
-		return Response.json(
-			{ error: "Invalid input", details: parsed.error.flatten() },
-			{ status: 400 },
-		);
+		return badRequest("Invalid input", parsed.error.flatten());
 	}
 
 	const { action } = parsed.data;
@@ -40,25 +37,14 @@ export async function PATCH(
 		.where(eq(friendRequest.id, id))
 		.get();
 
-	if (!req) {
-		return Response.json(
-			{ error: "Friend request not found" },
-			{ status: 404 },
-		);
-	}
+	if (!req) return notFound("Friend request");
 
 	if (req.receiverId !== userId) {
-		return Response.json(
-			{ error: "Only the receiver can accept or reject" },
-			{ status: 403 },
-		);
+		return forbidden("Only the receiver can accept or reject");
 	}
 
 	if (req.status !== "pending") {
-		return Response.json(
-			{ error: "Friend request is not pending" },
-			{ status: 400 },
-		);
+		return badRequest("Friend request is not pending");
 	}
 
 	const newStatus = action === "accept" ? "accepted" : "rejected";
@@ -70,41 +56,32 @@ export async function PATCH(
 
 	const io = getIO();
 	if (io) {
-		const senderSockets = presence.getSocketIds(req.senderId);
-		const senderCounts = getNotificationCount(req.senderId);
-		for (const sid of senderSockets) {
-			io.to(sid).emit("friend-request:update", {
-				id: req.id,
-				senderId: req.senderId,
-				receiverId: req.receiverId,
-				status: newStatus,
-			});
-			io.to(sid).emit("notification:count", senderCounts);
+		const updatePayload = {
+			id: req.id,
+			senderId: req.senderId,
+			receiverId: req.receiverId,
+			status: newStatus,
+		};
+		for (const sid of presence.getSocketIds(req.senderId)) {
+			io.to(sid).emit(SocketEvent.FRIEND_REQUEST_UPDATE, updatePayload);
 		}
-
-		const receiverSockets = presence.getSocketIds(userId);
-		const receiverCounts = getNotificationCount(userId);
-		for (const sid of receiverSockets) {
-			io.to(sid).emit("notification:count", receiverCounts);
+		for (const sid of presence.getSocketIds(userId)) {
+			io.to(sid).emit(SocketEvent.FRIEND_REQUEST_UPDATE, updatePayload);
 		}
+		emitNotificationCount(io, req.senderId);
+		emitNotificationCount(io, userId);
 	}
 
 	return Response.json({ id: req.id, status: newStatus });
 }
 
-/**
- * DELETE /api/friend-requests/[id]
- * Cancel (if pending and sender) or unfriend (if accepted).
- */
 export async function DELETE(
 	_request: Request,
 	{ params }: { params: Promise<{ id: string }> },
 ) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 	const { id } = await params;
 
 	const req = db
@@ -113,36 +90,22 @@ export async function DELETE(
 		.where(eq(friendRequest.id, id))
 		.get();
 
-	if (!req) {
-		return Response.json(
-			{ error: "Friend request not found" },
-			{ status: 404 },
-		);
-	}
+	if (!req) return notFound("Friend request");
 
-	// Pending: only the sender can cancel
 	if (req.status === "pending" && req.senderId !== userId) {
-		return Response.json(
-			{ error: "Only the sender can cancel a pending request" },
-			{ status: 403 },
-		);
+		return forbidden("Only the sender can cancel a pending request");
 	}
 
-	// Accepted: either party can unfriend
 	if (
 		req.status === "accepted" &&
 		req.senderId !== userId &&
 		req.receiverId !== userId
 	) {
-		return Response.json({ error: "Forbidden" }, { status: 403 });
+		return forbidden();
 	}
 
-	// Rejected: cannot delete
 	if (req.status === "rejected") {
-		return Response.json(
-			{ error: "Cannot delete a rejected request" },
-			{ status: 400 },
-		);
+		return badRequest("Cannot delete a rejected request");
 	}
 
 	const otherUserId = req.senderId === userId ? req.receiverId : req.senderId;
@@ -151,23 +114,20 @@ export async function DELETE(
 
 	const io = getIO();
 	if (io) {
-		const otherSockets = presence.getSocketIds(otherUserId);
-		const otherCounts = getNotificationCount(otherUserId);
-		for (const sid of otherSockets) {
-			io.to(sid).emit("friend-request:update", {
-				id,
-				senderId: req.senderId,
-				receiverId: req.receiverId,
-				status: "none",
-			});
-			io.to(sid).emit("notification:count", otherCounts);
+		const updatePayload = {
+			id,
+			senderId: req.senderId,
+			receiverId: req.receiverId,
+			status: "none",
+		};
+		for (const sid of presence.getSocketIds(otherUserId)) {
+			io.to(sid).emit(SocketEvent.FRIEND_REQUEST_UPDATE, updatePayload);
 		}
-
-		const mySockets = presence.getSocketIds(userId);
-		const myCounts = getNotificationCount(userId);
-		for (const sid of mySockets) {
-			io.to(sid).emit("notification:count", myCounts);
+		for (const sid of presence.getSocketIds(userId)) {
+			io.to(sid).emit(SocketEvent.FRIEND_REQUEST_UPDATE, updatePayload);
 		}
+		emitNotificationCount(io, otherUserId);
+		emitNotificationCount(io, userId);
 	}
 
 	return Response.json({ ok: true });

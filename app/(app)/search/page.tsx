@@ -4,6 +4,7 @@ import { Search as SearchIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EmptyState } from "@/components/feature/empty-state";
+import { FriendRequestButton } from "@/components/feature/friend-request-button";
 import { SearchBar } from "@/components/feature/search-bar";
 import { UserResultItem } from "@/components/feature/user-result-item";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +16,7 @@ interface SearchUser {
 	username: string | null;
 	image: string | null;
 	friendStatus: FriendStatus;
+	friendRequestId?: string | null;
 }
 
 export default function SearchPage() {
@@ -24,35 +26,32 @@ export default function SearchPage() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [navigating, setNavigating] = useState<string | null>(null);
 
-	useEffect(() => {
-		async function loadUsers() {
-			setIsLoading(true);
-			try {
-				const res = await fetch("/api/users/search?q=");
-				if (res.ok) {
-					const data = await res.json();
-					const friends = (data.friends ?? data.following ?? []).map(
-						(u: SearchUser) => ({
-							...u,
-							friendStatus: u.friendStatus ?? ("friends" as FriendStatus),
-						}),
-					);
-					const others = (data.others ?? data.notFollowing ?? []).map(
-						(u: SearchUser) => ({
-							...u,
-							friendStatus: u.friendStatus ?? ("none" as FriendStatus),
-						}),
-					);
-					setAllUsers([...friends, ...others]);
-				}
-			} catch {
-				// silently fail
-			} finally {
-				setIsLoading(false);
+	const loadUsers = useCallback(async () => {
+		setIsLoading(true);
+		try {
+			const res = await fetch("/api/users/search?q=");
+			if (res.ok) {
+				const data = await res.json();
+				const friends = (data.friends ?? []).map((u: SearchUser) => ({
+					...u,
+					friendStatus: u.friendStatus ?? ("friends" as FriendStatus),
+				}));
+				const others = (data.others ?? []).map((u: SearchUser) => ({
+					...u,
+					friendStatus: u.friendStatus ?? ("none" as FriendStatus),
+				}));
+				setAllUsers([...friends, ...others]);
 			}
+		} catch {
+			// silently fail
+		} finally {
+			setIsLoading(false);
 		}
-		loadUsers();
 	}, []);
+
+	useEffect(() => {
+		loadUsers();
+	}, [loadUsers]);
 
 	const filtered = useMemo(() => {
 		if (!query.trim()) return allUsers;
@@ -93,6 +92,17 @@ export default function SearchPage() {
 		[router],
 	);
 
+	const handleStatusChange = useCallback(
+		(userId: string, newStatus: FriendStatus) => {
+			setAllUsers((prev) =>
+				prev.map((u) =>
+					u.id === userId ? { ...u, friendStatus: newStatus } : u,
+				),
+			);
+		},
+		[],
+	);
+
 	return (
 		<div className="space-y-6">
 			<div>
@@ -105,7 +115,7 @@ export default function SearchPage() {
 			<SearchBar
 				value={query}
 				onChange={setQuery}
-				placeholder="Search by name..."
+				placeholder="Search by username or name..."
 			/>
 
 			{isLoading && (
@@ -132,7 +142,9 @@ export default function SearchPage() {
 					<div className="space-y-6">
 						{friends.length > 0 && (
 							<section>
-								<h2 className="mb-3 font-heading text-lg font-bold">Friends</h2>
+								<h2 className="mb-3 font-heading text-lg font-bold">
+									Following
+								</h2>
 								<div className="space-y-2">
 									{friends.map((user) => (
 										<UserResultItem
@@ -140,10 +152,17 @@ export default function SearchPage() {
 											username={user.username}
 											name={user.name}
 											image={user.image}
-											friendStatus="friends"
 											onClick={() => handleUserClick(user.id)}
 											className={
 												navigating === user.id ? "opacity-50" : undefined
+											}
+											actions={
+												<FriendRequestButton
+													userId={user.id}
+													initialStatus={user.friendStatus}
+													requestId={user.friendRequestId ?? undefined}
+													onStatusChange={(s) => handleStatusChange(user.id, s)}
+												/>
 											}
 										/>
 									))}
@@ -161,10 +180,17 @@ export default function SearchPage() {
 											username={user.username}
 											name={user.name}
 											image={user.image}
-											friendStatus={user.friendStatus}
 											onClick={() => handleUserClick(user.id)}
 											className={
 												navigating === user.id ? "opacity-50" : undefined
+											}
+											actions={
+												<FriendRequestButton
+													userId={user.id}
+													initialStatus={user.friendStatus}
+													requestId={user.friendRequestId ?? undefined}
+													onStatusChange={(s) => handleStatusChange(user.id, s)}
+												/>
 											}
 										/>
 									))}
@@ -182,10 +208,17 @@ export default function SearchPage() {
 											username={user.username}
 											name={user.name}
 											image={user.image}
-											friendStatus="none"
 											onClick={() => handleUserClick(user.id)}
 											className={
 												navigating === user.id ? "opacity-50" : undefined
+											}
+											actions={
+												<FriendRequestButton
+													userId={user.id}
+													initialStatus={user.friendStatus}
+													requestId={user.friendRequestId ?? undefined}
+													onStatusChange={(s) => handleStatusChange(user.id, s)}
+												/>
 											}
 										/>
 									))}

@@ -1,11 +1,15 @@
 import { z } from "zod";
+import { MAX_MESSAGE_LENGTH } from "@/lib/constants";
 
 /** Message body validation */
 export const messageSchema = z
 	.object({
 		body: z
 			.string()
-			.max(2000, "Message cannot exceed 2000 characters")
+			.max(
+				MAX_MESSAGE_LENGTH,
+				`Message cannot exceed ${MAX_MESSAGE_LENGTH} characters`,
+			)
 			.transform((v) => v.trim())
 			.optional()
 			.default(""),
@@ -48,7 +52,6 @@ export const registerSchema = z.object({
 			/^[a-zA-Z0-9_]+$/,
 			"Username can only contain letters, numbers, and underscores",
 		),
-	email: z.email("Invalid email address"),
 	password: z
 		.string()
 		.min(8, "Password must be at least 8 characters")
@@ -58,7 +61,7 @@ export const registerSchema = z.object({
 
 /** Login */
 export const loginSchema = z.object({
-	email: z.email("Invalid email address"),
+	username: z.string().min(1, "Username is required"),
 	password: z.string().min(1, "Password is required"),
 });
 
@@ -71,6 +74,9 @@ export const cursorPaginationSchema = z.object({
 /** Profile update */
 export const updateProfileSchema = z.object({
 	image: z.string().optional(),
+	name: z.string().min(1).max(50).optional(),
+	lastName: z.string().max(50).optional(),
+	bio: z.string().max(200).optional(),
 });
 
 export type MessageInput = z.infer<typeof messageSchema>;

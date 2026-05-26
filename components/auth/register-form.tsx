@@ -25,7 +25,10 @@ export function RegisterForm({
 	...props
 }: React.ComponentProps<"div">) {
 	const router = useRouter();
-	const [apiError, setApiError] = useState<Record<string, string>>({});
+	const [apiError, setApiError] = useState<{
+		username?: string;
+		general?: string;
+	}>({});
 	const {
 		register,
 		handleSubmit,
@@ -37,10 +40,13 @@ export function RegisterForm({
 	const onSubmit = async (data: RegisterFormInput) => {
 		setApiError({});
 
+		const generatedEmail = `${data.username.toLowerCase()}@trashydance.local`;
+
 		const { error } = await authClient.signUp.email({
-			email: data.email,
+			email: generatedEmail,
 			password: data.password,
-			name: data.email.split("@")[0],
+			name: data.username,
+			username: data.username,
 			callbackURL: "/home",
 		});
 
@@ -49,10 +55,11 @@ export function RegisterForm({
 			return;
 		}
 
-		if (error?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
-			setApiError({ email: "Email already in use" });
-		} else if (error.message?.includes("email")) {
-			setApiError({ email: error.message });
+		if (
+			error?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL" ||
+			error?.message?.includes("username")
+		) {
+			setApiError({ username: "Username already taken" });
 		} else if (error.message) {
 			setApiError({ general: error.message });
 		}
@@ -87,17 +94,18 @@ export function RegisterForm({
 					)}
 
 					<Field>
-						<FieldLabel htmlFor="email">Email</FieldLabel>
+						<FieldLabel htmlFor="username">Username</FieldLabel>
 						<Input
-							{...register("email")}
-							id="email"
-							type="email"
-							placeholder="m@example.com"
+							{...register("username")}
+							id="username"
+							type="text"
+							placeholder="Choose a username"
+							autoComplete="username"
 							disabled={isSubmitting}
 						/>
-						{(errors.email || apiError.email) && (
+						{(errors.username || apiError.username) && (
 							<p className="text-xs text-red-600">
-								{errors.email?.message || apiError.email}
+								{errors.username?.message || apiError.username}
 							</p>
 						)}
 					</Field>

@@ -9,28 +9,15 @@ import {
 	useState,
 } from "react";
 import { Button } from "@/components/ui/button";
+import {
+	ALLOWED_MIME_ACCEPT_STRING,
+	ALLOWED_MIME_TYPES_SET,
+	MAX_FILE_SIZE,
+	MAX_MESSAGE_LENGTH,
+	MESSAGE_LENGTH_WARNING_THRESHOLD,
+	TEXTAREA_MAX_HEIGHT_PX,
+} from "@/lib/constants";
 import { cn, formatFileSize } from "@/lib/utils";
-
-const MAX_LENGTH = 2000;
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-
-const ALLOWED_TYPES = [
-	"image/jpeg",
-	"image/png",
-	"image/gif",
-	"image/webp",
-	"video/mp4",
-	"video/webm",
-	"application/pdf",
-	"application/msword",
-	"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-	"application/vnd.ms-excel",
-	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-	"application/vnd.ms-powerpoint",
-	"application/vnd.openxmlformats-officedocument.presentationml.presentation",
-];
-
-const ACCEPT_STRING = ALLOWED_TYPES.join(",");
 
 interface FileInfo {
 	fileName: string;
@@ -63,7 +50,7 @@ export function MessageInput({
 		const el = textareaRef.current;
 		if (el) {
 			el.style.height = "auto";
-			el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+			el.style.height = `${Math.min(el.scrollHeight, TEXTAREA_MAX_HEIGHT_PX)}px`;
 		}
 	}, []);
 
@@ -77,7 +64,7 @@ export function MessageInput({
 			return;
 		}
 
-		if (!ALLOWED_TYPES.includes(file.type)) {
+		if (!ALLOWED_MIME_TYPES_SET.has(file.type)) {
 			setFileError("File type not allowed");
 			return;
 		}
@@ -97,7 +84,7 @@ export function MessageInput({
 	const handleSend = useCallback(async () => {
 		const trimmed = value.trim();
 		if (!trimmed && !selectedFile) return;
-		if (trimmed.length > MAX_LENGTH) return;
+		if (trimmed.length > MAX_MESSAGE_LENGTH) return;
 		if (isUploading) return;
 
 		let fileInfo: FileInfo | undefined;
@@ -151,14 +138,15 @@ export function MessageInput({
 	);
 
 	const charCount = value.length;
-	const nearLimit = charCount > MAX_LENGTH * 0.9;
+	const nearLimit =
+		charCount > MAX_MESSAGE_LENGTH * MESSAGE_LENGTH_WARNING_THRESHOLD;
 	const canSend =
 		!isUploading && (value.trim().length > 0 || selectedFile !== null);
 
 	return (
 		<div className={cn("flex flex-col gap-2", className)}>
 			{selectedFile && (
-				<div className="flex items-center gap-2 rounded-md border-2 border-foreground bg-muted px-3 py-2 text-sm">
+				<div className="flex items-center gap-2 rounded-md border-2 border-border bg-muted px-3 py-2 text-sm">
 					<Paperclip className="size-4 shrink-0 text-muted-foreground" />
 					<span className="truncate flex-1">{selectedFile.name}</span>
 					<span className="shrink-0 text-xs text-muted-foreground">
@@ -179,7 +167,7 @@ export function MessageInput({
 				<input
 					ref={fileInputRef}
 					type="file"
-					accept={ACCEPT_STRING}
+					accept={ALLOWED_MIME_ACCEPT_STRING}
 					onChange={handleFileSelect}
 					className="hidden"
 					aria-label="Attach file"
@@ -198,24 +186,26 @@ export function MessageInput({
 					<textarea
 						ref={textareaRef}
 						value={value}
-						onChange={(e) => setValue(e.target.value.slice(0, MAX_LENGTH))}
+						onChange={(e) =>
+							setValue(e.target.value.slice(0, MAX_MESSAGE_LENGTH))
+						}
 						onInput={handleInput}
 						onKeyDown={handleKeyDown}
 						placeholder="Type a message..."
 						disabled={disabled || isUploading}
 						rows={1}
-						className="w-full resize-none rounded-md border-2 border-foreground bg-transparent px-3 py-2 text-sm shadow-[4px_4px_0px_0px] shadow-foreground transition-all outline-none placeholder:text-muted-foreground focus:shadow-[2px_2px_0px_0px] focus:shadow-foreground focus:translate-x-[2px] focus:translate-y-[2px] disabled:opacity-50"
+						className="w-full resize-none rounded-md border-2 border-border bg-transparent px-3 py-2 text-sm shadow-[4px_4px_0px_0px] shadow-border transition-all outline-none placeholder:text-muted-foreground focus:shadow-[2px_2px_0px_0px] focus:shadow-border focus:translate-x-[2px] focus:translate-y-[2px] disabled:opacity-50"
 					/>
 					{nearLimit && (
 						<span
 							className={cn(
 								"absolute right-2 bottom-1 text-xs",
-								charCount >= MAX_LENGTH
+								charCount >= MAX_MESSAGE_LENGTH
 									? "text-destructive"
 									: "text-muted-foreground",
 							)}
 						>
-							{charCount}/{MAX_LENGTH}
+							{charCount}/{MAX_MESSAGE_LENGTH}
 						</span>
 					)}
 				</div>

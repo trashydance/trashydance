@@ -1,77 +1,64 @@
 import { and, count, eq, or } from "drizzle-orm";
 import type { NextRequest } from "next/server";
-import { getAuthSession } from "@/lib/auth-session";
+import { notFound, requireAuth, unauthorized } from "@/lib/api-helpers";
 import db from "@/lib/db";
 import { getFriendRequestInfo } from "@/lib/friend-helpers";
-import { friendRequest, user } from "@/schema/auth";
+import { account, friendRequest, user } from "@/schema/auth";
 
-/**
- * GET /api/profile/[username]
- * Public profile for a user by username.
- * Returns user info, friend count, and friend status with the current user.
- */
 export async function GET(
 	_request: NextRequest,
 	{ params }: { params: Promise<{ username: string }> },
 ) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const currentUserId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const currentUserId = auth.userId;
 	const { username: profileUsername } = await params;
+
+	const selectFields = {
+		id: user.id,
+		name: user.name,
+		lastName: user.lastName,
+		bio: user.bio,
+		username: user.username,
+		image: user.image,
+		intraLogin: user.intraLogin,
+		createdAt: user.createdAt,
+	};
 
 	let profileUser:
 		| {
 				id: string;
 				name: string;
+				lastName: string | null;
+				bio: string | null;
 				username: string | null;
 				image: string | null;
+				intraLogin: string | null;
 				createdAt: Date;
 		  }
 		| undefined;
 	if (profileUsername === "me") {
 		profileUser = db
-			.select({
-				id: user.id,
-				name: user.name,
-				username: user.username,
-				image: user.image,
-				createdAt: user.createdAt,
-			})
+			.select(selectFields)
 			.from(user)
 			.where(eq(user.id, currentUserId))
 			.get();
 	} else {
 		profileUser = db
-			.select({
-				id: user.id,
-				name: user.name,
-				username: user.username,
-				image: user.image,
-				createdAt: user.createdAt,
-			})
+			.select(selectFields)
 			.from(user)
 			.where(eq(user.username, profileUsername))
 			.get();
 		if (!profileUser) {
 			profileUser = db
-				.select({
-					id: user.id,
-					name: user.name,
-					username: user.username,
-					image: user.image,
-					createdAt: user.createdAt,
-				})
+				.select(selectFields)
 				.from(user)
 				.where(eq(user.name, profileUsername))
 				.get();
 		}
 	}
 
-	if (!profileUser) {
-		return Response.json({ error: "User not found" }, { status: 404 });
-	}
+	if (!profileUser) return notFound("User");
 
 	// Count accepted friend requests (where user is sender or receiver)
 	const friendCountResult = db
@@ -93,11 +80,31 @@ export async function GET(
 			? getFriendRequestInfo(currentUserId, profileUser.id)
 			: { status: "none" as const, requestId: null };
 
+	let intraLogin = profileUser.intraLogin;
+	if (!intraLogin) {
+		const fortyTwoAccount = db
+			.select({ accountId: account.accountId })
+			.from(account)
+			.where(
+				and(
+					eq(account.userId, profileUser.id),
+					eq(account.providerId, "42"),
+				),
+			)
+			.get();
+		if (fortyTwoAccount) {
+			intraLogin = fortyTwoAccount.accountId;
+		}
+	}
+
 	return Response.json({
 		id: profileUser.id,
 		name: profileUser.name,
+		lastName: profileUser.lastName,
+		bio: profileUser.bio,
 		username: profileUser.username ?? profileUser.name,
 		image: profileUser.image,
+		intraLogin,
 		createdAt: profileUser.createdAt.getTime(),
 		friendCount: friendCountResult?.value ?? 0,
 		friendStatus,

@@ -1,6 +1,10 @@
 "use client";
 
 import { io, type Socket } from "socket.io-client";
+import {
+	SOCKET_RECONNECTION_ATTEMPTS,
+	SOCKET_RECONNECTION_DELAY,
+} from "@/lib/constants";
 
 let socket: Socket | null = null;
 
@@ -14,8 +18,8 @@ export function getSocket(): Socket {
 			path: "/socket.io",
 			transports: ["websocket", "polling"],
 			autoConnect: true,
-			reconnectionAttempts: 5,
-			reconnectionDelay: 2000,
+			reconnectionAttempts: SOCKET_RECONNECTION_ATTEMPTS,
+			reconnectionDelay: SOCKET_RECONNECTION_DELAY,
 		});
 		socket.on("connect_error", () => {});
 	}

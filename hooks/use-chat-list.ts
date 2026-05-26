@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { SocketEvent } from "@/lib/constants";
 import type { Conversation } from "@/lib/types";
 import { useSocket } from "./use-socket";
 
@@ -89,9 +90,15 @@ export function useChatList() {
 			});
 		}
 
-		socket.on("message:new", handleNewMessage);
+		function handleFriendUpdate() {
+			fetchConversations();
+		}
+
+		socket.on(SocketEvent.MESSAGE_NEW, handleNewMessage);
+		socket.on(SocketEvent.FRIEND_REQUEST_UPDATE, handleFriendUpdate);
 		return () => {
-			socket.off("message:new", handleNewMessage);
+			socket.off(SocketEvent.MESSAGE_NEW, handleNewMessage);
+			socket.off(SocketEvent.FRIEND_REQUEST_UPDATE, handleFriendUpdate);
 		};
 	}, [socket, fetchConversations]);
 

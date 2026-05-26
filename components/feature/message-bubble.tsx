@@ -79,7 +79,7 @@ function FilePreview({
 						src={fileUrl}
 						alt={fileName}
 						className={cn(
-							"rounded-md border border-foreground/20",
+							"rounded-md border border-border/20",
 							fullView ? "max-w-full" : "max-w-[240px] max-h-[180px]",
 						)}
 						style={{ objectFit: "cover" }}
@@ -112,7 +112,7 @@ function FilePreview({
 				<video
 					src={fileUrl}
 					controls
-					className="max-w-[280px] max-h-[200px] rounded-md border border-foreground/20"
+					className="max-w-[280px] max-h-[200px] rounded-md border border-border/20"
 					preload="metadata"
 				/>
 			</div>
@@ -127,7 +127,7 @@ function FilePreview({
 			download={fileName}
 			className={cn(
 				"mb-1 flex items-center gap-2 rounded-md border px-3 py-2 text-sm no-underline transition-colors hover:bg-accent/50",
-				isSelf ? "border-primary-foreground/30" : "border-foreground/20",
+				isSelf ? "border-primary-foreground/30" : "border-border/20",
 			)}
 		>
 			<Icon className="size-5 shrink-0" />
@@ -159,10 +159,10 @@ export function MessageBubble({
 		>
 			<div
 				className={cn(
-					"max-w-[75%] rounded-lg border-2 border-foreground px-3 py-2 shadow-[3px_3px_0px_0px] shadow-foreground",
+					"max-w-[75%] rounded-lg border-2 border-border px-3 py-2 shadow-[3px_3px_0px_0px] shadow-border",
 					isSelf
 						? "bg-primary text-primary-foreground"
-						: "bg-card text-card-foreground",
+						: "bg-background text-foreground",
 				)}
 			>
 				{hasFile && (

@@ -1,16 +1,10 @@
-import { getAuthSession } from "@/lib/auth-session";
+import { requireAuth, unauthorized } from "@/lib/api-helpers";
 import { getNotificationCount } from "@/lib/notification-helpers";
 
-/**
- * GET /api/notifications/count
- * Return { pendingRequests: N, unreadChats: N }
- */
 export async function GET() {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
 
-	const counts = getNotificationCount(session.user.id);
+	const counts = getNotificationCount(auth.userId);
 	return Response.json(counts);
 }

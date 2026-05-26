@@ -1,63 +1,34 @@
-import { and, eq, or } from "drizzle-orm";
-import { getAuthSession } from "@/lib/auth-session";
+import { eq } from "drizzle-orm";
+import { notFound, requireAuth, unauthorized } from "@/lib/api-helpers";
+import { findConversationForParticipant } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
-import { getNotificationCount } from "@/lib/notification-helpers";
+import { emitNotificationCount } from "@/lib/socket/handlers";
 import { getIO } from "@/lib/socket/io-instance";
-import { presence } from "@/lib/socket/presence";
 import { conversation } from "@/schema/auth";
 
-/**
- * POST /api/conversations/[id]/read
- * Mark a conversation as read for the current user.
- */
 export async function POST(
 	_request: Request,
 	{ params }: { params: Promise<{ id: string }> },
 ) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 	const { id } = await params;
 
-	const conv = db
-		.select()
-		.from(conversation)
-		.where(
-			and(
-				eq(conversation.id, id),
-				or(eq(conversation.userAId, userId), eq(conversation.userBId, userId)),
-			),
-		)
-		.get();
-
-	if (!conv) {
-		return Response.json({ error: "Conversation not found" }, { status: 404 });
-	}
+	const conv = findConversationForParticipant(id, userId);
+	if (!conv) return notFound("Conversation");
 
 	const now = new Date();
+	const updateField =
+		conv.userAId === userId
+			? { userALastReadAt: now }
+			: { userBLastReadAt: now };
 
-	if (conv.userAId === userId) {
-		db.update(conversation)
-			.set({ userALastReadAt: now })
-			.where(eq(conversation.id, id))
-			.run();
-	} else {
-		db.update(conversation)
-			.set({ userBLastReadAt: now })
-			.where(eq(conversation.id, id))
-			.run();
-	}
+	db.update(conversation).set(updateField).where(eq(conversation.id, id)).run();
 
-	// Emit notification:count update
 	const io = getIO();
 	if (io) {
-		const counts = getNotificationCount(userId);
-		const mySockets = presence.getSocketIds(userId);
-		for (const sid of mySockets) {
-			io.to(sid).emit("notification:count", counts);
-		}
+		emitNotificationCount(io, userId);
 	}
 
 	return Response.json({ ok: true });

@@ -1,22 +1,15 @@
-import { and, like, ne, or } from "drizzle-orm";
+import { and, eq, like, ne, or } from "drizzle-orm";
 import type { NextRequest } from "next/server";
-import { getAuthSession } from "@/lib/auth-session";
+import { requireAuth, unauthorized } from "@/lib/api-helpers";
 import db from "@/lib/db";
-import { getFriendIds } from "@/lib/friend-helpers";
+import { getFriendRequestInfo } from "@/lib/friend-helpers";
 import { searchQuerySchema } from "@/lib/validation/schemas";
 import { user } from "@/schema/auth";
 
-/**
- * GET /api/users/search?q=...
- * Search users by username (case-insensitive LIKE).
- * Returns results grouped by friend status. Excludes the current user.
- */
 export async function GET(request: NextRequest) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 
 	const searchParams = Object.fromEntries(request.nextUrl.searchParams);
 	const parsed = searchQuerySchema.safeParse(searchParams);
@@ -29,7 +22,6 @@ export async function GET(request: NextRequest) {
 
 	const { q } = parsed.data;
 
-	// If no query, return all users; otherwise filter by name/username
 	const users = q.trim()
 		? db
 				.select({
@@ -42,7 +34,11 @@ export async function GET(request: NextRequest) {
 				.where(
 					and(
 						ne(user.id, userId),
-						or(like(user.username, `%${q}%`), like(user.name, `%${q}%`)),
+						or(
+							like(user.username, `%${q}%`),
+							like(user.name, `%${q}%`),
+							like(user.lastName, `%${q}%`),
+						),
 					),
 				)
 				.limit(50)
@@ -63,12 +59,17 @@ export async function GET(request: NextRequest) {
 		return Response.json({ friends: [], others: [] });
 	}
 
-	// Get friend IDs (accepted friend requests)
-	const friendIdList = getFriendIds(userId);
-	const friendSet = new Set(friendIdList);
+	const enriched = users.map((u) => {
+		const info = getFriendRequestInfo(userId, u.id);
+		return {
+			...u,
+			friendStatus: info.status,
+			friendRequestId: info.requestId,
+		};
+	});
 
-	const friends = users.filter((u) => friendSet.has(u.id));
-	const others = users.filter((u) => !friendSet.has(u.id));
+	const friends = enriched.filter((u) => u.friendStatus === "friends");
+	const others = enriched.filter((u) => u.friendStatus !== "friends");
 
 	return Response.json({ friends, others });
 }

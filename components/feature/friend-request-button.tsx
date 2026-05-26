@@ -41,7 +41,7 @@ export function FriendRequestButton({
 				className={className}
 			>
 				<UserPlus className="size-4" />
-				Add Friend
+				Follow
 			</Button>
 		);
 	}
@@ -95,7 +95,7 @@ export function FriendRequestButton({
 			className={className}
 		>
 			<UserMinus className="size-4" />
-			Unfriend
+			Unfollow
 		</Button>
 	);
 }

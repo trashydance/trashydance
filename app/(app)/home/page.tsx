@@ -140,7 +140,7 @@ export default function HomePage() {
 									<Link
 										key={msg.id}
 										href={`/chat/${msg.conversationId}?messageId=${msg.id}`}
-										className="block rounded-md border-2 border-foreground bg-card p-3 shadow-[4px_4px_0px_0px] shadow-foreground transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+										className="block rounded-md border-2 border-border bg-background p-3 shadow-[4px_4px_0px_0px] shadow-border transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
 									>
 										<div className="flex items-center justify-between gap-2">
 											<span className="text-xs font-medium text-muted-foreground">
@@ -185,7 +185,7 @@ export default function HomePage() {
 				<div className="space-y-6">
 					{displayConversations.friends.length > 0 && (
 						<section>
-							<h2 className="mb-3 font-heading text-lg font-bold">Friends</h2>
+							<h2 className="mb-3 font-heading text-lg font-bold">Following</h2>
 							<div className="space-y-2">
 								{displayConversations.friends.map((c) => (
 									<ChatListItem

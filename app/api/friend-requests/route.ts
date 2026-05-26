@@ -1,53 +1,44 @@
 import { and, eq, or } from "drizzle-orm";
-import { getAuthSession } from "@/lib/auth-session";
+import {
+	badRequest,
+	conflict,
+	notFound,
+	requireAuth,
+	unauthorized,
+} from "@/lib/api-helpers";
+import { SocketEvent } from "@/lib/constants";
 import db from "@/lib/db";
-import { getNotificationCount } from "@/lib/notification-helpers";
+import { emitNotificationCount } from "@/lib/socket/handlers";
 import { getIO } from "@/lib/socket/io-instance";
 import { presence } from "@/lib/socket/presence";
 import { friendRequestSchema } from "@/lib/validation/schemas";
 import { friendRequest, user } from "@/schema/auth";
 
-/**
- * POST /api/friend-requests
- * Send a friend request. Body: { receiverId: string }
- */
 export async function POST(request: Request) {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 
 	const body: unknown = await request.json();
 	const parsed = friendRequestSchema.safeParse(body);
 	if (!parsed.success) {
-		return Response.json(
-			{ error: "Invalid input", details: parsed.error.flatten() },
-			{ status: 400 },
-		);
+		return badRequest("Invalid input", parsed.error.flatten());
 	}
 
 	const { receiverId } = parsed.data;
 
 	if (receiverId === userId) {
-		return Response.json(
-			{ error: "Cannot send a friend request to yourself" },
-			{ status: 400 },
-		);
+		return badRequest("Cannot send a friend request to yourself");
 	}
 
-	// Verify the receiver exists
 	const receiver = db
 		.select({ id: user.id })
 		.from(user)
 		.where(eq(user.id, receiverId))
 		.get();
 
-	if (!receiver) {
-		return Response.json({ error: "User not found" }, { status: 404 });
-	}
+	if (!receiver) return notFound("User");
 
-	// Check no existing request in either direction
 	const existing = db
 		.select()
 		.from(friendRequest)
@@ -69,12 +60,9 @@ export async function POST(request: Request) {
 		if (existing.status === "rejected") {
 			db.delete(friendRequest).where(eq(friendRequest.id, existing.id)).run();
 		} else if (existing.status === "accepted") {
-			return Response.json({ error: "Already friends" }, { status: 409 });
+			return conflict("Already friends");
 		} else {
-			return Response.json(
-				{ error: "Friend request already pending" },
-				{ status: 409 },
-			);
+			return conflict("Friend request already pending");
 		}
 	}
 
@@ -92,21 +80,18 @@ export async function POST(request: Request) {
 		})
 		.run();
 
-	// Emit socket events to receiver
 	const io = getIO();
 	if (io) {
-		const receiverSockets = presence.getSocketIds(receiverId);
-		const counts = getNotificationCount(receiverId);
-		for (const sid of receiverSockets) {
-			io.to(sid).emit("friend-request:new", {
+		for (const sid of presence.getSocketIds(receiverId)) {
+			io.to(sid).emit(SocketEvent.FRIEND_REQUEST_NEW, {
 				id,
 				senderId: userId,
 				receiverId,
 				status: "pending",
 				createdAt: now.getTime(),
 			});
-			io.to(sid).emit("notification:count", counts);
 		}
+		emitNotificationCount(io, receiverId);
 	}
 
 	return Response.json(
@@ -115,16 +100,10 @@ export async function POST(request: Request) {
 	);
 }
 
-/**
- * GET /api/friend-requests
- * Return all friend requests relevant to the current user.
- */
 export async function GET() {
-	const session = await getAuthSession();
-	if (!session?.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-	const userId = session.user.id;
+	const auth = await requireAuth();
+	if (!auth) return unauthorized();
+	const { userId } = auth;
 
 	const requests = db
 		.select()
@@ -141,7 +120,6 @@ export async function GET() {
 		return Response.json({ received: [], sent: [], accepted: [] });
 	}
 
-	// Collect all user IDs we need to look up
 	const userIds = [
 		...new Set(requests.flatMap((r) => [r.senderId, r.receiverId])),
 	];
@@ -165,8 +143,8 @@ export async function GET() {
 
 	for (const r of requests) {
 		const sender = userMap.get(r.senderId) ?? null;
-		const receiver = userMap.get(r.receiverId) ?? null;
-		const friendUser = r.senderId === userId ? receiver : sender;
+		const receiverUser = userMap.get(r.receiverId) ?? null;
+		const friendUser = r.senderId === userId ? receiverUser : sender;
 
 		const entry = {
 			id: r.id,
@@ -176,7 +154,7 @@ export async function GET() {
 			createdAt: r.createdAt?.getTime() ?? null,
 			updatedAt: r.updatedAt?.getTime() ?? null,
 			sender,
-			receiver,
+			receiver: receiverUser,
 			friend: friendUser,
 		};
 

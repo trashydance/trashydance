@@ -6,6 +6,19 @@
 
 ## Instructions
 
+### Local Development
+
+Requirements:
+
+- Node.js
+- pnpm
+
+1. Clone the repository
+2. Install dependencies: `pnpm install`
+3. Copy `.env.example` to `.env` and add your environment variables
+4. Run database migrations: `pnpm drizzle-kit migrate`
+5. Start the development server: `pnpm dev`
+
 ### 42 OAuth Setup
 
 This project supports OAuth via 42 Intra.

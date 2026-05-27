@@ -37,10 +37,5 @@
 		"drizzle-kit": "^0.31.10",
 		"tailwindcss": "^4",
 		"typescript": "^5"
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"better-sqlite3"
-		]
 	}
 }

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { NotificationBadge } from "@/components/feature/notification-badge";
 import {
 	DropdownMenu,
@@ -23,12 +24,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNotificationCount } from "@/hooks/use-notification-count";
 import { useSocket } from "@/hooks/use-socket";
-import { useTheme } from "@/hooks/use-theme";
 import { authClient } from "@/lib/auth-client";
 
 export function AppNav() {
 	const router = useRouter();
-	const { theme, toggleTheme } = useTheme();
+	const { theme, setTheme } = useTheme();
 	const { pendingRequests } = useNotificationCount();
 	const { socket } = useSocket();
 
@@ -94,7 +94,7 @@ export function AppNav() {
 					<DropdownMenuItem
 						onSelect={(e) => {
 							e.preventDefault();
-							toggleTheme();
+							setTheme(theme === "dark" ? "light" : "dark");
 						}}
 						className="flex items-center gap-2"
 					>

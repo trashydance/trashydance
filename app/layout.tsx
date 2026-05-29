@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Caveat, Inter, VT323 } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -42,11 +43,15 @@ export default function RootLayout({
 				inter.variable,
 			)}
 		>
-			<head>
-				<script src="/theme-init.js" />
-			</head>
 			<body className="min-h-full flex flex-col font-[family-name:var(--font-pixel)]">
-				<TooltipProvider>{children}</TooltipProvider>
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="system"
+					enableSystem
+					disableTransitionOnChange
+				>
+					<TooltipProvider>{children}</TooltipProvider>
+				</ThemeProvider>
 			</body>
 		</html>
 	);

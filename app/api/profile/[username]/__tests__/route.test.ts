@@ -40,9 +40,7 @@ describe("GET /api/profile/[username]", () => {
 
 		const { GET } = await import("@/app/api/profile/[username]/route");
 
-		const req = new Request(
-			"http://localhost:3000/api/profile/nonexistent",
-		);
+		const req = new Request("http://localhost:3000/api/profile/nonexistent");
 
 		const res = await GET(req, await makeParams("nonexistent"));
 

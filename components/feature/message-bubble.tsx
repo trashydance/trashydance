@@ -11,6 +11,7 @@ import {
 	Presentation,
 	Video,
 } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import { cn, formatFileSize, formatRelativeTime } from "@/lib/utils";
 
@@ -75,16 +76,21 @@ function FilePreview({
 					onClick={() => setFullView(!fullView)}
 					className="block cursor-pointer"
 				>
-					<img
+					<Image
 						src={fileUrl}
 						alt={fileName}
+						width={240}
+						height={180}
 						className={cn(
 							"rounded-md border border-border/20",
-							fullView ? "max-w-full" : "max-w-[240px] max-h-[180px]",
+							fullView
+								? "w-auto h-auto max-w-full"
+								: "max-w-[240px] max-h-[180px]",
 						)}
 						style={{ objectFit: "cover" }}
 					/>
 				</button>
+
 				{fullView && (
 					<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
 						<button
@@ -93,10 +99,13 @@ function FilePreview({
 							className="absolute inset-0"
 							aria-label="Close full size image"
 						/>
-						<img
+						<Image
 							src={fileUrl}
 							alt={fileName}
+							width={1200}
+							height={900}
 							className="relative z-10 max-h-[90vh] max-w-[90vw] rounded-md"
+							style={{ objectFit: "contain" }}
 						/>
 					</div>
 				)}
@@ -121,6 +130,7 @@ function FilePreview({
 
 	// Document download link
 	const Icon = getFileIcon(fileType);
+
 	return (
 		<a
 			href={fileUrl}
@@ -174,9 +184,11 @@ export function MessageBubble({
 						isSelf={isSelf}
 					/>
 				)}
+
 				{body && (
 					<p className="whitespace-pre-wrap break-words text-sm">{body}</p>
 				)}
+
 				<div
 					className={cn(
 						"mt-1 flex items-center gap-1 text-xs",
@@ -184,10 +196,13 @@ export function MessageBubble({
 					)}
 				>
 					<span>{formatRelativeTime(createdAt)}</span>
+
 					{isSelf && status === "sending" && (
 						<Loader2 className="size-3 animate-spin" />
 					)}
+
 					{isSelf && status === "sent" && <Check className="size-3" />}
+
 					{isSelf && status === "error" && (
 						<button
 							type="button"

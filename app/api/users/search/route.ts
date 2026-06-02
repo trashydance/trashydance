@@ -1,4 +1,4 @@
-import { and, eq, like, ne, or } from "drizzle-orm";
+import { and, like, ne, or } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { requireAuth, unauthorized } from "@/lib/api-helpers";
 import db from "@/lib/db";

@@ -86,10 +86,7 @@ export async function GET(
 			.select({ accountId: account.accountId })
 			.from(account)
 			.where(
-				and(
-					eq(account.userId, profileUser.id),
-					eq(account.providerId, "42"),
-				),
+				and(eq(account.userId, profileUser.id), eq(account.providerId, "42")),
 			)
 			.get();
 		if (fortyTwoAccount) {

@@ -183,8 +183,7 @@ export default function ChatPage() {
 				<div className="space-y-3">
 					{messages.map((msg) => {
 						const isSelf =
-							msg.senderId === meta.currentUserId ||
-							msg.id.startsWith("temp-");
+							msg.senderId === meta.currentUserId || msg.id.startsWith("temp-");
 						const isHighlighted =
 							highlightActive && msg.id === highlightMessageId;
 

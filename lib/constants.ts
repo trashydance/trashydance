@@ -1,5 +1,7 @@
 export const PROJECT_NAME = "trashydance";
 
+export const CONTACT_EMAIL = "edforte@student.42roma.it";
+
 export const MAX_MESSAGE_LENGTH = 2000;
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB

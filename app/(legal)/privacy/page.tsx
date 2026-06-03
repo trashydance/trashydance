@@ -1,3 +1,5 @@
+import { CONTACT_EMAIL } from "@/lib/constants";
+
 export default function PrivacyPage() {
 	return (
 		<main className="container mx-auto max-w-3xl px-4 py-12">
@@ -167,10 +169,10 @@ export default function PrivacyPage() {
 					To exercise any of these rights, use the account settings in the
 					application or contact us at{" "}
 					<a
-						href="mailto:info@wearepeople.it"
+						href={`mailto:${CONTACT_EMAIL}`}
 						className="underline hover:text-foreground"
 					>
-						info@wearepeople.it
+						{CONTACT_EMAIL}
 					</a>
 					.
 				</p>
@@ -236,10 +238,10 @@ export default function PrivacyPage() {
 					believe that a child under 13 has provided us with personal data,
 					please contact us at{" "}
 					<a
-						href="mailto:info@wearepeople.it"
+						href={`mailto:${CONTACT_EMAIL}`}
 						className="underline hover:text-foreground"
 					>
-						info@wearepeople.it
+						{CONTACT_EMAIL}
 					</a>
 					.
 				</p>
@@ -265,10 +267,10 @@ export default function PrivacyPage() {
 					If you have any questions about this Privacy Policy or our data
 					practices, please contact us at:{" "}
 					<a
-						href="mailto:info@wearepeople.it"
+						href={`mailto:${CONTACT_EMAIL}`}
 						className="underline hover:text-foreground"
 					>
-						info@wearepeople.it
+						{CONTACT_EMAIL}
 					</a>
 				</p>
 			</section>

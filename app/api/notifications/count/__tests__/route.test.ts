@@ -4,7 +4,6 @@ import {
 	createTestDb,
 	seedConversation,
 	seedFriendRequest,
-	seedMessage,
 	seedUsers,
 	type TestDb,
 } from "@/test/db-helpers";

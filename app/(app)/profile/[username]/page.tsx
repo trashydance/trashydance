@@ -250,7 +250,10 @@ export default function ProfilePage() {
 							</div>
 						</div>
 						<DialogFooter>
-							<Button onClick={handleSave} disabled={saving || !editName.trim()}>
+							<Button
+								onClick={handleSave}
+								disabled={saving || !editName.trim()}
+							>
 								{saving ? "Saving..." : "Save"}
 							</Button>
 						</DialogFooter>

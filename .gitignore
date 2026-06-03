@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 
+
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -43,3 +44,16 @@ next-env.d.ts
 
 # database
 *.db
+
+# uploads
+data/uploads/*
+!data/uploads/.gitkeep
+
+
+
+
+
+
+*.md
+.claude/
+*.pdf

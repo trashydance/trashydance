@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { genericOAuth } from "better-auth/plugins";
+import { genericOAuth, twoFactor, username } from "better-auth/plugins";
 import * as schema from "@/schema/auth";
 import { PROJECT_NAME } from "./constants";
 import db from "./db";
@@ -18,6 +18,8 @@ export const auth = betterAuth({
 	},
 
 	plugins: [
+		twoFactor(),
+		username(),
 		genericOAuth({
 			config: [
 				{
@@ -35,8 +37,11 @@ export const auth = betterAuth({
 							updatedAt: profile.updated_at,
 							email: profile.email,
 							emailVerified: true,
-							name: profile.usual_full_name,
+							name: profile.first_name || profile.usual_full_name,
+							lastName: profile.last_name || null,
+							username: profile.login,
 							image: profile.image?.link,
+							intraLogin: profile.login,
 						};
 					},
 				},

@@ -1,15 +1,12 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from "react";
 import { IntraIcon } from "@/components/icons/42-intra";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { authClient } from "@/lib/auth-client";
 
-type ApiErrorState = Record<string, string>;
-
 interface OAuthButtonProps {
-	setApiError: Dispatch<SetStateAction<ApiErrorState>>;
+	setApiError: (errors: { general?: string }) => void;
 	disabled?: boolean;
 }
 
@@ -19,7 +16,7 @@ export function OAuthButton({ setApiError, disabled }: OAuthButtonProps) {
 
 		const { error } = await authClient.signIn.oauth2({
 			providerId: "42",
-			callbackURL: "/rooms",
+			callbackURL: "/home",
 		});
 
 		if (error) {

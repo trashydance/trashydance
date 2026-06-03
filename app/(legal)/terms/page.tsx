@@ -1,3 +1,5 @@
+import { CONTACT_EMAIL } from "@/lib/constants";
+
 export default function TermsPage() {
 	return (
 		<main className="container mx-auto max-w-3xl px-4 py-12">
@@ -200,10 +202,10 @@ export default function TermsPage() {
 					If you have any questions about these Terms of Service, please contact
 					us at:{" "}
 					<a
-						href="mailto:info@wearepeople.it"
+						href={`mailto:${CONTACT_EMAIL}`}
 						className="underline hover:text-foreground"
 					>
-						info@wearepeople.it
+						{CONTACT_EMAIL}
 					</a>
 				</p>
 			</section>

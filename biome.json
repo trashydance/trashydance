@@ -7,7 +7,14 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/components/ui"]
+		"includes": [
+			"**",
+			"!**/components/ui",
+			"!**/drizzle",
+			"!.claude",
+			"!.agents",
+			"!skills-lock.json"
+		]
 	},
 	"formatter": {
 		"enabled": true,
@@ -17,6 +24,9 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true
+		},
+		"domains": {
+			"drizzle": "all"
 		}
 	},
 	"javascript": {

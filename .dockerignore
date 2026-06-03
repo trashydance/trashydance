@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+*.md
+.env
+.env.local
+.vscode
+.claude
+.agents
+local.db
+data/

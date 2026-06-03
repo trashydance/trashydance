@@ -30,6 +30,7 @@ export default function RootLayout({
 	return (
 		<html
 			lang="en"
+			suppressHydrationWarning
 			className={cn(
 				"h-full",
 				"antialiased",
@@ -37,9 +38,11 @@ export default function RootLayout({
 				fontCalligrafico.variable,
 				"font-sans",
 				inter.variable,
-				"dark",
 			)}
 		>
+			<head>
+				<script src="/theme-init.js" />
+			</head>
 			<body className="min-h-full flex flex-col font-[family-name:var(--font-pixel)]">
 				<TooltipProvider>{children}</TooltipProvider>
 			</body>

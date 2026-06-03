@@ -290,16 +290,6 @@ pnpm test:coverage # Run tests with coverage report
 - [Caddy](https://caddyserver.com/) — HTTP/2 web server with automatic HTTPS
 - [Biome](https://biomejs.dev/) — Fast linter and formatter
 
-### AI Usage
-
-AI tools (Claude Code by Anthropic) were used as a development assistant for:
-- **Code review and quality analysis**: Identifying code smells, DRY violations, performance issues, and security vulnerabilities
-- **Refactoring planning**: Designing the multi-phase refactoring strategy with safety net (test-first approach)
-- **Test infrastructure**: Helping set up Vitest configuration and writing baseline test suites
-- **Security hardening**: Identifying TOTP secret leak, missing rate limiting, and file upload validation gaps
-
-All AI-generated code was reviewed, tested, and validated by team members before merging. The architectural decisions, feature design, and implementation logic are the team's own work.
-
 ---
 
 ## Architecture

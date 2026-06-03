@@ -1,0 +1,36 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+      - caddy-data:/data
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    expose:
+      - "3000"
+    volumes:
+      - db-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=/app/data/trashydance.db
+      - BETTER_AUTH_URL=${BETTER_AUTH_URL:-https://localhost}
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+      - BETTER_AUTH_TELEMETRY=0
+      - FORTYTWO_CLIENT_ID=${FORTYTWO_CLIENT_ID}
+      - FORTYTWO_CLIENT_SECRET=${FORTYTWO_CLIENT_SECRET}
+      - PORT=3000
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  caddy-data:

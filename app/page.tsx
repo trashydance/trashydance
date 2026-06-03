@@ -1,38 +1,26 @@
 import Image from "next/image";
-import Button from "../components/button";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
 	return (
-		<main
-			// bg-[url('/sfondo.jpg')] carica l'immagine dalla cartella public
-			// bg-cover fa in modo che copra tutto lo schermo senza deformarsi
-			// bg-center centra l'immagine
-			className="flex flex-col h-screen w-screen items-center justify-center bg-[url('/title.jpg')] bg-cover bg-center overflow-hidden"
-		>
-			<div className="flex flex-col items-center justify-center relative w-full max-w-[1400px] px-8 z-10 transform -translate-x-4 md:-translate-x-8">
-				<div className="relative w-full flex justify-center">
-					<Image
-						src="/toptitle.svg"
-						alt="Title"
-						width={800}
-						height={300}
-						className="animate-breathe w-full drop-shadow-xl z-100"
-						style={{ height: "auto" }}
-						priority
-					/>
-					<Image
-						src="/bottomtitle.svg"
-						alt="now with games too"
-						width={200}
-						height={100}
-						className="absolute top-[50%] sm:top-[55%] left-[55%] sm:left-[55%] -translate-x-1/2 animate-rock w-[220px] sm:w-[266px] drop-shadow-xl z-[150]"
-						priority
-					/>
-				</div>
+		<main className="flex flex-col h-screen w-screen items-center justify-center bg-background bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:70px_70px] px-5 pt-[70px] prose-h4:xl:text-2xl prose-h4:lg:text-xl prose-h4:text-lg">
+			<div className="flex flex-col items-center justify-center relative w-full">
+				<Image
+					src="/toptitle.svg"
+					alt="Title"
+					width={1800}
+					height={600}
+					className="animate-breathe w-full drop-shadow-xl"
+					style={{ height: "auto" }}
+					priority
+				/>
 			</div>
 
-			<div className="-mt-20 sm:-mt-32 z-40 relative">
-				<Button text="Get in" />
+			<div className="-mt-60 z-40 pl-8">
+				<Button asChild size="gigantic">
+					<Link href="/home">Get in</Link>
+				</Button>
 			</div>
 		</main>
 	);

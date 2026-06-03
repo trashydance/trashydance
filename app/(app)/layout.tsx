@@ -1,23 +1,47 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { AppNav } from "@/components/feature/app-nav";
+import { AppIcon } from "@/components/icons/app-icon";
+import { ToastProvider } from "@/components/ui/toast";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
 	return (
-		<div className="flex flex-col gap-4">
-			{children}
-			<footer>
-				<Link href="/privacy">
-					<Button variant="link" size="xs">
-						Privacy
-					</Button>
-				</Link>
-				<Link href="/terms">
-					<Button variant="link" size="xs">
-						Terms
-					</Button>
-				</Link>
-			</footer>
-		</div>
+		<ToastProvider>
+			<div className="flex min-h-svh flex-col">
+				<header className="sticky top-0 z-40 border-b-2 border-border bg-background">
+					<div className="flex h-14 items-center justify-between px-4 sm:px-6">
+						<Link
+							href="/home"
+							className="flex items-center gap-2 font-heading text-lg font-bold"
+						>
+							<AppIcon className="size-6" />
+							<span className="hidden sm:inline">trashydance</span>
+						</Link>
+						<AppNav />
+					</div>
+				</header>
+
+				<main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
+					{children}
+				</main>
+
+				<footer className="border-t-2 border-border bg-background">
+					<div className="mx-auto flex max-w-2xl items-center justify-center gap-4 px-4 py-3">
+						<Link
+							href="/privacy"
+							className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+						>
+							Privacy
+						</Link>
+						<Link
+							href="/terms"
+							className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+						>
+							Terms
+						</Link>
+					</div>
+				</footer>
+			</div>
+		</ToastProvider>
 	);
 }

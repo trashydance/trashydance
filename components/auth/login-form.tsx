@@ -2,9 +2,11 @@
 
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { OAuthButton } from "@/components/auth/oauth-button";
+import { TwoFactorVerify } from "@/components/auth/two-factor-verify";
 import { AppIcon } from "@/components/icons/app-icon";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +25,13 @@ export function LoginForm({
 	className,
 	...props
 }: React.ComponentProps<"div">) {
-	const [apiError, setApiError] = useState<Record<string, string>>({});
+	const router = useRouter();
+	const [apiError, setApiError] = useState<{
+		username?: string;
+		password?: string;
+		general?: string;
+	}>({});
+	const [twoFactorRequired, setTwoFactorRequired] = useState(false);
 	const {
 		register,
 		handleSubmit,
@@ -35,13 +43,23 @@ export function LoginForm({
 	const onSubmit = async (data: LoginFormInput) => {
 		setApiError({});
 
-		const { error } = await authClient.signIn.email({
-			email: data.email,
+		const result = await authClient.signIn.username({
+			username: data.username,
 			password: data.password,
-			callbackURL: "/rooms",
 		});
 
+		const responseData = result.data as
+			| (typeof result.data & { twoFactorRedirect?: boolean })
+			| undefined;
+		const error = result.error;
+
+		if (responseData?.twoFactorRedirect) {
+			setTwoFactorRequired(true);
+			return;
+		}
+
 		if (!error) {
+			router.push("/home");
 			return;
 		}
 
@@ -56,13 +74,26 @@ export function LoginForm({
 			errorMessage.includes("invalid password");
 
 		if (userNotFoundError) {
-			setApiError({ email: "User not found" });
+			setApiError({ username: "User not found" });
 		} else if (invalidPasswordError) {
 			setApiError({ password: "Invalid password" });
 		} else {
 			setApiError({ general: errorMessage || "An error occurred" });
 		}
 	};
+
+	if (twoFactorRequired) {
+		return (
+			<TwoFactorVerify
+				className={className}
+				onSuccess={() => router.push("/home")}
+				onBack={() => {
+					setTwoFactorRequired(false);
+					setApiError({});
+				}}
+			/>
+		);
+	}
 
 	return (
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -91,17 +122,18 @@ export function LoginForm({
 					)}
 
 					<Field>
-						<FieldLabel htmlFor="email">Email</FieldLabel>
+						<FieldLabel htmlFor="username">Username</FieldLabel>
 						<Input
-							{...register("email")}
-							id="email"
-							type="email"
-							placeholder="m@example.com"
+							{...register("username")}
+							id="username"
+							type="text"
+							placeholder="Your username"
+							autoComplete="username"
 							disabled={isSubmitting}
 						/>
-						{(errors.email || apiError.email) && (
+						{(errors.username || apiError.username) && (
 							<p className="text-xs text-red-600">
-								{errors.email?.message || apiError.email}
+								{errors.username?.message || apiError.username}
 							</p>
 						)}
 					</Field>

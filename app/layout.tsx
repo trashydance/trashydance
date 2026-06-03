@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Caveat, Inter, VT323 } from "next/font/google"; //font import
+import { Caveat, Inter, VT323 } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -32,7 +32,7 @@ export default function RootLayout({
 	return (
 		<html
 			lang="en"
-			// 4. Inserisci le variabili CSS dei font nel tag HTML
+			suppressHydrationWarning
 			className={cn(
 				"h-full",
 				"antialiased",
@@ -40,10 +40,11 @@ export default function RootLayout({
 				fontCalligrafico.variable,
 				"font-sans",
 				inter.variable,
-				"dark",
 			)}
 		>
-			{/* 5. Imposta un font di default per tutta l'app (es. il font pixelato) */}
+			<head>
+				<script src="/theme-init.js" />
+			</head>
 			<body className="min-h-full flex flex-col font-[family-name:var(--font-pixel)]">
 				<TooltipProvider>{children}</TooltipProvider>
 			</body>

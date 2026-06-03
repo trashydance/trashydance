@@ -6,14 +6,12 @@ import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-// Font for headings (VT323)
 const fontHeading = VT323({
 	weight: "400",
 	variable: "--font-heading",
 	subsets: ["latin"],
 });
 
-// Font calligrafic
 const fontCalligrafico = Caveat({
 	variable: "--font-calligrafic",
 	subsets: ["latin"],

@@ -2,6 +2,7 @@ import { ArrowRight, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { COPYRIGHT_NOTICE } from "@/lib/constants";
 
 const TAGS = ["Realtime · WebSocket", "2FA + 42 OAuth", "Mobile-first"];
 
@@ -30,7 +31,6 @@ export default function Home() {
 			<main className="flex min-h-0 flex-1 items-center">
 				<div className="mx-auto grid w-full max-w-7xl items-center gap-8 px-5 py-6 lg:grid-cols-[minmax(0,1fr)_auto]">
 					<div className="flex flex-col items-start gap-6 lg:gap-8">
-
 						<h1 className="max-w-xl text-5xl sm:text-6xl lg:text-7xl xl:text-8xl">
 							Direct chat for the people you actually{" "}
 							<span className="inline-block border-4 border-ink bg-lime px-3">
@@ -84,9 +84,7 @@ export default function Home() {
 			{/* footer */}
 			<footer className="border-t-4 border-ink">
 				<div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-5">
-					<p className="font-display text-xs uppercase">
-						© 2026 TrashyDance · 42 final project
-					</p>
+					<p className="font-display text-xs uppercase">{COPYRIGHT_NOTICE}</p>
 					<nav className="flex gap-5 text-sm">
 						<Link href="/privacy" className="hover:underline">
 							Privacy

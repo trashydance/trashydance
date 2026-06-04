@@ -36,18 +36,14 @@ export function useSearch() {
 			);
 			if (res.ok) {
 				const data = await res.json();
-				const friends = (data.friends ?? data.following ?? []).map(
-					(u: User) => ({
-						...u,
-						friendStatus: "friends" as FriendStatus,
-					}),
-				);
-				const others = (data.others ?? data.notFollowing ?? []).map(
-					(u: User) => ({
-						...u,
-						friendStatus: "none" as FriendStatus,
-					}),
-				);
+				const friends = (data.friends ?? []).map((u: User) => ({
+					...u,
+					friendStatus: "friends" as FriendStatus,
+				}));
+				const others = (data.others ?? []).map((u: User) => ({
+					...u,
+					friendStatus: "none" as FriendStatus,
+				}));
 				setResults([...friends, ...others]);
 			}
 		} catch (err) {

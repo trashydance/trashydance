@@ -4,6 +4,9 @@ import { genericOAuth, twoFactor, username } from "better-auth/plugins";
 import * as schema from "@/schema/auth";
 import { PROJECT_NAME } from "./constants";
 import db from "./db";
+import { getEnv } from "./env";
+
+const env = getEnv();
 
 export const auth = betterAuth({
 	appName: PROJECT_NAME,
@@ -30,8 +33,8 @@ export const auth = betterAuth({
 			config: [
 				{
 					providerId: "42",
-					clientId: process.env.FORTYTWO_CLIENT_ID || "",
-					clientSecret: process.env.FORTYTWO_CLIENT_SECRET || "",
+					clientId: env.FORTYTWO_CLIENT_ID,
+					clientSecret: env.FORTYTWO_CLIENT_SECRET,
 					authorizationUrl: "https://api.intra.42.fr/oauth/authorize",
 					tokenUrl: "https://api.intra.42.fr/oauth/token",
 					userInfoUrl: "https://api.intra.42.fr/v2/me",

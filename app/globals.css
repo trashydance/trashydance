@@ -27,6 +27,7 @@
 	--accent-foreground: #0b0b0b;
 	--destructive: #ff3d3d;
 	--destructive-foreground: #fff;
+	--online: #2ecc40;
 	--border: #0b0b0b;
 	--input: #0b0b0b;
 	--ring: #c6ff3d;
@@ -34,6 +35,7 @@
 	--shadow-brutal-sm: 2px 2px 0 0 var(--ink);
 	--shadow-brutal-lg: 6px 6px 0 0 var(--ink);
 	--shadow-brutal-xl: 10px 10px 0 0 var(--ink);
+	--shadow-brutal-cobalt: 8px 8px 0 0 var(--cobalt);
 	/* alias di compatibilità per i componenti esistenti */
 	--secondary-background: #fff;
 	--main: var(--lime);
@@ -90,6 +92,7 @@
 	--color-accent-foreground: var(--accent-foreground);
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
+	--color-online: var(--online);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
@@ -116,6 +119,7 @@
 	--shadow-brutal-sm: var(--shadow-brutal-sm);
 	--shadow-brutal-lg: var(--shadow-brutal-lg);
 	--shadow-brutal-xl: var(--shadow-brutal-xl);
+	--shadow-brutal-cobalt: var(--shadow-brutal-cobalt);
 	--shadow-shadow: var(--shadow);
 	--spacing-boxShadowX: 4px;
 	--spacing-boxShadowY: 4px;
@@ -129,6 +133,18 @@
 @utility brutal-press-hover {
 	box-shadow: var(--shadow-brutal-lg);
 	transform: translate(-2px, -2px);
+}
+
+/* press su focus: per elementi con ombra base 4px (shadow-shadow) */
+@utility brutal-press-focus {
+	box-shadow: var(--shadow-brutal-sm);
+	transform: translate(2px, 2px);
+}
+
+/* press su focus: per elementi con ombra base 2px (shadow-brutal-sm) */
+@utility brutal-press-focus-sm {
+	box-shadow: none;
+	transform: translate(1px, 1px);
 }
 
 @layer base {

@@ -9,10 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useTheme } from "@/hooks/use-theme";
 import { authClient } from "@/lib/auth-client";
+import { BIO_MAX_LENGTH } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const THEMES = ["light", "dark", "system"] as const;
-const BIO_MAX_LENGTH = 200;
 
 export default function SettingsPage() {
 	const router = useRouter();

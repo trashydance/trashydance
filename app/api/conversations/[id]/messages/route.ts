@@ -6,12 +6,13 @@ import {
 	requireAuth,
 	unauthorized,
 } from "@/lib/api-helpers";
-import { SocketEvent } from "@/lib/constants";
+import { RATE_LIMIT, SocketEvent } from "@/lib/constants";
 import {
 	findConversationForParticipant,
 	getPartnerId,
 } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { emitNotificationCount } from "@/lib/socket/handlers";
 import { getIO } from "@/lib/socket/io-instance";
 import { presence } from "@/lib/socket/presence";
@@ -106,6 +107,17 @@ export async function POST(
 	if (!auth) return unauthorized();
 	const { userId } = auth;
 	const { id: conversationId } = await params;
+
+	// Same key as the Socket.IO path: the budget is shared across channels.
+	if (
+		!rateLimit(
+			`msg:${userId}`,
+			RATE_LIMIT.MESSAGE_MAX,
+			RATE_LIMIT.MESSAGE_WINDOW_MS,
+		)
+	) {
+		return rateLimitResponse();
+	}
 
 	const conv = findConversationForParticipant(conversationId, userId);
 	if (!conv) return notFound("Conversation");

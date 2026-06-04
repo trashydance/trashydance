@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { COPYRIGHT_NOTICE } from "@/lib/constants";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
 	return (
@@ -24,7 +25,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 			<footer className="border-t-4 border-border bg-background">
 				<div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
 					<p className="text-xs font-bold uppercase tracking-wide">
-						© 2026 Trashydance · 42 Final Project
+						{COPYRIGHT_NOTICE}
 					</p>
 					<div className="flex items-center gap-4">
 						<Link

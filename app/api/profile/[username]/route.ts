@@ -1,12 +1,11 @@
 import { and, count, eq, or } from "drizzle-orm";
-import type { NextRequest } from "next/server";
 import { notFound, requireAuth, unauthorized } from "@/lib/api-helpers";
 import db from "@/lib/db";
 import { getFriendRequestInfo } from "@/lib/friend-helpers";
 import { account, friendRequest, user } from "@/schema/auth";
 
 export async function GET(
-	_request: NextRequest,
+	_request: Request,
 	{ params }: { params: Promise<{ username: string }> },
 ) {
 	const auth = await requireAuth();

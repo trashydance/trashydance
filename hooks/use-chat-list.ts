@@ -23,16 +23,10 @@ export function useChatList() {
 			const res = await fetch("/api/conversations");
 			if (res.ok) {
 				const data = await res.json();
-				if (Array.isArray(data)) {
-					const friends = data.filter((c: Conversation) => c.isFriend);
-					const others = data.filter((c: Conversation) => !c.isFriend);
-					setConversations({ friends, others });
-				} else {
-					setConversations({
-						friends: data.friends ?? [],
-						others: data.others ?? [],
-					});
-				}
+				setConversations({
+					friends: data.friends ?? [],
+					others: data.others ?? [],
+				});
 			}
 		} catch {
 			// Silently fail; user can reload

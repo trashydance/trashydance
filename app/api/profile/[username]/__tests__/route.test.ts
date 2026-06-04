@@ -17,9 +17,9 @@ beforeEach(() => {
 
 // Next.js route handler context (params non deve essere Promise)
 function makeParams(username: string) {
-	return Promise.resolve({
-		params: { username },
-	});
+	return {
+		params: Promise.resolve({ username }),
+	};
 }
 
 describe("GET /api/profile/[username]", () => {

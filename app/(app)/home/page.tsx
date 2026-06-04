@@ -97,10 +97,6 @@ export default function HomePage() {
 	const hasSearchResults =
 		searchResults &&
 		(searchResults.users.length > 0 || searchResults.messages.length > 0);
-	const _showConversations =
-		!query.trim() ||
-		displayConversations.friends.length > 0 ||
-		displayConversations.others.length > 0;
 
 	if (isLoading) {
 		return (

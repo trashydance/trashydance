@@ -25,7 +25,7 @@ export function ChatListItem({
 }: ChatListItemProps) {
 	const { partner, lastMessage } = conversation;
 	const unread = conversation.unreadCount ?? 0;
-	const displayName = partner.name || partner.username;
+	const displayName = partner.name || partner.username || "?";
 	const initials = displayName.slice(0, 2).toUpperCase();
 
 	return (

@@ -30,7 +30,11 @@ export function formatRelativeTime(input: string | number): string {
 	return new Date(date).toLocaleDateString();
 }
 
-/** Palette avatar del design Lovable: colore deterministico per utente. */
+/**
+ * Palette avatar del design Lovable: colore deterministico per utente.
+ * NB: i primi valori duplicano i token brand di app/globals.css
+ * (--pink, --cobalt, --lime, --destructive) — tenere in sync a mano.
+ */
 const AVATAR_COLORS = [
 	"#ff3d8b", // pink
 	"#2547ff", // cobalt

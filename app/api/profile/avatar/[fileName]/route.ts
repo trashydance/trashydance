@@ -6,13 +6,7 @@ import {
 	requireAuth,
 	unauthorized,
 } from "@/lib/api-helpers";
-
-const MIME_TYPES: Record<string, string> = {
-	".jpg": "image/jpeg",
-	".png": "image/png",
-	".gif": "image/gif",
-	".webp": "image/webp",
-};
+import { AVATAR_UPLOAD_DIR, MIME_TYPES } from "@/lib/constants";
 
 export async function GET(
 	_request: Request,
@@ -27,7 +21,7 @@ export async function GET(
 		return badRequest("Invalid path");
 	}
 
-	const filePath = join(process.cwd(), "data", "uploads", "avatars", fileName);
+	const filePath = join(process.cwd(), AVATAR_UPLOAD_DIR, fileName);
 
 	if (!existsSync(filePath)) return notFound("File");
 

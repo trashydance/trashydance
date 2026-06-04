@@ -21,6 +21,7 @@ import { FriendRequestButton } from "@/components/feature/friend-request-button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AVATAR_ACCEPT_STRING, INTRA_PROFILE_BASE_URL } from "@/lib/constants";
 import type { Profile } from "@/lib/types";
 import { getAvatarColor } from "@/lib/utils";
 
@@ -107,7 +108,7 @@ export default function ProfilePage() {
 
 	return (
 		<div className="mx-auto w-full max-w-2xl py-8">
-			<div className="rounded-base border-4 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--cobalt)] sm:p-8">
+			<div className="rounded-base border-4 border-border bg-card p-6 shadow-brutal-cobalt sm:p-8">
 				<div className="flex flex-col gap-6 sm:flex-row sm:items-start">
 					<div className="relative w-fit shrink-0">
 						<Avatar className="size-28 shadow-shadow">
@@ -126,7 +127,7 @@ export default function ProfilePage() {
 								<input
 									ref={avatarInputRef}
 									type="file"
-									accept="image/jpeg,image/png,image/gif,image/webp"
+									accept={AVATAR_ACCEPT_STRING}
 									onChange={handleAvatarUpload}
 									className="hidden"
 									aria-label="Upload profile picture"
@@ -193,7 +194,7 @@ export default function ProfilePage() {
 					</div>
 					{profile.intraLogin && (
 						<a
-							href={`https://profile.intra.42.fr/users/${profile.intraLogin}`}
+							href={`${INTRA_PROFILE_BASE_URL}/${profile.intraLogin}`}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="col-span-2 flex flex-col items-center justify-center border-4 border-border p-4 text-center transition-colors hover:bg-muted sm:col-span-1"
@@ -219,7 +220,7 @@ export default function ProfilePage() {
 						</Button>
 					) : (
 						<FriendRequestButton
-							userId={displayName}
+							userId={profile.id}
 							initialStatus={profile.friendStatus}
 							requestId={profile.friendRequestId}
 						/>

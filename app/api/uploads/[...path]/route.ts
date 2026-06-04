@@ -6,26 +6,8 @@ import {
 	requireAuth,
 	unauthorized,
 } from "@/lib/api-helpers";
+import { MIME_TYPES, UPLOAD_BASE_DIR } from "@/lib/constants";
 import { findConversationForParticipant } from "@/lib/conversation-helpers";
-
-const MIME_TYPES: Record<string, string> = {
-	".jpg": "image/jpeg",
-	".jpeg": "image/jpeg",
-	".png": "image/png",
-	".gif": "image/gif",
-	".webp": "image/webp",
-	".mp4": "video/mp4",
-	".webm": "video/webm",
-	".pdf": "application/pdf",
-	".doc": "application/msword",
-	".docx":
-		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-	".xls": "application/vnd.ms-excel",
-	".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-	".ppt": "application/vnd.ms-powerpoint",
-	".pptx":
-		"application/vnd.openxmlformats-officedocument.presentationml.presentation",
-};
 
 export async function GET(
 	_request: Request,
@@ -53,8 +35,7 @@ export async function GET(
 
 	const filePath = join(
 		process.cwd(),
-		"data",
-		"uploads",
+		UPLOAD_BASE_DIR,
 		conversationId,
 		fileName,
 	);

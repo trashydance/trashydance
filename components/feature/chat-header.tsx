@@ -70,7 +70,7 @@ export function ChatHeader({
 							<span
 								className={
 									isOnline
-										? "size-1.5 rounded-full bg-[#2ecc40]"
+										? "size-1.5 rounded-full bg-online"
 										: "size-1.5 rounded-full bg-muted-foreground"
 								}
 							/>

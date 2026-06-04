@@ -61,14 +61,17 @@ export function AppNav() {
 							key={href}
 							href={href}
 							className={cn(
-								"relative inline-flex items-center gap-1.5 rounded-base border-2 border-border px-4 py-2 text-xs font-bold uppercase tracking-wide shadow-brutal-sm transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none",
+								"relative inline-flex items-center gap-1.5 rounded-base border-4 border-border px-4 py-2 text-xs font-bold uppercase tracking-wide shadow-brutal-sm transition-all hover:brutal-press-hover",
 								active ? "bg-main text-main-foreground" : "bg-card",
 							)}
 						>
 							<Icon className="size-4" />
 							<span className="hidden sm:inline">{label}</span>
 							{href === "/friends" && pendingRequests > 0 && (
-								<NotificationBadge count={pendingRequests} />
+								<NotificationBadge
+									count={pendingRequests}
+									className="absolute -right-3 -top-3 z-10"
+								/>
 							)}
 						</Link>
 					);
@@ -80,7 +83,7 @@ export function AppNav() {
 					type="button"
 					onClick={toggleTheme}
 					aria-label={theme === "dark" ? "Light mode" : "Dark mode"}
-					className="inline-flex size-10 items-center justify-center rounded-base border-2 border-border bg-card shadow-brutal-sm transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+					className="inline-flex size-10 items-center justify-center rounded-base border-4 border-border bg-card shadow-brutal-sm transition-all hover:brutal-press-hover"
 				>
 					{theme === "dark" ? (
 						<Moon className="size-4" />
@@ -93,7 +96,7 @@ export function AppNav() {
 					<DropdownMenuTrigger asChild>
 						<button
 							type="button"
-							className="inline-flex size-10 items-center justify-center rounded-base border-2 border-border bg-main text-xs font-bold uppercase text-main-foreground shadow-brutal-sm transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+							className="inline-flex size-10 items-center justify-center rounded-base border-4 border-border bg-main text-xs font-bold uppercase text-main-foreground shadow-brutal-sm transition-all hover:brutal-press-hover"
 							aria-label="Menu"
 						>
 							{initials}
@@ -101,7 +104,7 @@ export function AppNav() {
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end" className="w-56">
 						{user && (
-							<div className="border-b-2 border-border px-4 py-3">
+							<div className="border-b-4 border-border px-4 py-3">
 								<p className="text-sm font-bold uppercase tracking-wide">
 									{user.name}
 								</p>

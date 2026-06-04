@@ -24,7 +24,7 @@ export function SearchBar({
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
 				placeholder={placeholder}
-				className="h-13 w-full rounded-base border-2 border-border bg-card py-2 pr-9 pl-9 text-sm shadow-shadow transition-all outline-none placeholder:text-muted-foreground focus:shadow-brutal-sm focus:translate-x-[2px] focus:translate-y-[2px]"
+				className="h-13 w-full rounded-base border-4 border-border bg-card py-2 pr-9 pl-9 text-sm shadow-shadow transition-all outline-none placeholder:text-muted-foreground focus:shadow-brutal-sm focus:translate-x-[2px] focus:translate-y-[2px]"
 			/>
 			{value && (
 				<button

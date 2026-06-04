@@ -146,7 +146,7 @@ export function MessageInput({
 	return (
 		<div className={cn("flex flex-col gap-2", className)}>
 			{selectedFile && (
-				<div className="flex items-center gap-2 rounded-md border-2 border-border bg-muted px-3 py-2 text-sm">
+				<div className="flex items-center gap-2 rounded-md border-4 border-border bg-muted px-3 py-2 text-sm">
 					<Paperclip className="size-4 shrink-0 text-muted-foreground" />
 					<span className="truncate flex-1">{selectedFile.name}</span>
 					<span className="shrink-0 text-xs text-muted-foreground">
@@ -194,7 +194,7 @@ export function MessageInput({
 						placeholder="Write something..."
 						disabled={disabled || isUploading}
 						rows={1}
-						className="w-full resize-none rounded-base border-2 border-border bg-card px-3 py-2 pr-16 text-sm shadow-brutal-sm transition-all outline-none placeholder:text-muted-foreground focus:translate-x-[1px] focus:translate-y-[1px] focus:shadow-none disabled:opacity-50"
+						className="w-full resize-none rounded-base border-4 border-border bg-card px-3 py-2 pr-16 text-sm shadow-brutal-sm transition-all outline-none placeholder:text-muted-foreground focus:translate-x-[1px] focus:translate-y-[1px] focus:shadow-none disabled:opacity-50"
 					/>
 					<span
 						className={cn(

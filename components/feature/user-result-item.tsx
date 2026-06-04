@@ -32,7 +32,7 @@ export function UserResultItem({
 	return (
 		<div
 			className={cn(
-				"flex w-full items-center gap-4 rounded-base border-2 border-border bg-card p-4 shadow-shadow transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none",
+				"flex w-full items-center gap-4 rounded-base border-4 border-border bg-card p-4 shadow-shadow transition-all hover:brutal-press-hover",
 				className,
 			)}
 		>

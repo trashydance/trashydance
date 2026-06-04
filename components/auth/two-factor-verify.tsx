@@ -95,7 +95,7 @@ export function TwoFactorVerify({
 			</div>
 
 			{error && (
-				<div className="rounded-base border-2 border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+				<div className="rounded-base border-4 border-destructive bg-destructive/10 p-3 text-sm text-destructive">
 					{error}
 				</div>
 			)}

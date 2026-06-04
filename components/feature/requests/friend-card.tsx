@@ -13,7 +13,7 @@ export function FriendCard({ user, subtitle, children }: FriendCardProps) {
 	const initials = displayName.slice(0, 2).toUpperCase();
 
 	return (
-		<div className="flex items-center gap-4 rounded-base border-2 border-border bg-card p-4 shadow-shadow transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none">
+		<div className="flex items-center gap-4 rounded-base border-4 border-border bg-card p-4 shadow-shadow transition-all hover:brutal-press-hover">
 			<Avatar>
 				{user.image && <AvatarImage src={user.image} alt={displayName} />}
 				<AvatarFallback

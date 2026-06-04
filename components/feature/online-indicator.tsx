@@ -13,7 +13,7 @@ export function OnlineIndicator({ online, className }: OnlineIndicatorProps) {
 			role="status"
 			aria-label={online ? "Online" : "Offline"}
 			className={cn(
-				"absolute -bottom-1 -left-1 z-10 size-3 rounded-full border-2 border-border",
+				"absolute -bottom-1 -left-1 z-10 size-4 rounded-full border-2 border-border",
 				online ? "bg-[#2ecc40]" : "bg-muted-foreground",
 				className,
 			)}

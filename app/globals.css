@@ -126,6 +126,11 @@
 	--font-weight-heading: 900;
 }
 
+@utility brutal-press-hover {
+	box-shadow: var(--shadow-brutal-lg);
+	transform: translate(-2px, -2px);
+}
+
 @layer base {
 	html,
 	body {

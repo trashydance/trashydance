@@ -8,7 +8,7 @@ export function SectionHeader({ title, count }: SectionHeaderProps) {
 		<div className="mb-4 flex items-center gap-3">
 			<h2 className="font-heading text-xl">{title}</h2>
 			{count !== undefined && (
-				<span className="flex size-6 shrink-0 items-center justify-center bg-foreground text-xs font-bold text-background">
+				<span className="flex h-[26px] min-w-[26px] shrink-0 items-center justify-center bg-foreground px-1.5 text-sm font-bold text-background">
 					{count}
 				</span>
 			)}

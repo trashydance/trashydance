@@ -142,14 +142,14 @@ export default function SettingsPage() {
 
 			<section>
 				<SectionHeader title="Appearance" />
-				<div className="flex items-center justify-between gap-4 rounded-base border-2 border-border bg-card p-4 shadow-shadow">
+				<div className="flex items-center justify-between gap-4 rounded-base border-4 border-border bg-card p-4 shadow-shadow">
 					<div>
 						<p className="text-sm font-bold uppercase tracking-wide">Theme</p>
 						<p className="text-sm text-muted-foreground">
 							Match system or pick a side.
 						</p>
 					</div>
-					<div className="flex border-2 border-border p-1">
+					<div className="flex border-4 border-border p-1">
 						{THEMES.map((t) => (
 							<button
 								key={t}
@@ -158,7 +158,7 @@ export default function SettingsPage() {
 								className={cn(
 									"px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors",
 									theme === t
-										? "border-2 border-border bg-main text-main-foreground"
+										? "border-4 border-border bg-main text-main-foreground"
 										: "text-foreground hover:bg-muted",
 								)}
 							>
@@ -174,7 +174,7 @@ export default function SettingsPage() {
 				<div className="flex flex-col gap-4">
 					<TwoFactorSetup twoFactorEnabled={twoFactorEnabled} />
 
-					<div className="flex flex-col gap-4 rounded-base border-2 border-border bg-card p-6 shadow-shadow">
+					<div className="flex flex-col gap-4 rounded-base border-4 border-border bg-card p-6 shadow-shadow">
 						<p className="text-sm font-bold uppercase tracking-wide">
 							Change password
 						</p>
@@ -249,7 +249,7 @@ export default function SettingsPage() {
 
 			<section>
 				<SectionHeader title="Account" />
-				<div className="flex flex-col gap-4 rounded-base border-2 border-border bg-card p-6 shadow-shadow">
+				<div className="flex flex-col gap-4 rounded-base border-4 border-border bg-card p-6 shadow-shadow">
 					<div className="grid gap-4 sm:grid-cols-2">
 						<div>
 							<label
@@ -309,7 +309,7 @@ export default function SettingsPage() {
 					</div>
 				</div>
 
-				<div className="mt-4 flex flex-col gap-3 rounded-base border-2 border-border bg-accent p-6 text-accent-foreground shadow-shadow">
+				<div className="mt-4 flex flex-col gap-3 rounded-base border-4 border-border bg-accent p-6 text-accent-foreground shadow-shadow">
 					<div className="flex items-center justify-between gap-4">
 						<div>
 							<p className="text-sm font-bold uppercase tracking-wide">
@@ -332,7 +332,7 @@ export default function SettingsPage() {
 					</div>
 
 					{deleteOpen && (
-						<div className="flex flex-col gap-3 border-t-2 border-border pt-3">
+						<div className="flex flex-col gap-3 border-t-4 border-border pt-3">
 							<p className="text-xs font-bold uppercase tracking-wide">
 								Confirm with your password
 							</p>

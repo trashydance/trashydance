@@ -107,9 +107,9 @@ export default function ProfilePage() {
 
 	return (
 		<div className="mx-auto w-full max-w-2xl py-8">
-			<div className="rounded-base border-2 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--cobalt)] sm:p-8">
+			<div className="rounded-base border-4 border-border bg-card p-6 shadow-[8px_8px_0_0_var(--cobalt)] sm:p-8">
 				<div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-					<div className="relative shrink-0">
+					<div className="relative w-fit shrink-0">
 						<Avatar className="size-28 shadow-shadow">
 							{profile.image && (
 								<AvatarImage src={profile.image} alt={displayName} />
@@ -136,7 +136,7 @@ export default function ProfilePage() {
 									onClick={() => avatarInputRef.current?.click()}
 									disabled={uploadingAvatar}
 									aria-label="Change profile picture"
-									className="absolute -right-2 -bottom-2 flex size-9 items-center justify-center border-2 border-border bg-card shadow-brutal-sm transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:opacity-50"
+									className="absolute -right-2 -bottom-2 flex size-9 items-center justify-center border-4 border-border bg-card shadow-brutal-sm transition-all hover:brutal-press-hover disabled:opacity-50"
 								>
 									{uploadingAvatar ? (
 										<Loader2 className="size-4 animate-spin" />
@@ -156,10 +156,10 @@ export default function ProfilePage() {
 						<div className="mt-3 flex flex-wrap items-center gap-2">
 							{profile.isOwnProfile && (
 								<>
-									<span className="border-2 border-border bg-main px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-main-foreground">
+									<span className="border-4 border-border bg-main px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-main-foreground">
 										Online
 									</span>
-									<span className="border-2 border-border bg-secondary px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-secondary-foreground">
+									<span className="border-4 border-border bg-secondary px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-secondary-foreground">
 										You
 									</span>
 								</>
@@ -175,7 +175,7 @@ export default function ProfilePage() {
 				</div>
 
 				<div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-					<div className="border-2 border-border p-4 text-center">
+					<div className="border-4 border-border p-4 text-center">
 						<span className="flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
 							<Users className="size-3.5" />
 							Friends
@@ -184,7 +184,7 @@ export default function ProfilePage() {
 							{profile.friendCount}
 						</span>
 					</div>
-					<div className="border-2 border-border p-4 text-center">
+					<div className="border-4 border-border p-4 text-center">
 						<span className="flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
 							<CalendarDays className="size-3.5" />
 							Since
@@ -196,7 +196,7 @@ export default function ProfilePage() {
 							href={`https://profile.intra.42.fr/users/${profile.intraLogin}`}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="flex flex-col items-center justify-center border-2 border-border p-4 text-center transition-colors hover:bg-muted"
+							className="col-span-2 flex flex-col items-center justify-center border-4 border-border p-4 text-center transition-colors hover:bg-muted sm:col-span-1"
 						>
 							<span className="flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
 								<ExternalLink className="size-3.5" />

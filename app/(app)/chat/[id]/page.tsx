@@ -157,7 +157,7 @@ export default function ChatPage() {
 	}
 
 	return (
-		<div className="flex h-[calc(100svh-11.5rem)] w-full flex-col rounded-base border-2 border-border bg-card shadow-shadow">
+		<div className="flex h-[calc(100svh-11.5rem)] w-full flex-col rounded-base border-4 border-border bg-card shadow-shadow">
 			<ChatHeader
 				partnerId={meta.partnerId}
 				partnerUsername={meta.partnerUsername}
@@ -224,7 +224,7 @@ export default function ChatPage() {
 				<div ref={messagesEndRef} />
 			</div>
 
-			<div className="border-t-2 border-border px-4 py-3">
+			<div className="border-t-4 border-border px-4 py-3">
 				<MessageInput onSend={sendMessage} conversationId={conversationId} />
 			</div>
 		</div>

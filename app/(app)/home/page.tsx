@@ -146,7 +146,7 @@ export default function HomePage() {
 									<Link
 										key={msg.id}
 										href={`/chat/${msg.conversationId}?messageId=${msg.id}`}
-										className="block rounded-base border-2 border-border bg-card p-3 shadow-shadow transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+										className="block rounded-base border-4 border-border bg-card p-3 shadow-shadow transition-all hover:brutal-press-hover"
 									>
 										<div className="flex items-center justify-between gap-2">
 											<span className="text-xs font-medium text-muted-foreground">

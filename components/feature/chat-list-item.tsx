@@ -9,6 +9,7 @@ import {
 	getAvatarColor,
 	truncateText,
 } from "@/lib/utils";
+import { NotificationBadge } from "./notification-badge";
 import { OnlineIndicator } from "./online-indicator";
 
 interface ChatListItemProps {
@@ -31,7 +32,7 @@ export function ChatListItem({
 		<Link
 			href={`/chat/${conversation.id}`}
 			className={cn(
-				"relative flex items-center gap-4 rounded-base border-2 border-border bg-card p-4 shadow-shadow transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none",
+				"relative flex items-center gap-4 rounded-base border-4 border-border bg-card p-4 shadow-shadow transition-all hover:brutal-press-hover",
 			)}
 		>
 			<div className="relative shrink-0">
@@ -63,11 +64,7 @@ export function ChatListItem({
 						{formatRelativeTime(lastMessage.createdAt)}
 					</span>
 				)}
-				{unread > 0 && (
-					<span className="flex size-5 items-center justify-center border-2 border-border bg-accent text-[10px] font-bold text-accent-foreground">
-						{unread > 99 ? "99+" : unread}
-					</span>
-				)}
+				{unread > 0 && <NotificationBadge count={unread} />}
 			</div>
 		</Link>
 	);

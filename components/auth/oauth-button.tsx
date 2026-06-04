@@ -32,7 +32,7 @@ export function OAuthButton({ setApiError, disabled }: OAuthButtonProps) {
 				onClick={handleOAuth42}
 				disabled={disabled}
 			>
-				<span className="flex size-6 shrink-0 items-center justify-center border-2 border-border bg-white text-secondary">
+				<span className="flex size-6 shrink-0 items-center justify-center border-4 border-border bg-white text-secondary">
 					<IntraIcon className="size-3.5" />
 				</span>
 				Continue with 42

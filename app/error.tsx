@@ -26,7 +26,7 @@ export default function RootError({
 					<button
 						type="button"
 						onClick={reset}
-						className="rounded-base border-2 border-border bg-foreground px-4 py-2 text-background shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none"
+						className="rounded-base border-4 border-border bg-foreground px-4 py-2 text-background shadow-shadow transition-all hover:brutal-press-hover"
 					>
 						Try again
 					</button>

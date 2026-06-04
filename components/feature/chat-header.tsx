@@ -3,13 +3,12 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { usePresence } from "@/hooks/use-presence";
 import type { FriendStatus } from "@/lib/types";
-import { getAvatarColor } from "@/lib/utils";
 import { FriendRequestButton } from "./friend-request-button";
 import { OnlineIndicator } from "./online-indicator";
+import { UserAvatar } from "./user-avatar";
 
 interface ChatHeaderProps {
 	partnerId: string;
@@ -28,7 +27,6 @@ export function ChatHeader({
 	friendStatus: initialFriendStatus,
 	friendRequestId,
 }: ChatHeaderProps) {
-	const initials = partnerUsername.slice(0, 2).toUpperCase();
 	const [currentStatus, setCurrentStatus] = useState(initialFriendStatus);
 	const isFriend = currentStatus === "friends";
 	const presenceMap = usePresence(isFriend ? [partnerId] : []);
@@ -49,16 +47,7 @@ export function ChatHeader({
 				className="flex items-center gap-2"
 			>
 				<div className="relative">
-					<Avatar>
-						{partnerImage && (
-							<AvatarImage src={partnerImage} alt={partnerUsername} />
-						)}
-						<AvatarFallback
-							style={{ backgroundColor: getAvatarColor(partnerUsername) }}
-						>
-							{initials}
-						</AvatarFallback>
-					</Avatar>
+					<UserAvatar name={partnerUsername} image={partnerImage} />
 					{isFriend && <OnlineIndicator online={isOnline} />}
 				</div>
 				<div className="flex flex-col">

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { OAuthButton } from "@/components/auth/oauth-button";
+import { OrDivider } from "@/components/auth/or-divider";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -154,13 +155,7 @@ export function RegisterForm({
 						{isSubmitting ? "Creating account..." : "Create Account"}
 					</Button>
 
-					<div className="flex items-center gap-3">
-						<div className="h-0.5 flex-1 bg-foreground" />
-						<span className="text-xs font-bold uppercase tracking-wide">
-							Or
-						</span>
-						<div className="h-0.5 flex-1 bg-foreground" />
-					</div>
+					<OrDivider />
 					<OAuthButton setApiError={setApiError} disabled={isSubmitting} />
 				</FieldGroup>
 			</form>

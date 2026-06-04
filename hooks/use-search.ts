@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { DEBOUNCE_MS } from "@/lib/constants";
 import type { FriendStatus, User } from "@/lib/types";
+import { useDebouncedValue } from "./use-debounced-value";
 
 interface SearchResult extends User {
 	friendStatus: FriendStatus;
@@ -12,7 +14,7 @@ export function useSearch() {
 	const [results, setResults] = useState<SearchResult[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
-	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const debouncedQuery = useDebouncedValue(query, DEBOUNCE_MS);
 
 	const fetchResults = useCallback(async (searchQuery: string) => {
 		if (abortRef.current) {
@@ -56,20 +58,8 @@ export function useSearch() {
 	}, []);
 
 	useEffect(() => {
-		if (timerRef.current) {
-			clearTimeout(timerRef.current);
-		}
-
-		timerRef.current = setTimeout(() => {
-			fetchResults(query);
-		}, 300);
-
-		return () => {
-			if (timerRef.current) {
-				clearTimeout(timerRef.current);
-			}
-		};
-	}, [query, fetchResults]);
+		fetchResults(debouncedQuery);
+	}, [debouncedQuery, fetchResults]);
 
 	return { query, setQuery, results, isLoading };
 }

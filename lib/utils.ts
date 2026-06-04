@@ -46,6 +46,15 @@ const AVATAR_COLORS = [
 	"#3dff9e", // mint
 ];
 
+/**
+ * Iniziali per gli avatar: prime due lettere del nome, maiuscole.
+ * NB: nav-user.tsx usa volutamente una semantica diversa (iniziali delle
+ * parole nome+cognome) e NON deve usare questa funzione.
+ */
+export function getInitials(name: string): string {
+	return name.slice(0, 2).toUpperCase();
+}
+
 export function getAvatarColor(seed: string): string {
 	let hash = 0;
 	for (let i = 0; i < seed.length; i++) {

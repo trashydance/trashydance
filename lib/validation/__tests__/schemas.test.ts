@@ -20,7 +20,7 @@ describe("messageSchema", () => {
 	it("accepts a file-only message with empty body", () => {
 		const result = messageSchema.safeParse({
 			body: "",
-			fileUrl: "/uploads/file.pdf",
+			fileUrl: "/api/uploads/conv-1/file.pdf",
 			fileName: "file.pdf",
 		});
 		expect(result.success).toBe(true);
@@ -51,7 +51,7 @@ describe("messageSchema", () => {
 
 	it("defaults body to empty string when omitted", () => {
 		const result = messageSchema.safeParse({
-			fileUrl: "/uploads/file.pdf",
+			fileUrl: "/api/uploads/conv-1/file.pdf",
 		});
 		expect(result.success).toBe(true);
 	});
@@ -184,20 +184,11 @@ describe("registerSchema", () => {
 		expect(result.success).toBe(false);
 	});
 
-	it("rejects password without letters", () => {
-		const result = registerSchema.safeParse({
-			...validData,
-			password: "12345678",
-		});
-		expect(result.success).toBe(false);
-	});
-
-	it("rejects password without digits", () => {
-		const result = registerSchema.safeParse({
-			...validData,
-			password: "password",
-		});
-		expect(result.success).toBe(false);
+	it("accepts any 8+ character password (min-length-only policy)", () => {
+		for (const password of ["12345678", "password"]) {
+			const result = registerSchema.safeParse({ ...validData, password });
+			expect(result.success).toBe(true);
+		}
 	});
 });
 

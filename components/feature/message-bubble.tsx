@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { cn, formatFileSize, getAvatarColor } from "@/lib/utils";
+import { cn, formatFileSize, getAvatarColor, getInitials } from "@/lib/utils";
 
 interface MessageBubbleProps {
 	body: string;
@@ -167,7 +167,7 @@ export function MessageBubble({
 	partnerImage,
 }: MessageBubbleProps) {
 	const hasFile = fileName && fileUrl && fileType && fileSize;
-	const partnerInitials = (partnerName ?? "??").slice(0, 2).toUpperCase();
+	const partnerInitials = getInitials(partnerName ?? "??");
 
 	return (
 		<div

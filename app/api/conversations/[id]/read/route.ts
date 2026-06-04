@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { notFound, requireAuth, unauthorized } from "@/lib/api-helpers";
 import { findConversationForParticipant } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
-import { emitNotificationCount } from "@/lib/socket/handlers";
+import { emitNotificationCount } from "@/lib/socket/emit";
 import { getIO } from "@/lib/socket/io-instance";
 import { conversation } from "@/schema/auth";
 

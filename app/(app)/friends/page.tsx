@@ -1,106 +1,23 @@
 "use client";
 
 import { Users } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
 import { EmptyState } from "@/components/feature/empty-state";
 import { FriendsList } from "@/components/feature/requests/friends-list";
 import { ReceivedRequests } from "@/components/feature/requests/received-requests";
 import { SentRequests } from "@/components/feature/requests/sent-requests";
-import type { FriendRequestsData } from "@/components/feature/requests/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSocket } from "@/hooks/use-socket";
-import { SocketEvent } from "@/lib/constants";
+import { useFriendRequests } from "@/hooks/use-friend-requests";
 
 export default function FriendsPage() {
-	const [data, setData] = useState<FriendRequestsData | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [actionLoading, setActionLoading] = useState<string | null>(null);
-
-	const fetchRequests = useCallback(async () => {
-		try {
-			const res = await fetch("/api/friend-requests");
-			if (res.ok) {
-				setData(await res.json());
-			}
-		} catch {
-			// Network error
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
-
-	useEffect(() => {
-		fetchRequests();
-	}, [fetchRequests]);
-
-	const { socket } = useSocket();
-
-	useEffect(() => {
-		if (!socket) return;
-		const onUpdate = () => fetchRequests();
-		socket.on(SocketEvent.FRIEND_REQUEST_NEW, onUpdate);
-		socket.on(SocketEvent.FRIEND_REQUEST_UPDATE, onUpdate);
-		socket.on(SocketEvent.NOTIFICATION_COUNT, onUpdate);
-		return () => {
-			socket.off(SocketEvent.FRIEND_REQUEST_NEW, onUpdate);
-			socket.off(SocketEvent.FRIEND_REQUEST_UPDATE, onUpdate);
-			socket.off(SocketEvent.NOTIFICATION_COUNT, onUpdate);
-		};
-	}, [socket, fetchRequests]);
-
-	const performAction = useCallback(
-		async (url: string, options?: RequestInit) => {
-			try {
-				const res = await fetch(url, options);
-				if (res.ok) fetchRequests();
-			} catch {
-				// Network error
-			} finally {
-				setActionLoading(null);
-			}
-		},
-		[fetchRequests],
-	);
-
-	const handleAccept = useCallback(
-		(id: string) => {
-			setActionLoading(id);
-			performAction(`/api/friend-requests/${id}`, {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "accept" }),
-			});
-		},
-		[performAction],
-	);
-
-	const handleReject = useCallback(
-		(id: string) => {
-			setActionLoading(id);
-			performAction(`/api/friend-requests/${id}`, {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "reject" }),
-			});
-		},
-		[performAction],
-	);
-
-	const handleCancel = useCallback(
-		(id: string) => {
-			setActionLoading(id);
-			performAction(`/api/friend-requests/${id}`, { method: "DELETE" });
-		},
-		[performAction],
-	);
-
-	const handleUnfriend = useCallback(
-		(id: string) => {
-			setActionLoading(id);
-			performAction(`/api/friend-requests/${id}`, { method: "DELETE" });
-		},
-		[performAction],
-	);
+	const {
+		data,
+		isLoading,
+		actionLoading,
+		handleAccept,
+		handleReject,
+		handleCancel,
+		handleUnfriend,
+	} = useFriendRequests();
 
 	if (isLoading) {
 		return (

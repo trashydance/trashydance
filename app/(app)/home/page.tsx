@@ -2,14 +2,17 @@
 
 import { MessageSquare, Search as SearchIcon } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChatListItem } from "@/components/feature/chat-list-item";
 import { EmptyState } from "@/components/feature/empty-state";
 import { SearchBar } from "@/components/feature/search-bar";
 import { SectionHeader } from "@/components/feature/section-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChatList } from "@/hooks/use-chat-list";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePresence } from "@/hooks/use-presence";
+import { authClient } from "@/lib/auth-client";
+import { DEBOUNCE_MS } from "@/lib/constants";
 import { formatRelativeTime, truncateText } from "@/lib/utils";
 
 interface SearchResultMessage {
@@ -33,12 +36,13 @@ interface GlobalSearchResults {
 }
 
 export default function HomePage() {
-	const { conversations, isLoading } = useChatList();
+	const { data: session } = authClient.useSession();
+	const { conversations, isLoading } = useChatList(session?.user?.id);
 	const [query, setQuery] = useState("");
 	const [searchResults, setSearchResults] =
 		useState<GlobalSearchResults | null>(null);
 	const [searching, setSearching] = useState(false);
-	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const debouncedQuery = useDebouncedValue(query, DEBOUNCE_MS);
 
 	const friendPartnerIds = useMemo(
 		() => conversations.friends.map((c) => c.partner.id),
@@ -72,12 +76,8 @@ export default function HomePage() {
 	}, []);
 
 	useEffect(() => {
-		if (timerRef.current) clearTimeout(timerRef.current);
-		timerRef.current = setTimeout(() => doSearch(query), 300);
-		return () => {
-			if (timerRef.current) clearTimeout(timerRef.current);
-		};
-	}, [query, doSearch]);
+		doSearch(debouncedQuery);
+	}, [debouncedQuery, doSearch]);
 
 	const filteredConversations = useMemo(() => {
 		if (!query.trim()) return null;

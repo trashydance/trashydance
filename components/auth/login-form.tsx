@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { OAuthButton } from "@/components/auth/oauth-button";
+import { OrDivider } from "@/components/auth/or-divider";
 import { TwoFactorVerify } from "@/components/auth/two-factor-verify";
 import { Button } from "@/components/ui/button";
 import {
@@ -159,13 +160,7 @@ export function LoginForm({
 						{isSubmitting ? "Logging in..." : "Log in"}
 					</Button>
 
-					<div className="flex items-center gap-3">
-						<div className="h-0.5 flex-1 bg-foreground" />
-						<span className="text-xs font-bold uppercase tracking-wide">
-							Or
-						</span>
-						<div className="h-0.5 flex-1 bg-foreground" />
-					</div>
+					<OrDivider />
 					<OAuthButton setApiError={setApiError} disabled={isSubmitting} />
 				</FieldGroup>
 			</form>

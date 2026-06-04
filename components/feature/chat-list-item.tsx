@@ -1,16 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { Conversation } from "@/lib/types";
-import {
-	cn,
-	formatRelativeTime,
-	getAvatarColor,
-	truncateText,
-} from "@/lib/utils";
+import { cn, formatRelativeTime, truncateText } from "@/lib/utils";
 import { NotificationBadge } from "./notification-badge";
 import { OnlineIndicator } from "./online-indicator";
+import { UserAvatar } from "./user-avatar";
 
 interface ChatListItemProps {
 	conversation: Conversation & { unreadCount?: number };
@@ -26,7 +21,6 @@ export function ChatListItem({
 	const { partner, lastMessage } = conversation;
 	const unread = conversation.unreadCount ?? 0;
 	const displayName = partner.name || partner.username || "?";
-	const initials = displayName.slice(0, 2).toUpperCase();
 
 	return (
 		<Link
@@ -36,16 +30,11 @@ export function ChatListItem({
 			)}
 		>
 			<div className="relative shrink-0">
-				<Avatar>
-					{partner.image && (
-						<AvatarImage src={partner.image} alt={displayName} />
-					)}
-					<AvatarFallback
-						style={{ backgroundColor: getAvatarColor(displayName) }}
-					>
-						{initials}
-					</AvatarFallback>
-				</Avatar>
+				<UserAvatar
+					name={partner.name}
+					username={partner.username}
+					image={partner.image}
+				/>
 				{showOnlineIndicator && <OnlineIndicator online={isOnline} />}
 			</div>
 			<div className="min-w-0 flex-1">

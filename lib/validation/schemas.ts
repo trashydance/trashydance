@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { BIO_MAX_LENGTH, MAX_MESSAGE_LENGTH } from "@/lib/constants";
+import {
+	ALLOWED_MIME_TYPES_SET,
+	BIO_MAX_LENGTH,
+	MAX_FILE_SIZE,
+	MAX_MESSAGE_LENGTH,
+} from "@/lib/constants";
 
 /** Message body validation */
 export const messageSchema = z
@@ -13,10 +18,19 @@ export const messageSchema = z
 			.transform((v) => v.trim())
 			.optional()
 			.default(""),
-		fileName: z.string().optional(),
-		fileUrl: z.string().optional(),
-		fileType: z.string().optional(),
-		fileSize: z.number().optional(),
+		fileName: z.string().max(255).optional(),
+		fileUrl: z
+			.string()
+			.regex(
+				/^\/api\/uploads\/[a-zA-Z0-9-]+\/[a-zA-Z0-9._-]+$/,
+				"fileUrl must reference an uploaded file",
+			)
+			.optional(),
+		fileType: z
+			.string()
+			.refine((t) => ALLOWED_MIME_TYPES_SET.has(t), "File type not allowed")
+			.optional(),
+		fileSize: z.number().int().positive().max(MAX_FILE_SIZE).optional(),
 	})
 	.refine((data) => data.body.length > 0 || data.fileUrl, {
 		message: "Message must have text or a file attachment",
@@ -42,6 +56,11 @@ export const searchQuerySchema = z.object({
 	q: z.string().max(100, "Search query is too long").default(""),
 });
 
+/** Password policy, single source of truth: minimum 8 characters. */
+export const passwordSchema = z
+	.string()
+	.min(8, "Password must be at least 8 characters");
+
 /** Registration */
 export const registerSchema = z.object({
 	username: z
@@ -52,11 +71,7 @@ export const registerSchema = z.object({
 			/^[a-zA-Z0-9_]+$/,
 			"Username can only contain letters, numbers, and underscores",
 		),
-	password: z
-		.string()
-		.min(8, "Password must be at least 8 characters")
-		.regex(/[a-zA-Z]/, "Password must contain at least one letter")
-		.regex(/[0-9]/, "Password must contain at least one digit"),
+	password: passwordSchema,
 });
 
 /** Login */
@@ -64,6 +79,18 @@ export const loginSchema = z.object({
 	username: z.string().min(1, "Username is required"),
 	password: z.string().min(1, "Password is required"),
 });
+
+/** Change password (settings) */
+export const changePasswordSchema = z
+	.object({
+		currentPassword: z.string().min(1, "Current password is required"),
+		newPassword: passwordSchema,
+		confirmPassword: z.string().min(1, "Please confirm your password"),
+	})
+	.refine((data) => data.newPassword === data.confirmPassword, {
+		message: "Passwords don't match",
+		path: ["confirmPassword"],
+	});
 
 /** Pagination cursor */
 export const cursorPaginationSchema = z.object({

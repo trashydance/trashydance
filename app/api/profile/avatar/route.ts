@@ -6,23 +6,28 @@ import {
 	ALLOWED_AVATAR_MIME_TYPES_SET,
 	AVATAR_EXTENSIONS,
 	AVATAR_UPLOAD_DIR,
-	MAGIC_BYTES,
 	MAX_AVATAR_SIZE,
+	RATE_LIMIT,
 } from "@/lib/constants";
 import db from "@/lib/db";
+import { validateFileContent } from "@/lib/file-validation";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { user } from "@/schema/auth";
-
-function validateMagicBytes(buffer: Buffer, mimeType: string): boolean {
-	const expected = MAGIC_BYTES[mimeType];
-	if (!expected) return false;
-	if (buffer.length < expected.length) return false;
-	return expected.every((byte, i) => buffer[i] === byte);
-}
 
 export async function POST(request: Request) {
 	const auth = await requireAuth();
 	if (!auth) return unauthorized();
 	const { userId } = auth;
+
+	if (
+		!rateLimit(
+			`upload:${userId}`,
+			RATE_LIMIT.UPLOAD_MAX,
+			RATE_LIMIT.UPLOAD_WINDOW_MS,
+		)
+	) {
+		return rateLimitResponse();
+	}
 
 	const formData = await request.formData();
 	const file = formData.get("file");
@@ -43,7 +48,7 @@ export async function POST(request: Request) {
 
 	const buffer = Buffer.from(await file.arrayBuffer());
 
-	if (!validateMagicBytes(buffer, file.type)) {
+	if (!validateFileContent(buffer, file.type)) {
 		return badRequest("File content does not match declared type");
 	}
 

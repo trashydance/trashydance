@@ -18,12 +18,11 @@ import {
 	useState,
 } from "react";
 import { FriendRequestButton } from "@/components/feature/friend-request-button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/feature/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AVATAR_ACCEPT_STRING, INTRA_PROFILE_BASE_URL } from "@/lib/constants";
 import type { Profile } from "@/lib/types";
-import { getAvatarColor } from "@/lib/utils";
 
 export default function ProfilePage() {
 	const params = useParams<{ username: string }>();
@@ -100,7 +99,6 @@ export default function ProfilePage() {
 
 	const displayName = profile.username || profile.name;
 	const fullName = [profile.name, profile.lastName].filter(Boolean).join(" ");
-	const initials = displayName.slice(0, 2).toUpperCase();
 	const joinDate = new Date(profile.createdAt).toLocaleDateString("en-US", {
 		month: "long",
 		year: "numeric",
@@ -111,17 +109,12 @@ export default function ProfilePage() {
 			<div className="rounded-base border-4 border-border bg-card p-6 shadow-brutal-cobalt sm:p-8">
 				<div className="flex flex-col gap-6 sm:flex-row sm:items-start">
 					<div className="relative w-fit shrink-0">
-						<Avatar className="size-28 shadow-shadow">
-							{profile.image && (
-								<AvatarImage src={profile.image} alt={displayName} />
-							)}
-							<AvatarFallback
-								className="text-3xl"
-								style={{ backgroundColor: getAvatarColor(displayName) }}
-							>
-								{initials}
-							</AvatarFallback>
-						</Avatar>
+						<UserAvatar
+							name={displayName}
+							image={profile.image}
+							className="size-28 shadow-shadow"
+							fallbackClassName="text-3xl"
+						/>
 						{profile.isOwnProfile && (
 							<>
 								<input

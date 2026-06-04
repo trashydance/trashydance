@@ -24,7 +24,7 @@ import { useNotificationCount } from "@/hooks/use-notification-count";
 import { useSocket } from "@/hooks/use-socket";
 import { useTheme } from "@/hooks/use-theme";
 import { authClient } from "@/lib/auth-client";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 
 const NAV_ITEMS = [
 	{ href: "/home", label: "Home", icon: Home },
@@ -37,16 +37,16 @@ export function AppNav() {
 	const pathname = usePathname();
 	const { theme, toggleTheme } = useTheme();
 	const { pendingRequests } = useNotificationCount();
-	const { socket } = useSocket();
+	const { disconnect } = useSocket();
 	const { data: session } = authClient.useSession();
 
 	const user = session?.user;
 	const handle =
 		(user as { username?: string | null } | undefined)?.username ?? user?.name;
-	const initials = (handle ?? "??").slice(0, 2).toUpperCase();
+	const initials = getInitials(handle ?? "??");
 
 	const handleLogout = async () => {
-		socket?.disconnect();
+		disconnect();
 		await authClient.signOut();
 		router.push("/login");
 	};

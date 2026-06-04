@@ -13,7 +13,8 @@ const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
-	// .env is loaded by Next during prepare(); fail fast if anything is missing.
+	// .env is loaded via `--env-file` in dev (see package.json) and injected by
+	// compose.yaml in production; fail fast if anything is missing.
 	const env = getEnv();
 
 	const httpServer = createServer(handle);

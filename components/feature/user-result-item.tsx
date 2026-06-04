@@ -1,9 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn, getAvatarColor } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { OnlineIndicator } from "./online-indicator";
+import { UserAvatar } from "./user-avatar";
 
 interface UserResultItemProps {
 	username: string | null;
@@ -27,7 +27,6 @@ export function UserResultItem({
 	isOnline = false,
 }: UserResultItemProps) {
 	const displayName = username || name;
-	const initials = displayName.slice(0, 2).toUpperCase();
 
 	return (
 		<div
@@ -42,14 +41,7 @@ export function UserResultItem({
 				className="flex min-w-0 flex-1 items-center gap-3 text-left hover:opacity-80 transition-opacity"
 			>
 				<div className="relative shrink-0">
-					<Avatar>
-						{image && <AvatarImage src={image} alt={displayName} />}
-						<AvatarFallback
-							style={{ backgroundColor: getAvatarColor(displayName) }}
-						>
-							{initials}
-						</AvatarFallback>
-					</Avatar>
+					<UserAvatar name={displayName} image={image} />
 					{showOnlineIndicator && <OnlineIndicator online={isOnline} />}
 				</div>
 				<div className="min-w-0 flex-1">

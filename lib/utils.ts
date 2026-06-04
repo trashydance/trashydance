@@ -30,6 +30,26 @@ export function formatRelativeTime(input: string | number): string {
 	return new Date(date).toLocaleDateString();
 }
 
+/** Palette avatar del design Lovable: colore deterministico per utente. */
+const AVATAR_COLORS = [
+	"#ff3d8b", // pink
+	"#2547ff", // cobalt
+	"#c6ff3d", // lime
+	"#ff8a00", // orange
+	"#8b3dff", // purple
+	"#ff3d3d", // red
+	"#00e0c8", // teal
+	"#3dff9e", // mint
+];
+
+export function getAvatarColor(seed: string): string {
+	let hash = 0;
+	for (let i = 0; i < seed.length; i++) {
+		hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+	}
+	return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
 export function truncateText(
 	text: string | null | undefined,
 	maxLength: number,

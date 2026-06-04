@@ -6,7 +6,7 @@ export default function Button({ text }: { text: string }) {
 	return (
 		<a
 			href="/home"
-			className="block relative isolate w-72 h-48 text-gray-800 transition-all hover:brightness-105"
+			className="block relative isolate w-72 h-48 text-foreground transition-all hover:brightness-105"
 		>
 			<div className="relative flex w-full h-full items-center justify-center animate-unstabile">
 				<Image
@@ -17,7 +17,7 @@ export default function Button({ text }: { text: string }) {
 					priority
 					className="object-contain drop-shadow-md -z-10"
 				/>
-				<span className="z-10 mt-8 text-5xl font-bold font-[family-name:var(--font-pixel)]">
+				<span className="z-10 mt-8 text-5xl font-bold font-heading">
 					{text}
 				</span>
 			</div>

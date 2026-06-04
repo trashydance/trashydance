@@ -130,12 +130,7 @@ export default function FriendsPage() {
 
 	return (
 		<div className="space-y-8">
-			<div>
-				<h1 className="font-heading text-2xl font-bold">Friends</h1>
-				<p className="text-sm text-muted-foreground">
-					Manage your follow requests and connections.
-				</p>
-			</div>
+			<h1 className="font-heading text-5xl">Friends.</h1>
 
 			{isEmpty && (
 				<EmptyState

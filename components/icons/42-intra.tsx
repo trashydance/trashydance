@@ -1,10 +1,11 @@
-export function IntraIcon() {
+export function IntraIcon({ className }: { className?: string }) {
 	return (
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 42 42"
 			aria-label="42 Intra"
 			role="img"
+			className={className}
 		>
 			<title>42 Intra</title>
 			<path

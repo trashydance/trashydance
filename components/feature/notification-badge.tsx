@@ -16,7 +16,7 @@ export function NotificationBadge({
 	return (
 		<span
 			className={cn(
-				"inline-flex size-5 items-center justify-center rounded-full border-2 border-border bg-destructive text-[10px] font-bold text-white shadow-[2px_2px_0px_0px] shadow-border",
+				"inline-flex size-4 items-center justify-center rounded-none bg-accent text-[10px] font-bold text-accent-foreground",
 				className,
 			)}
 		>

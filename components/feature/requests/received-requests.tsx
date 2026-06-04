@@ -1,4 +1,5 @@
 import { Check, X } from "lucide-react";
+import { SectionHeader } from "@/components/feature/section-header";
 import { Button } from "@/components/ui/button";
 import { FriendCard } from "./friend-card";
 import type { ReceivedRequest } from "./types";
@@ -20,10 +21,14 @@ export function ReceivedRequests({
 
 	return (
 		<section>
-			<h2 className="mb-3 font-heading text-lg font-bold">Received</h2>
+			<SectionHeader title="Received requests" count={requests.length} />
 			<div className="space-y-2">
 				{requests.map((req) => (
-					<FriendCard key={req.id} user={req.sender}>
+					<FriendCard
+						key={req.id}
+						user={req.sender}
+						subtitle="wants to follow you"
+					>
 						<Button
 							variant="default"
 							size="sm"
@@ -38,6 +43,7 @@ export function ReceivedRequests({
 							size="sm"
 							onClick={() => onReject(req.id)}
 							disabled={loadingId === req.id}
+							className="bg-accent text-accent-foreground"
 						>
 							<X className="size-4" />
 							Reject

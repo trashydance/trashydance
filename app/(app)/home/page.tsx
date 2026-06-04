@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatListItem } from "@/components/feature/chat-list-item";
 import { EmptyState } from "@/components/feature/empty-state";
 import { SearchBar } from "@/components/feature/search-bar";
+import { SectionHeader } from "@/components/feature/section-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChatList } from "@/hooks/use-chat-list";
 import { usePresence } from "@/hooks/use-presence";
@@ -117,10 +118,12 @@ export default function HomePage() {
 
 	return (
 		<div className="space-y-6">
+			<h1 className="font-heading text-5xl">Inbox.</h1>
+
 			<SearchBar
 				value={query}
 				onChange={setQuery}
-				placeholder="Search conversations & messages..."
+				placeholder="Search people, or words inside chats..."
 			/>
 
 			{searching && (
@@ -134,13 +137,16 @@ export default function HomePage() {
 				<div className="space-y-4">
 					{searchResults.messages.length > 0 && (
 						<section>
-							<h2 className="mb-2 font-heading text-lg font-bold">Messages</h2>
+							<SectionHeader
+								title="Messages"
+								count={searchResults.messages.length}
+							/>
 							<div className="space-y-2">
 								{searchResults.messages.map((msg) => (
 									<Link
 										key={msg.id}
 										href={`/chat/${msg.conversationId}?messageId=${msg.id}`}
-										className="block rounded-md border-2 border-border bg-background p-3 shadow-[4px_4px_0px_0px] shadow-border transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+										className="block rounded-base border-2 border-border bg-card p-3 shadow-shadow transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
 									>
 										<div className="flex items-center justify-between gap-2">
 											<span className="text-xs font-medium text-muted-foreground">
@@ -185,7 +191,10 @@ export default function HomePage() {
 				<div className="space-y-6">
 					{displayConversations.friends.length > 0 && (
 						<section>
-							<h2 className="mb-3 font-heading text-lg font-bold">Following</h2>
+							<SectionHeader
+								title="Following"
+								count={displayConversations.friends.length}
+							/>
 							<div className="space-y-2">
 								{displayConversations.friends.map((c) => (
 									<ChatListItem
@@ -201,7 +210,10 @@ export default function HomePage() {
 
 					{displayConversations.others.length > 0 && (
 						<section>
-							<h2 className="mb-3 font-heading text-lg font-bold">Others</h2>
+							<SectionHeader
+								title="Others"
+								count={displayConversations.others.length}
+							/>
 							<div className="space-y-2">
 								{displayConversations.others.map((c) => (
 									<ChatListItem key={c.id} conversation={c} />

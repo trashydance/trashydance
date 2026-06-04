@@ -17,6 +17,12 @@ export const auth = betterAuth({
 		enabled: true,
 	},
 
+	user: {
+		deleteUser: {
+			enabled: true,
+		},
+	},
+
 	plugins: [
 		twoFactor(),
 		username(),

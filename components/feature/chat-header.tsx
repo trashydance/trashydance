@@ -7,12 +7,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { usePresence } from "@/hooks/use-presence";
 import type { FriendStatus } from "@/lib/types";
+import { getAvatarColor } from "@/lib/utils";
 import { FriendRequestButton } from "./friend-request-button";
 import { OnlineIndicator } from "./online-indicator";
 
 interface ChatHeaderProps {
 	partnerId: string;
 	partnerUsername: string;
+	partnerName?: string;
 	partnerImage: string | null;
 	friendStatus: FriendStatus;
 	friendRequestId?: string;
@@ -21,6 +23,7 @@ interface ChatHeaderProps {
 export function ChatHeader({
 	partnerId,
 	partnerUsername,
+	partnerName,
 	partnerImage,
 	friendStatus: initialFriendStatus,
 	friendRequestId,
@@ -35,7 +38,7 @@ export function ChatHeader({
 	}, []);
 
 	return (
-		<header className="flex items-center gap-3 border-b-2 border-border bg-background px-4 py-3 shadow-[0px_4px_0px_0px] shadow-border">
+		<header className="flex items-center gap-3 border-b-2 border-border bg-background px-4 py-3">
 			<Button variant="ghost" size="icon-sm" asChild>
 				<Link href="/home" aria-label="Back to chats">
 					<ArrowLeft className="size-4" />
@@ -50,17 +53,28 @@ export function ChatHeader({
 						{partnerImage && (
 							<AvatarImage src={partnerImage} alt={partnerUsername} />
 						)}
-						<AvatarFallback>{initials}</AvatarFallback>
+						<AvatarFallback
+							style={{ backgroundColor: getAvatarColor(partnerUsername) }}
+						>
+							{initials}
+						</AvatarFallback>
 					</Avatar>
 					{isFriend && <OnlineIndicator online={isOnline} />}
 				</div>
 				<div className="flex flex-col">
-					<span className="font-heading text-sm font-semibold">
-						{partnerUsername}
+					<span className="text-sm font-bold uppercase tracking-wide">
+						{partnerName || partnerUsername}
 					</span>
 					{isFriend && (
-						<span className="text-xs text-muted-foreground">
-							{isOnline ? "online" : "offline"}
+						<span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+							<span
+								className={
+									isOnline
+										? "size-1.5 rounded-full bg-[#2ecc40]"
+										: "size-1.5 rounded-full bg-muted-foreground"
+								}
+							/>
+							{isOnline ? "Online" : "Offline"}
 						</span>
 					)}
 				</div>

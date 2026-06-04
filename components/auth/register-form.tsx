@@ -6,14 +6,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { OAuthButton } from "@/components/auth/oauth-button";
-import { AppIcon } from "@/components/icons/app-icon";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
 	FieldDescription,
 	FieldGroup,
 	FieldLabel,
-	FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
@@ -69,32 +67,26 @@ export function RegisterForm({
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<FieldGroup>
-					<div className="flex flex-col items-center gap-2 text-center">
-						<Link
-							href="/"
-							className="flex flex-col items-center gap-2 font-medium"
-						>
-							<div className="flex size-8 items-center justify-center rounded-md">
-								<AppIcon className="size-6" />
-							</div>
-							<span className="sr-only">ChatSimulator</span>
-						</Link>
-						<h1 className="text-xl font-bold">
-							Create your ChatSimulator account
-						</h1>
-						<FieldDescription>
-							Already have an account? <Link href="/login">Sign in</Link>
-						</FieldDescription>
+					<div>
+						<h1 className="font-heading text-5xl">Sign up.</h1>
+						<p className="mt-2 text-sm text-muted-foreground">
+							Pick a handle. Start chatting.
+						</p>
 					</div>
 
 					{apiError.general && (
-						<div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+						<div className="rounded-base border-2 border-destructive bg-destructive/10 p-3 text-sm text-destructive">
 							{apiError.general}
 						</div>
 					)}
 
 					<Field>
-						<FieldLabel htmlFor="username">Username</FieldLabel>
+						<FieldLabel
+							htmlFor="username"
+							className="text-xs font-bold uppercase tracking-wide"
+						>
+							Username
+						</FieldLabel>
 						<Input
 							{...register("username")}
 							id="username"
@@ -102,56 +94,81 @@ export function RegisterForm({
 							placeholder="Choose a username"
 							autoComplete="username"
 							disabled={isSubmitting}
+							className="h-12"
 						/>
+						<FieldDescription className="text-xs">
+							3–20 chars, letters/numbers/underscore.
+						</FieldDescription>
 						{(errors.username || apiError.username) && (
-							<p className="text-xs text-red-600">
+							<p className="text-xs text-destructive">
 								{errors.username?.message || apiError.username}
 							</p>
 						)}
 					</Field>
 
 					<Field>
-						<FieldLabel htmlFor="password">Password</FieldLabel>
+						<FieldLabel
+							htmlFor="password"
+							className="text-xs font-bold uppercase tracking-wide"
+						>
+							Password
+						</FieldLabel>
 						<Input
 							{...register("password")}
 							id="password"
 							type="password"
 							placeholder="Enter your password"
 							disabled={isSubmitting}
+							className="h-12"
 						/>
 						{errors.password && (
-							<p className="text-xs text-red-600">{errors.password.message}</p>
+							<p className="text-xs text-destructive">
+								{errors.password.message}
+							</p>
 						)}
 					</Field>
 
 					<Field>
-						<FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+						<FieldLabel
+							htmlFor="confirmPassword"
+							className="text-xs font-bold uppercase tracking-wide"
+						>
+							Confirm
+						</FieldLabel>
 						<Input
 							{...register("confirmPassword")}
 							id="confirmPassword"
 							type="password"
 							placeholder="Confirm your password"
 							disabled={isSubmitting}
+							className="h-12"
 						/>
 						{errors.confirmPassword && (
-							<p className="text-xs text-red-600">
+							<p className="text-xs text-destructive">
 								{errors.confirmPassword.message}
 							</p>
 						)}
 					</Field>
 
-					<Button type="submit" disabled={isSubmitting} className="w-full">
+					<Button type="submit" disabled={isSubmitting} className="h-14 w-full">
 						{isSubmitting ? "Creating account..." : "Create Account"}
 					</Button>
 
-					<FieldSeparator>Or</FieldSeparator>
+					<div className="flex items-center gap-3">
+						<div className="h-0.5 flex-1 bg-foreground" />
+						<span className="text-xs font-bold uppercase tracking-wide">
+							Or
+						</span>
+						<div className="h-0.5 flex-1 bg-foreground" />
+					</div>
 					<OAuthButton setApiError={setApiError} disabled={isSubmitting} />
 				</FieldGroup>
 			</form>
-			<FieldDescription className="px-6 text-center">
-				By clicking continue, you agree to our{" "}
-				<Link href="/terms">Terms of Service</Link> and{" "}
-				<Link href="/privacy">Privacy Policy</Link>.
+			<FieldDescription className="text-center">
+				Already have an account?{" "}
+				<Link href="/login" className="font-bold uppercase tracking-wide">
+					Log in
+				</Link>
 			</FieldDescription>
 		</div>
 	);

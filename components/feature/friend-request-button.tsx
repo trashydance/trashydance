@@ -12,6 +12,8 @@ interface FriendRequestButtonProps {
 	requestId?: string;
 	className?: string;
 	onStatusChange?: (status: FriendStatus) => void;
+	/** Text-only style (no icons, "Cancel" for pending requests), used on the search page */
+	textOnly?: boolean;
 }
 
 export function FriendRequestButton({
@@ -20,6 +22,7 @@ export function FriendRequestButton({
 	requestId: initialRequestId,
 	className,
 	onStatusChange,
+	textOnly = false,
 }: FriendRequestButtonProps) {
 	const {
 		friendStatus,
@@ -40,7 +43,7 @@ export function FriendRequestButton({
 				disabled={isLoading}
 				className={className}
 			>
-				<UserPlus className="size-4" />
+				{!textOnly && <UserPlus className="size-4" />}
 				Follow
 			</Button>
 		);
@@ -53,10 +56,10 @@ export function FriendRequestButton({
 				size="sm"
 				onClick={cancelRequest}
 				disabled={isLoading}
-				className={cn("opacity-70", className)}
+				className={cn(!textOnly && "opacity-70", className)}
 			>
-				<Clock className="size-4" />
-				Pending...
+				{!textOnly && <Clock className="size-4" />}
+				{textOnly ? "Cancel" : "Pending..."}
 			</Button>
 		);
 	}
@@ -70,7 +73,7 @@ export function FriendRequestButton({
 					onClick={acceptRequest}
 					disabled={isLoading}
 				>
-					<Check className="size-4" />
+					{!textOnly && <Check className="size-4" />}
 					Accept
 				</Button>
 				<Button
@@ -78,8 +81,9 @@ export function FriendRequestButton({
 					size="sm"
 					onClick={rejectRequest}
 					disabled={isLoading}
+					className="bg-accent text-accent-foreground"
 				>
-					<X className="size-4" />
+					{!textOnly && <X className="size-4" />}
 					Reject
 				</Button>
 			</div>
@@ -94,7 +98,7 @@ export function FriendRequestButton({
 			disabled={isLoading}
 			className={className}
 		>
-			<UserMinus className="size-4" />
+			{!textOnly && <UserMinus className="size-4" />}
 			Unfollow
 		</Button>
 	);

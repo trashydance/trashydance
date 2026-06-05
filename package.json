@@ -14,7 +14,8 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
-		"preinstall": "npx only-allow pnpm"
+		"preinstall": "npx only-allow pnpm",
+		"knip": "knip"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.2.2",
@@ -42,7 +43,7 @@
 		"@biomejs/biome": "2.4.13",
 		"@tailwindcss/postcss": "^4",
 		"@types/better-sqlite3": "^7.6.13",
-		"@types/node": "^20",
+		"@types/node": "^20.19.39",
 		"@types/qrcode": "^1.5.6",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
@@ -51,9 +52,10 @@
 		"drizzle-kit": "^0.31.10",
 		"husky": "^9.1.7",
 		"happy-dom": "^20.9.0",
+		"knip": "^6.15.0",
 		"tailwindcss": "^4",
 		"tsx": "^4.22.3",
-		"typescript": "^5",
+		"typescript": "^5.9.3",
 		"vitest": "^4.1.7"
 	}
 }

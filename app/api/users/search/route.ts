@@ -4,7 +4,7 @@ import { requireAuth, unauthorized } from "@/lib/api-helpers";
 import db from "@/lib/db";
 import { getFriendRequestInfo } from "@/lib/friend-helpers";
 import { searchQuerySchema } from "@/lib/validation/schemas";
-import { user } from "@/schema/auth";
+import { user } from "@/schema";
 
 export async function GET(request: NextRequest) {
 	const auth = await requireAuth();

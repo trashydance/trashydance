@@ -1,5 +1,5 @@
 import { and, eq, or } from "drizzle-orm";
-import { friendRequest } from "@/schema/auth";
+import { friendRequest } from "@/schema";
 import db from "./db";
 
 export type FriendStatus =

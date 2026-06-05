@@ -4,10 +4,8 @@ import {
 	EllipsisVertical,
 	Home,
 	LogOut,
-	Moon,
 	Search,
 	Settings,
-	Sun,
 	User,
 	Users,
 } from "lucide-react";
@@ -23,12 +21,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNotificationCount } from "@/hooks/use-notification-count";
 import { useSocket } from "@/hooks/use-socket";
-import { useTheme } from "@/hooks/use-theme";
 import { authClient } from "@/lib/auth-client";
 
 export function AppNav() {
 	const router = useRouter();
-	const { theme, toggleTheme } = useTheme();
 	const { pendingRequests } = useNotificationCount();
 	const { socket } = useSocket();
 
@@ -90,20 +86,6 @@ export function AppNav() {
 							<Settings className="size-4" />
 							Settings
 						</Link>
-					</DropdownMenuItem>
-					<DropdownMenuItem
-						onSelect={(e) => {
-							e.preventDefault();
-							toggleTheme();
-						}}
-						className="flex items-center gap-2"
-					>
-						{theme === "dark" ? (
-							<Sun className="size-4" />
-						) : (
-							<Moon className="size-4" />
-						)}
-						{theme === "dark" ? "Light mode" : "Dark mode"}
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem

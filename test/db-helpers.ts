@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import type db from "@/lib/db";
-import * as schema from "@/schema/auth";
+import * as schema from "@/schema";
 
 const SCHEMA_SQL = `
 CREATE TABLE user (

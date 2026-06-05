@@ -19,7 +19,7 @@ import {
 	cursorPaginationSchema,
 	messageSchema,
 } from "@/lib/validation/schemas";
-import { conversation, message, user } from "@/schema/auth";
+import { conversation, message, user } from "@/schema";
 
 export async function GET(
 	request: NextRequest,

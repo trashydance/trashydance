@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1777408857743,
-      "tag": "0000_naive_spyke",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1779562258930,
-      "tag": "0001_fluffy_sandman",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1779600000000,
-      "tag": "0002_friend_requests",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1779700000000,
-      "tag": "0003_file_uploads",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1779800000000,
-      "tag": "0004_two_factor",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1779900000000,
-      "tag": "0005_profile_fields",
+      "when": 1780672095644,
+      "tag": "0000_slow_blacklash",
       "breakpoints": true
     }
   ]

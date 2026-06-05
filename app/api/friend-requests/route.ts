@@ -12,7 +12,7 @@ import { emitNotificationCount } from "@/lib/socket/handlers";
 import { getIO } from "@/lib/socket/io-instance";
 import { presence } from "@/lib/socket/presence";
 import { friendRequestSchema } from "@/lib/validation/schemas";
-import { friendRequest, user } from "@/schema/auth";
+import { friendRequest, user } from "@/schema";
 
 export async function POST(request: Request) {
 	const auth = await requireAuth();

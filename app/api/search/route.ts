@@ -4,7 +4,7 @@ import { badRequest, requireAuth, unauthorized } from "@/lib/api-helpers";
 import { getPartnerId } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
 import { searchQuerySchema } from "@/lib/validation/schemas";
-import { conversation, message, user } from "@/schema/auth";
+import { conversation, message, user } from "@/schema";
 
 export async function GET(request: NextRequest) {
 	const auth = await requireAuth();

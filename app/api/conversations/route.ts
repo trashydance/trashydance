@@ -9,7 +9,7 @@ import { getPartnerId, getUserLastReadAt } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
 import { getFriendIds } from "@/lib/friend-helpers";
 import { createConversationSchema } from "@/lib/validation/schemas";
-import { conversation, message, user } from "@/schema/auth";
+import { conversation, message, user } from "@/schema";
 
 export async function GET() {
 	const auth = await requireAuth();

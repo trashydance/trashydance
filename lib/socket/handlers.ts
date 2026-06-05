@@ -10,7 +10,7 @@ import { getFriendIds } from "@/lib/friend-helpers";
 import { getNotificationCount } from "@/lib/notification-helpers";
 import { rateLimit } from "@/lib/rate-limit";
 import { messageSchema } from "@/lib/validation/schemas";
-import { conversation, message, user } from "@/schema/auth";
+import { conversation, message, user } from "@/schema";
 import { socketAuthMiddleware } from "./auth";
 import { presence } from "./presence";
 

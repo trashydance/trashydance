@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { notFound, requireAuth, unauthorized } from "@/lib/api-helpers";
 import db from "@/lib/db";
 import { getFriendRequestInfo } from "@/lib/friend-helpers";
-import { account, friendRequest, user } from "@/schema/auth";
+import { account, friendRequest, user } from "@/schema";
 
 export async function GET(
 	_request: NextRequest,

@@ -12,7 +12,7 @@ import { emitNotificationCount } from "@/lib/socket/handlers";
 import { getIO } from "@/lib/socket/io-instance";
 import { presence } from "@/lib/socket/presence";
 import { friendRequestActionSchema } from "@/lib/validation/schemas";
-import { friendRequest } from "@/schema/auth";
+import { friendRequest } from "@/schema";
 
 export async function PATCH(
 	request: Request,

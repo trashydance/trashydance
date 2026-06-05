@@ -1,6 +1,6 @@
 import { and, eq, or } from "drizzle-orm";
 import db from "@/lib/db";
-import { conversation } from "@/schema/auth";
+import { conversation } from "@/schema";
 
 export function getPartnerId(
 	conv: { userAId: string; userBId: string },

@@ -82,7 +82,7 @@ function FilePreview({
 						width={240}
 						height={180}
 						className={cn(
-							"rounded-base border-4 border-border",
+							"rounded-base border-2 border-border",
 							fullView
 								? "w-auto h-auto max-w-full"
 								: "max-w-[240px] max-h-[180px]",
@@ -135,9 +135,9 @@ function FilePreview({
 		<a
 			href={fileUrl}
 			download={fileName}
-			className="mb-1 flex items-center gap-3 rounded-base border-4 border-border bg-card px-3 py-2 text-sm text-foreground no-underline shadow-brutal-sm transition-all hover:brutal-press-hover"
+			className="mb-1 flex items-center gap-3 rounded-base border-2 border-border bg-card px-3 py-2 text-sm text-foreground no-underline shadow-brutal-sm transition-all hover:brutal-press-hover"
 		>
-			<span className="flex size-9 shrink-0 items-center justify-center border-4 border-border bg-secondary text-secondary-foreground">
+			<span className="flex size-9 shrink-0 items-center justify-center border-2 border-border bg-secondary text-secondary-foreground">
 				<Icon className="size-4" />
 			</span>
 			<div className="flex-1 truncate">
@@ -179,7 +179,7 @@ export function MessageBubble({
 			<div className={cn("flex max-w-[75%] items-start gap-2")}>
 				{!isSelf && (
 					<span
-						className="mt-0.5 flex size-7 shrink-0 items-center justify-center overflow-hidden border-4 border-border text-[9px] font-bold uppercase text-ink"
+						className="mt-0.5 flex size-7 shrink-0 items-center justify-center overflow-hidden border-2 border-border text-[9px] font-bold uppercase text-ink"
 						style={
 							partnerImage
 								? undefined
@@ -200,7 +200,7 @@ export function MessageBubble({
 				)}
 				<div
 					className={cn(
-						"min-w-0 rounded-base border-4 border-border px-4 py-2.5 shadow-brutal-sm",
+						"min-w-0 rounded-base border-2 border-border px-4 py-2.5 shadow-brutal-sm",
 						isSelf ? "bg-main text-main-foreground" : "bg-card text-foreground",
 					)}
 				>

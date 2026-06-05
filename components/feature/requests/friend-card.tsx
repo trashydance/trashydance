@@ -11,7 +11,7 @@ export function FriendCard({ user, subtitle, children }: FriendCardProps) {
 	const displayName = user.username || user.name;
 
 	return (
-		<div className="flex items-center gap-4 rounded-base border-4 border-border bg-card p-4 shadow-shadow transition-all hover:brutal-press-hover">
+		<div className="flex items-center gap-4 rounded-base border-2 border-border bg-card p-4 shadow-shadow transition-all hover:brutal-press-hover">
 			<UserAvatar name={displayName} image={user.image} />
 			<div className="min-w-0 flex-1">
 				<span className="block truncate text-sm font-bold uppercase tracking-wide">

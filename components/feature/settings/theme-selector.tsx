@@ -16,7 +16,7 @@ export function ThemeSelector() {
 					Match system or pick a side.
 				</p>
 			</div>
-			<div className="flex border-4 border-border p-1">
+			<div className="flex border-2 border-border p-1">
 				{THEMES.map((t) => (
 					<button
 						key={t}
@@ -25,7 +25,7 @@ export function ThemeSelector() {
 						className={cn(
 							"px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors",
 							theme === t
-								? "border-4 border-border bg-main text-main-foreground"
+								? "border-2 border-border bg-main text-main-foreground"
 								: "text-foreground hover:bg-muted",
 						)}
 					>

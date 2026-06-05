@@ -36,7 +36,7 @@ export function ChatHeader({
 	}, []);
 
 	return (
-		<header className="flex items-center gap-3 border-b-4 border-border bg-background px-4 py-3">
+		<header className="flex items-center gap-3 border-b-2 border-border bg-background px-4 py-3">
 			<Button variant="ghost" size="icon-sm" asChild>
 				<Link href="/home" aria-label="Back to chats">
 					<ArrowLeft className="size-4" />

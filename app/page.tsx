@@ -10,10 +10,10 @@ export default function Home() {
 	return (
 		<div className="flex h-svh w-full flex-col overflow-hidden bg-background">
 			{/* header */}
-			<header className="border-b-4 border-ink">
+			<header className="border-b-2 border-ink">
 				<div className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-4">
 					<Link href="/" className="flex items-center gap-3">
-						<span className="flex size-10 items-center justify-center border-4 border-ink bg-lime font-display text-sm text-ink shadow-brutal-sm">
+						<span className="flex size-10 items-center justify-center border-2 border-ink bg-lime font-display text-sm text-ink shadow-brutal-sm">
 							TD
 						</span>
 						<span className="font-display text-lg uppercase tracking-tight">
@@ -33,7 +33,7 @@ export default function Home() {
 					<div className="flex flex-col items-start gap-6 lg:gap-8">
 						<h1 className="max-w-xl text-5xl sm:text-6xl lg:text-7xl xl:text-8xl">
 							Direct chat for the people you actually{" "}
-							<span className="inline-block border-4 border-ink bg-lime px-3">
+							<span className="inline-block border-2 border-ink bg-lime px-3">
 								talk to.
 							</span>
 						</h1>
@@ -62,7 +62,7 @@ export default function Home() {
 							{TAGS.map((tag) => (
 								<li
 									key={tag}
-									className="border-4 border-ink bg-card px-3 py-1 text-xs font-bold uppercase tracking-wide"
+									className="border-2 border-ink bg-card px-3 py-1 text-xs font-bold uppercase tracking-wide"
 								>
 									{tag}
 								</li>
@@ -82,7 +82,7 @@ export default function Home() {
 			</main>
 
 			{/* footer */}
-			<footer className="border-t-4 border-ink">
+			<footer className="border-t-2 border-ink">
 				<div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-5">
 					<p className="font-display text-xs uppercase">{COPYRIGHT_NOTICE}</p>
 					<nav className="flex gap-5 text-sm">

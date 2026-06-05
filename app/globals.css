@@ -135,6 +135,12 @@
 	transform: translate(-2px, -2px);
 }
 
+/* lift su hover: parte piatto, su hover si solleva e appare l'ombra */
+@utility brutal-lift-hover {
+	box-shadow: var(--shadow-brutal);
+	transform: translate(-4px, -4px);
+}
+
 /* press su focus: per elementi con ombra base 4px (shadow-shadow) */
 @utility brutal-press-focus {
 	box-shadow: var(--shadow-brutal-sm);

@@ -26,7 +26,7 @@ export function ChatListItem({
 		<Link
 			href={`/chat/${conversation.id}`}
 			className={cn(
-				"relative flex items-center gap-4 rounded-base border-4 border-border bg-card p-4 shadow-shadow transition-all hover:brutal-press-hover",
+				"relative flex items-center gap-4 rounded-base border-2 border-border bg-card p-4 transition-all hover:brutal-lift-hover",
 			)}
 		>
 			<div className="relative shrink-0">

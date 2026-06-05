@@ -162,7 +162,7 @@ export function TwoFactorSetup({ twoFactorEnabled }: TwoFactorSetupProps) {
 			<div className="flex items-center gap-4 rounded-base border-4 border-border bg-card p-6 shadow-shadow">
 				<span
 					className={cn(
-						"flex size-12 shrink-0 items-center justify-center border-4 border-border",
+						"flex size-12 shrink-0 items-center justify-center border-2 border-border",
 						twoFactorEnabled
 							? "bg-main text-main-foreground"
 							: "bg-accent text-accent-foreground",
@@ -227,7 +227,7 @@ export function TwoFactorSetup({ twoFactorEnabled }: TwoFactorSetupProps) {
 
 					<div className="flex flex-col gap-4 p-6">
 						{error && (
-							<div className="rounded-base border-4 border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+							<div className="rounded-base border-2 border-destructive bg-destructive/10 p-3 text-sm text-destructive">
 								{error}
 							</div>
 						)}
@@ -260,7 +260,7 @@ export function TwoFactorSetup({ twoFactorEnabled }: TwoFactorSetupProps) {
 									Raivo…).
 								</p>
 								<div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-									<div className="shrink-0 border-4 border-border bg-white p-2">
+									<div className="shrink-0 border-2 border-border bg-white p-2">
 										<canvas
 											ref={canvasRef}
 											aria-label="Scan this QR code with your authenticator app"
@@ -271,7 +271,7 @@ export function TwoFactorSetup({ twoFactorEnabled }: TwoFactorSetupProps) {
 											<p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
 												Or enter manually
 											</p>
-											<p className="mt-2 break-all border-4 border-border bg-background px-3 py-2 text-sm font-bold uppercase tracking-wide">
+											<p className="mt-2 break-all border-2 border-border bg-background px-3 py-2 text-sm font-bold uppercase tracking-wide">
 												{manualSecret}
 											</p>
 										</div>
@@ -310,14 +310,14 @@ export function TwoFactorSetup({ twoFactorEnabled }: TwoFactorSetupProps) {
 								<h2 className="font-heading text-3xl">
 									Save your backup codes.
 								</h2>
-								<div className="flex items-start gap-2 rounded-base border-4 border-accent bg-accent/10 p-3 text-sm text-accent">
+								<div className="flex items-start gap-2 rounded-base border-2 border-accent bg-accent/10 p-3 text-sm text-accent">
 									<AlertTriangle className="mt-0.5 size-4 shrink-0" />
 									<p>
 										Each code works once. Store them somewhere safe — they are
 										the only way in if you lose your authenticator.
 									</p>
 								</div>
-								<div className="grid grid-cols-2 gap-2 border-4 border-border bg-background p-4 font-mono text-sm">
+								<div className="grid grid-cols-2 gap-2 border-2 border-border bg-background p-4 font-mono text-sm">
 									{backupCodes.map((code) => (
 										<div key={code} className="text-center">
 											{code}

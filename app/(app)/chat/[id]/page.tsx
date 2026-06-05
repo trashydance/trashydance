@@ -224,7 +224,7 @@ export default function ChatPage() {
 				<div ref={messagesEndRef} />
 			</div>
 
-			<div className="border-t-4 border-border px-4 py-3">
+			<div className="border-t-2 border-border px-4 py-3">
 				<MessageInput onSend={sendMessage} conversationId={conversationId} />
 			</div>
 		</div>

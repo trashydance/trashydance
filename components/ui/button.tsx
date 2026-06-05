@@ -11,18 +11,18 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "text-main-foreground bg-main border-4 border-border shadow-shadow hover:brutal-press-hover",
-        noShadow: "text-main-foreground bg-main border-4 border-border",
+          "text-main-foreground bg-main border-2 border-border shadow-shadow hover:brutal-press-hover",
+        noShadow: "text-main-foreground bg-main border-2 border-border",
         neutral:
-          "bg-secondary-background text-foreground border-4 border-border shadow-shadow hover:brutal-press-hover",
+          "bg-secondary-background text-foreground border-2 border-border shadow-shadow hover:brutal-press-hover",
         reverse:
-          "text-main-foreground bg-main border-4 border-border hover:brutal-press-hover",
+          "text-main-foreground bg-main border-2 border-border hover:brutal-press-hover",
         outline:
-          "bg-card text-foreground border-4 border-border shadow-shadow hover:brutal-press-hover",
+          "bg-card text-foreground border-2 border-border shadow-shadow hover:brutal-press-hover",
         ghost:
-          "bg-transparent text-foreground border-4 border-transparent hover:bg-secondary-background hover:border-border",
+          "bg-transparent text-foreground border-2 border-transparent hover:bg-secondary-background hover:border-border",
         destructive:
-          "text-destructive-foreground bg-destructive border-4 border-border shadow-shadow hover:brutal-press-hover",
+          "text-destructive-foreground bg-destructive border-2 border-border shadow-shadow hover:brutal-press-hover",
       },
       size: {
         default: "h-10 px-4 py-2",

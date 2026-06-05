@@ -54,7 +54,7 @@ export function DeleteAccountSection() {
 			</div>
 
 			{deleteOpen && (
-				<div className="flex flex-col gap-3 border-t-4 border-border pt-3">
+				<div className="flex flex-col gap-3 border-t-2 border-border pt-3">
 					<p className="text-xs font-bold uppercase tracking-wide">
 						Confirm with your password
 					</p>

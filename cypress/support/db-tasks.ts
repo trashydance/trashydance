@@ -51,12 +51,17 @@ export interface SeedSocialPayload {
 	conversations?: SeedConversation[];
 }
 
+export interface SeedSocialResult {
+	conversations: { id: string; between: [string, string] }[];
+}
+
 /**
  * Inserisce amicizie, conversazioni e messaggi tra utenti già esistenti
  * (creati prima via cy.seedUser, così le password sono hashate da better-auth).
- * Gli utenti sono referenziati per username.
+ * Gli utenti sono referenziati per username. Restituisce gli id delle
+ * conversazioni create, utili per navigare direttamente a /chat/[id].
  */
-export function seedSocial(payload: SeedSocialPayload): null {
+export function seedSocial(payload: SeedSocialPayload): SeedSocialResult {
 	const sqlite = new Database(dbPath);
 	const userId = (username: string): string => {
 		const row = sqlite
@@ -84,10 +89,13 @@ export function seedSocial(payload: SeedSocialPayload): null {
 			.run(randomUUID(), userId(sender), userId(receiver), now, now);
 	}
 
+	const createdConversations: SeedSocialResult["conversations"] = [];
+
 	// Le conversazioni più in alto nel payload risultano le più recenti
 	let offset = 0;
 	for (const conv of payload.conversations ?? []) {
 		const convId = randomUUID();
+		createdConversations.push({ id: convId, between: conv.between });
 		const [a, b] = conv.between;
 		const messages = conv.messages ?? [];
 		const lastAt = now - offset * 60_000;
@@ -119,5 +127,5 @@ export function seedSocial(payload: SeedSocialPayload): null {
 	}
 
 	sqlite.close();
-	return null;
+	return { conversations: createdConversations };
 }

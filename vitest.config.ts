@@ -10,7 +10,7 @@ export default defineConfig({
 	test: {
 		environment: "happy-dom",
 		include: ["**/__tests__/**/*.test.ts", "**/__tests__/**/*.test.tsx"],
-		exclude: ["node_modules", ".next", ".claude", "drizzle", "e2e"],
+		exclude: ["node_modules", ".next", ".claude", "drizzle", "e2e", "cypress"],
 		setupFiles: ["./test/setup.ts"],
 	},
 });

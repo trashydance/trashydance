@@ -132,7 +132,6 @@ describe("searchQuerySchema", () => {
 describe("registerSchema", () => {
 	const validData = {
 		username: "john_doe",
-		email: "john@example.com",
 		password: "pass1234",
 	};
 
@@ -170,14 +169,6 @@ describe("registerSchema", () => {
 		expect(result.success).toBe(true);
 	});
 
-	it("rejects invalid email", () => {
-		const result = registerSchema.safeParse({
-			...validData,
-			email: "not-an-email",
-		});
-		expect(result.success).toBe(false);
-	});
-
 	it("rejects password shorter than 8 characters", () => {
 		const result = registerSchema.safeParse({
 			...validData,
@@ -206,15 +197,15 @@ describe("registerSchema", () => {
 describe("loginSchema", () => {
 	it("accepts valid credentials", () => {
 		const result = loginSchema.safeParse({
-			email: "john@example.com",
+			username: "john_doe",
 			password: "pass1234",
 		});
 		expect(result.success).toBe(true);
 	});
 
-	it("rejects invalid email", () => {
+	it("rejects empty username", () => {
 		const result = loginSchema.safeParse({
-			email: "not-email",
+			username: "",
 			password: "pass1234",
 		});
 		expect(result.success).toBe(false);
@@ -222,7 +213,7 @@ describe("loginSchema", () => {
 
 	it("rejects empty password", () => {
 		const result = loginSchema.safeParse({
-			email: "john@example.com",
+			username: "john_doe",
 			password: "",
 		});
 		expect(result.success).toBe(false);

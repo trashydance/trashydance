@@ -12,7 +12,7 @@ import {
 import db from "@/lib/db";
 import { validateFileContent } from "@/lib/file-validation";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
-import { user } from "@/schema/auth";
+import { user } from "@/schema";
 
 export async function POST(request: Request) {
 	const auth = await requireAuth();

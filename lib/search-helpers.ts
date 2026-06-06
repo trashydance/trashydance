@@ -2,7 +2,7 @@ import { and, desc, eq, like, ne, or } from "drizzle-orm";
 import { getPartnerId } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
 import { getFriendRequestInfo } from "@/lib/friend-helpers";
-import { conversation, message, user } from "@/schema/auth";
+import { conversation, message, user } from "@/schema";
 
 export function searchConversationsAndMessages(
 	userId: string,

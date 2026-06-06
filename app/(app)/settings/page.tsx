@@ -4,7 +4,6 @@ import { SectionHeader } from "@/components/feature/section-header";
 import { ChangePasswordForm } from "@/components/feature/settings/change-password-form";
 import { DeleteAccountSection } from "@/components/feature/settings/delete-account-section";
 import { ProfileForm } from "@/components/feature/settings/profile-form";
-import { ThemeSelector } from "@/components/feature/settings/theme-selector";
 import { TwoFactorSetup } from "@/components/feature/settings/two-factor-setup";
 import { authClient } from "@/lib/auth-client";
 
@@ -15,11 +14,6 @@ export default function SettingsPage() {
 	return (
 		<div className="flex flex-col gap-8">
 			<h1 className="font-heading text-5xl">Settings.</h1>
-
-			<section>
-				<SectionHeader title="Appearance" />
-				<ThemeSelector />
-			</section>
 
 			<section>
 				<SectionHeader title="Security" />

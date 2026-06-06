@@ -1,7 +1,7 @@
 import { and, count, eq, or } from "drizzle-orm";
 import db from "@/lib/db";
 import { type FriendStatus, getFriendRequestInfo } from "@/lib/friend-helpers";
-import { account, friendRequest, user } from "@/schema/auth";
+import { account, friendRequest, user } from "@/schema";
 
 export type ProfileView = {
 	id: string;

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MAX_AVATAR_SIZE } from "@/lib/constants";
-import { user } from "@/schema/auth";
+import { user } from "@/schema";
 import { setupApiMocks } from "@/test/api-helpers";
 import type { TestDb } from "@/test/db-helpers";
 import { createTestDb, seedUsers } from "@/test/db-helpers";

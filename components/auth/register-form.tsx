@@ -56,8 +56,8 @@ export function RegisterForm({
 		}
 
 		if (
-			error?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL" ||
-			error?.message?.includes("username")
+			error.code === "USERNAME_IS_ALREADY_TAKEN" ||
+			error.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL"
 		) {
 			setApiError({ username: "Username already taken" });
 		} else if (error.message) {

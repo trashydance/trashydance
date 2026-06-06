@@ -42,10 +42,8 @@ describe("Registrazione", () => {
 		cy.get("#password").type(user.password);
 		cy.get("#confirmPassword").type(user.password);
 		cy.contains("button", "Create Account").click();
-		// better-auth risponde USERNAME_IS_ALREADY_TAKEN: il form lo mostra
-		// nel box errori generale (il branch "Username already taken" non
-		// scatta mai: il suo check .includes("username") è case-sensitive)
-		cy.contains("Username is already taken");
+		// Errore per-campo sotto username (codice USERNAME_IS_ALREADY_TAKEN)
+		cy.contains("Username already taken");
 	});
 });
 

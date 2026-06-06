@@ -1,7 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { FriendRequestButton } from "@/components/feature/friend-request-button";
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
+import { updateProfile } from "@/lib/actions/profile";
 import type { Profile } from "@/lib/types";
 
 interface ProfileActionsProps {
@@ -24,7 +25,7 @@ interface ProfileActionsProps {
 }
 
 export function ProfileActions({ profile }: ProfileActionsProps) {
-	const router = useRouter();
+	const { toast } = useToast();
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [saving, setSaving] = useState(false);
 
@@ -32,8 +33,6 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 	const [editLastName, setEditLastName] = useState("");
 	const [editBio, setEditBio] = useState("");
 	const [editImage, setEditImage] = useState("");
-
-	const displayName = profile.username || profile.name;
 
 	const openEdit = useCallback(() => {
 		setEditName(profile.name);
@@ -46,32 +45,29 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 	const handleSave = useCallback(async () => {
 		setSaving(true);
 		try {
-			const res = await fetch("/api/profile", {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					name: editName,
-					lastName: editLastName || null,
-					bio: editBio || null,
-					image: editImage || null,
-				}),
+			const res = await updateProfile({
+				name: editName,
+				lastName: editLastName || null,
+				bio: editBio || null,
+				image: editImage || null,
 			});
 			if (res.ok) {
+				// revalidatePath inside the action re-renders the page
 				setDialogOpen(false);
-				// Re-render the server component so the page shows fresh data
-				router.refresh();
+			} else {
+				toast(res.error, "error");
 			}
 		} catch {
-			// Silently fail
+			toast("Something went wrong", "error");
 		} finally {
 			setSaving(false);
 		}
-	}, [editName, editLastName, editBio, editImage, router]);
+	}, [editName, editLastName, editBio, editImage, toast]);
 
 	if (!profile.isOwnProfile) {
 		return (
 			<FriendRequestButton
-				userId={displayName}
+				userId={profile.id}
 				initialStatus={profile.friendStatus}
 				requestId={profile.friendRequestId ?? undefined}
 			/>

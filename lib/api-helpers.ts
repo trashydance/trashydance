@@ -16,17 +16,9 @@ export function notFound(resource = "Resource") {
 	return Response.json({ error: `${resource} not found` }, { status: 404 });
 }
 
-export function forbidden(message = "Forbidden") {
-	return Response.json({ error: message }, { status: 403 });
-}
-
 export function badRequest(message: string, details?: unknown) {
 	return Response.json(
 		{ error: message, ...(details ? { details } : {}) },
 		{ status: 400 },
 	);
-}
-
-export function conflict(message: string) {
-	return Response.json({ error: message }, { status: 409 });
 }

@@ -2,13 +2,16 @@
 
 import { MessageSquare, Search as SearchIcon } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatListItem } from "@/components/feature/chat-list-item";
 import { EmptyState } from "@/components/feature/empty-state";
 import { SearchBar } from "@/components/feature/search-bar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/toast";
 import { type GroupedConversations, useChatList } from "@/hooks/use-chat-list";
 import { usePresence } from "@/hooks/use-presence";
+import { createConversation } from "@/lib/actions/conversations";
 import { formatRelativeTime, truncateText } from "@/lib/utils";
 
 interface SearchResultMessage {
@@ -36,6 +39,8 @@ interface HomeClientProps {
 }
 
 export function HomeClient({ initialConversations }: HomeClientProps) {
+	const router = useRouter();
+	const { toast } = useToast();
 	const { conversations } = useChatList(initialConversations);
 	const [query, setQuery] = useState("");
 	const [searchResults, setSearchResults] =
@@ -100,6 +105,23 @@ export function HomeClient({ initialConversations }: HomeClientProps) {
 	const hasSearchResults =
 		searchResults &&
 		(searchResults.users.length > 0 || searchResults.messages.length > 0);
+
+	// Friend without a conversation yet: create it, then open the chat
+	const handleStartChat = useCallback(
+		async (partnerId: string) => {
+			try {
+				const res = await createConversation(partnerId);
+				if (res.ok) {
+					router.push(`/chat/${res.data.id}`);
+				} else {
+					toast(res.error, "error");
+				}
+			} catch {
+				toast("Something went wrong", "error");
+			}
+		},
+		[router, toast],
+	);
 
 	const isEmpty =
 		conversations.friends.length === 0 && conversations.others.length === 0;
@@ -178,10 +200,13 @@ export function HomeClient({ initialConversations }: HomeClientProps) {
 							<div className="space-y-2">
 								{displayConversations.friends.map((c) => (
 									<ChatListItem
-										key={c.id}
+										key={c.id || c.partner.id}
 										conversation={c}
 										showOnlineIndicator
 										isOnline={presenceMap.get(c.partner.id) ?? false}
+										onStartChat={
+											c.id ? undefined : () => handleStartChat(c.partner.id)
+										}
 									/>
 								))}
 							</div>

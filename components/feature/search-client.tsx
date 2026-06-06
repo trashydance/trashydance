@@ -7,6 +7,8 @@ import { EmptyState } from "@/components/feature/empty-state";
 import { FriendRequestButton } from "@/components/feature/friend-request-button";
 import { SearchBar } from "@/components/feature/search-bar";
 import { UserResultItem } from "@/components/feature/user-result-item";
+import { useToast } from "@/components/ui/toast";
+import { createConversation } from "@/lib/actions/conversations";
 import type { FriendStatus, SearchUser } from "@/lib/types";
 
 interface SearchClientProps {
@@ -15,6 +17,7 @@ interface SearchClientProps {
 
 export function SearchClient({ initialUsers }: SearchClientProps) {
 	const router = useRouter();
+	const { toast } = useToast();
 	const [query, setQuery] = useState("");
 	const [allUsers, setAllUsers] = useState<SearchUser[]>(initialUsers);
 	const [navigating, setNavigating] = useState<string | null>(null);
@@ -46,21 +49,20 @@ export function SearchClient({ initialUsers }: SearchClientProps) {
 		async (userId: string) => {
 			setNavigating(userId);
 			try {
-				const res = await fetch("/api/conversations", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ otherUserId: userId }),
-				});
+				const res = await createConversation(userId);
 
 				if (res.ok) {
-					const data = await res.json();
-					router.push(`/chat/${data.id}`);
+					router.push(`/chat/${res.data.id}`);
+				} else {
+					toast(res.error, "error");
+					setNavigating(null);
 				}
 			} catch {
+				toast("Something went wrong", "error");
 				setNavigating(null);
 			}
 		},
-		[router],
+		[router, toast],
 	);
 
 	const handleStatusChange = useCallback(

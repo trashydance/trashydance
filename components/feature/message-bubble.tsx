@@ -82,6 +82,9 @@ function FilePreview({
 						alt={fileName}
 						width={240}
 						height={180}
+						// The uploads route requires the session cookie: skip the
+						// Next image optimizer (it fetches server-side, unauthenticated)
+						unoptimized
 						className={cn(
 							"rounded-md border border-border/20",
 							fullView
@@ -105,6 +108,7 @@ function FilePreview({
 							alt={fileName}
 							width={1200}
 							height={900}
+							unoptimized
 							className="relative z-10 max-h-[90vh] max-w-[90vw] rounded-md"
 							style={{ objectFit: "contain" }}
 						/>

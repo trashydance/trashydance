@@ -7,7 +7,7 @@ beforeEach(() => {
 	vi.resetModules();
 	getSession.mockReset();
 	vi.doMock("@/lib/auth", () => ({
-		auth: { api: { getSession } },
+		getAuth: () => ({ api: { getSession } }),
 	}));
 });
 

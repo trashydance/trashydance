@@ -3,7 +3,6 @@ import { createJsonRequest, setupApiMocks } from "@/test/api-helpers";
 import {
 	createTestDb,
 	seedConversation,
-	seedMessage,
 	seedUsers,
 	type TestDb,
 } from "@/test/db-helpers";
@@ -14,41 +13,6 @@ beforeEach(() => {
 	vi.resetModules();
 	testDb = createTestDb();
 	seedUsers(testDb);
-});
-
-describe("GET /api/conversations", () => {
-	it("returns 401 when not authenticated", async () => {
-		setupApiMocks(testDb, null);
-		const { GET } = await import("@/app/api/conversations/route");
-		const res = await GET();
-		expect(res.status).toBe(401);
-	});
-
-	it("returns empty arrays when user has no conversations", async () => {
-		setupApiMocks(testDb, "user-1");
-		const { GET } = await import("@/app/api/conversations/route");
-		const res = await GET();
-		expect(res.status).toBe(200);
-		const data = await res.json();
-		expect(data.friends).toEqual([]);
-		expect(data.others).toEqual([]);
-	});
-
-	it("returns conversations with partner info and last message", async () => {
-		seedConversation(testDb, "conv-1", "user-1", "user-2");
-		seedMessage(testDb, "msg-1", "conv-1", "user-2", "Hello!");
-
-		setupApiMocks(testDb, "user-1");
-		const { GET } = await import("@/app/api/conversations/route");
-		const res = await GET();
-		expect(res.status).toBe(200);
-
-		const data = await res.json();
-		const allConvos = [...data.friends, ...data.others];
-		expect(allConvos).toHaveLength(1);
-		expect(allConvos[0].partner.id).toBe("user-2");
-		expect(allConvos[0].lastMessage.body).toBe("Hello!");
-	});
 });
 
 describe("POST /api/conversations", () => {

@@ -3,8 +3,13 @@ import type { ReactNode } from "react";
 import { AppNav } from "@/components/feature/app-nav";
 import { AppIcon } from "@/components/icons/app-icon";
 import { ToastProvider } from "@/components/ui/toast";
+import { getNotificationCounts } from "@/lib/data/notifications";
+import { getCurrentUser } from "@/lib/data/session";
 
-export default function AppLayout({ children }: { children: ReactNode }) {
+export default async function AppLayout({ children }: { children: ReactNode }) {
+	const me = await getCurrentUser();
+	const counts = me ? await getNotificationCounts(me.id) : null;
+
 	return (
 		<ToastProvider>
 			<div className="flex min-h-svh flex-col">
@@ -17,7 +22,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 							<AppIcon className="size-6" />
 							<span className="hidden sm:inline">trashydance</span>
 						</Link>
-						<AppNav />
+						<AppNav initialCounts={counts ?? undefined} />
 					</div>
 				</header>
 

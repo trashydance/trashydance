@@ -19,13 +19,20 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useNotificationCount } from "@/hooks/use-notification-count";
+import {
+	type NotificationCount,
+	useNotificationCount,
+} from "@/hooks/use-notification-count";
 import { useSocket } from "@/hooks/use-socket";
 import { authClient } from "@/lib/auth-client";
 
-export function AppNav() {
+interface AppNavProps {
+	initialCounts?: NotificationCount;
+}
+
+export function AppNav({ initialCounts }: AppNavProps) {
 	const router = useRouter();
-	const { pendingRequests } = useNotificationCount();
+	const { pendingRequests } = useNotificationCount(initialCounts);
 	const { socket } = useSocket();
 
 	const handleLogout = async () => {

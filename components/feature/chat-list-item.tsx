@@ -55,7 +55,7 @@ export function ChatListItem({
 			</div>
 			{lastMessage && (
 				<span className="shrink-0 self-end text-xs text-muted-foreground whitespace-nowrap">
-					{formatRelativeTime(lastMessage.createdAt)}
+					{formatRelativeTime(lastMessage.createdAt ?? "")}
 				</span>
 			)}
 		</Link>

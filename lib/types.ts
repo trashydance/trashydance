@@ -23,10 +23,13 @@ export interface Conversation {
 	};
 	lastMessage: {
 		body: string;
-		createdAt: string;
+		// number (ms) from the server DTO, ISO string from socket events
+		createdAt: string | number | null;
 		senderId: string;
 	} | null;
+	lastMessageAt?: number | null;
 	isFriend: boolean;
+	unreadCount?: number;
 }
 
 export interface Message {
@@ -34,12 +37,22 @@ export interface Message {
 	conversationId: string;
 	senderId: string;
 	body: string;
-	createdAt: string;
+	// number (ms) from the server, ISO string for optimistic messages
+	createdAt: string | number | null;
 	status?: "sending" | "sent" | "error";
 	fileName?: string;
 	fileUrl?: string;
 	fileType?: string;
 	fileSize?: number;
+}
+
+export interface SearchUser {
+	id: string;
+	name: string;
+	username: string | null;
+	image: string | null;
+	friendStatus: FriendStatus;
+	friendRequestId: string | null;
 }
 
 export interface SearchResults {
@@ -50,14 +63,16 @@ export interface SearchResults {
 }
 
 export interface Profile {
+	id: string;
 	username: string;
 	name: string;
 	lastName: string | null;
 	bio: string | null;
 	image: string | null;
 	intraLogin: string | null;
-	createdAt: string;
+	createdAt: number;
 	friendCount: number;
 	friendStatus: FriendStatus;
-	friendRequestId?: string;
+	friendRequestId: string | null;
+	isOwnProfile: boolean;
 }

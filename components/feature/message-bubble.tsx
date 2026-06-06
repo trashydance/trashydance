@@ -17,7 +17,8 @@ import { cn, formatFileSize, formatRelativeTime } from "@/lib/utils";
 
 interface MessageBubbleProps {
 	body: string;
-	createdAt: string;
+	// number (ms) from the server, ISO string for optimistic messages
+	createdAt: string | number | null;
 	isSelf: boolean;
 	status?: "sending" | "sent" | "error";
 	onRetry?: () => void;
@@ -195,7 +196,7 @@ export function MessageBubble({
 						isSelf ? "justify-end opacity-70" : "opacity-50",
 					)}
 				>
-					<span>{formatRelativeTime(createdAt)}</span>
+					<span>{formatRelativeTime(createdAt ?? "")}</span>
 
 					{isSelf && status === "sending" && (
 						<Loader2 className="size-3 animate-spin" />

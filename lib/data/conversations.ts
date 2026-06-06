@@ -43,109 +43,137 @@ export async function getConversationList(
 
 	const partnerIds = conversations.map((c) => getPartnerId(c, userId));
 
-	if (partnerIds.length === 0) {
-		return { friends: [], others: [] };
-	}
-
-	const partners = db
-		.select({
-			id: user.id,
-			name: user.name,
-			username: user.username,
-			image: user.image,
-		})
-		.from(user)
-		.where(or(...partnerIds.map((pid) => eq(user.id, pid))))
-		.all();
-
-	const partnerMap = new Map(partners.map((p) => [p.id, p]));
-
 	const friendIds = getFriendIds(userId);
 	const friendSet = new Set(friendIds);
 
-	const conversationIds = conversations.map((c) => c.id);
-
-	// Single query: last message per conversation via correlated subquery
-	const lastMessages = db
-		.select({
-			conversationId: message.conversationId,
-			body: message.body,
-			senderId: message.senderId,
-			createdAt: message.createdAt,
-		})
-		.from(message)
-		.where(
-			and(
-				or(...conversationIds.map((cid) => eq(message.conversationId, cid))),
-				sql`${message.createdAt} = (
-					SELECT MAX(m2.created_at) FROM message m2
-					WHERE m2.conversation_id = ${message.conversationId}
-				)`,
-			),
-		)
-		.all();
-
-	const lastMessageMap = new Map(
-		lastMessages.map((m) => [m.conversationId, m]),
-	);
-
-	// Single query: unread counts for ALL conversations at once
-	const unreadConditions = conversations.map((c) => {
-		const partnerId = getPartnerId(c, userId);
-		const lastReadAt = getUserLastReadAt(c, userId);
-		const conds = [
-			eq(message.conversationId, c.id),
-			eq(message.senderId, partnerId),
-		];
-		if (lastReadAt) {
-			conds.push(gt(message.createdAt, lastReadAt));
-		}
-		return and(...conds);
-	});
-
-	const unreadResults = db
-		.select({
-			conversationId: message.conversationId,
-			value: count(),
-		})
-		.from(message)
-		.where(or(...unreadConditions))
-		.groupBy(message.conversationId)
-		.all();
-
-	const unreadMap = new Map(
-		unreadResults.map((r) => [r.conversationId, r.value]),
-	);
-
 	const results: Conversation[] = [];
 
-	for (const c of conversations) {
-		const partnerId = getPartnerId(c, userId);
-		const partner = partnerMap.get(partnerId);
-		// FK constraints make a missing partner impossible in practice
-		if (!partner) continue;
+	if (conversations.length > 0) {
+		const partners = db
+			.select({
+				id: user.id,
+				name: user.name,
+				username: user.username,
+				image: user.image,
+			})
+			.from(user)
+			.where(or(...partnerIds.map((pid) => eq(user.id, pid))))
+			.all();
 
-		const lastMsg = lastMessageMap.get(c.id);
+		const partnerMap = new Map(partners.map((p) => [p.id, p]));
 
-		results.push({
-			id: c.id,
-			partner: {
-				id: partner.id,
-				name: partner.name,
-				username: partner.username,
-				image: partner.image,
-			},
-			lastMessage: lastMsg
-				? {
-						body: lastMsg.body ?? "",
-						senderId: lastMsg.senderId,
-						createdAt: lastMsg.createdAt?.getTime() ?? null,
-					}
-				: null,
-			lastMessageAt: c.lastMessageAt?.getTime() ?? null,
-			isFriend: friendSet.has(partnerId),
-			unreadCount: unreadMap.get(c.id) ?? 0,
+		const conversationIds = conversations.map((c) => c.id);
+
+		// Single query: last message per conversation via correlated subquery
+		const lastMessages = db
+			.select({
+				conversationId: message.conversationId,
+				body: message.body,
+				senderId: message.senderId,
+				createdAt: message.createdAt,
+			})
+			.from(message)
+			.where(
+				and(
+					or(...conversationIds.map((cid) => eq(message.conversationId, cid))),
+					sql`${message.createdAt} = (
+						SELECT MAX(m2.created_at) FROM message m2
+						WHERE m2.conversation_id = ${message.conversationId}
+					)`,
+				),
+			)
+			.all();
+
+		const lastMessageMap = new Map(
+			lastMessages.map((m) => [m.conversationId, m]),
+		);
+
+		// Single query: unread counts for ALL conversations at once
+		const unreadConditions = conversations.map((c) => {
+			const partnerId = getPartnerId(c, userId);
+			const lastReadAt = getUserLastReadAt(c, userId);
+			const conds = [
+				eq(message.conversationId, c.id),
+				eq(message.senderId, partnerId),
+			];
+			if (lastReadAt) {
+				conds.push(gt(message.createdAt, lastReadAt));
+			}
+			return and(...conds);
 		});
+
+		const unreadResults = db
+			.select({
+				conversationId: message.conversationId,
+				value: count(),
+			})
+			.from(message)
+			.where(or(...unreadConditions))
+			.groupBy(message.conversationId)
+			.all();
+
+		const unreadMap = new Map(
+			unreadResults.map((r) => [r.conversationId, r.value]),
+		);
+
+		for (const c of conversations) {
+			const partnerId = getPartnerId(c, userId);
+			const partner = partnerMap.get(partnerId);
+			// FK constraints make a missing partner impossible in practice
+			if (!partner) continue;
+
+			const lastMsg = lastMessageMap.get(c.id);
+
+			results.push({
+				id: c.id,
+				partner: {
+					id: partner.id,
+					name: partner.name,
+					username: partner.username,
+					image: partner.image,
+				},
+				lastMessage: lastMsg
+					? {
+							body: lastMsg.body ?? "",
+							senderId: lastMsg.senderId,
+							createdAt: lastMsg.createdAt?.getTime() ?? null,
+						}
+					: null,
+				lastMessageAt: c.lastMessageAt?.getTime() ?? null,
+				isFriend: friendSet.has(partnerId),
+				unreadCount: unreadMap.get(c.id) ?? 0,
+			});
+		}
+	}
+
+	// Accepted friendships must always show on /home, even without a
+	// conversation row: append them as virtual entries (id: "") — the
+	// client starts the chat on click.
+	const partnerIdSet = new Set(partnerIds);
+	const orphanFriendIds = friendIds.filter((fid) => !partnerIdSet.has(fid));
+
+	if (orphanFriendIds.length > 0) {
+		const orphanFriends = db
+			.select({
+				id: user.id,
+				name: user.name,
+				username: user.username,
+				image: user.image,
+			})
+			.from(user)
+			.where(or(...orphanFriendIds.map((fid) => eq(user.id, fid))))
+			.all();
+
+		for (const friend of orphanFriends) {
+			results.push({
+				id: "",
+				partner: friend,
+				lastMessage: null,
+				lastMessageAt: null,
+				isFriend: true,
+				unreadCount: 0,
+			});
+		}
 	}
 
 	return {

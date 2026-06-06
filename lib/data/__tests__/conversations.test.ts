@@ -63,6 +63,37 @@ describe("getConversationList", () => {
 		expect(data.others).toHaveLength(1);
 		expect(data.others[0].partner.id).toBe("user-3");
 	});
+
+	// Rule 1: an accepted friendship always shows on /home, even without
+	// a conversation row (virtual entry, id "")
+	it("includes friends without a conversation as virtual entries", async () => {
+		seedFriendRequest(testDb, "fr-1", "user-2", "user-1", "accepted");
+
+		setupApiMocks(testDb, "user-1");
+
+		const { getConversationList } = await import("@/lib/data/conversations");
+
+		const data = await getConversationList("user-1");
+
+		expect(data.friends).toHaveLength(1);
+		expect(data.friends[0].id).toBe("");
+		expect(data.friends[0].partner.id).toBe("user-2");
+		expect(data.friends[0].lastMessage).toBeNull();
+	});
+
+	// Rule 3: a non-friend conversation without messages stays hidden
+	it("hides non-friend conversations without messages", async () => {
+		seedConversation(testDb, "conv-1", "user-1", "user-2");
+
+		setupApiMocks(testDb, "user-1");
+
+		const { getConversationList } = await import("@/lib/data/conversations");
+
+		const data = await getConversationList("user-1");
+
+		expect(data.friends).toHaveLength(0);
+		expect(data.others).toHaveLength(0);
+	});
 });
 
 describe("getConversationMeta", () => {

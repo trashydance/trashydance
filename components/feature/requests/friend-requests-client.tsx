@@ -8,7 +8,13 @@ import { FriendsList } from "@/components/feature/requests/friends-list";
 import { ReceivedRequests } from "@/components/feature/requests/received-requests";
 import { SentRequests } from "@/components/feature/requests/sent-requests";
 import type { FriendRequestsData } from "@/components/feature/requests/types";
+import { useToast } from "@/components/ui/toast";
 import { useSocket } from "@/hooks/use-socket";
+import {
+	removeFriendRequest,
+	respondFriendRequest,
+} from "@/lib/actions/friends";
+import type { ActionResult } from "@/lib/actions/types";
 import { SocketEvent } from "@/lib/constants";
 
 interface FriendRequestsClientProps {
@@ -19,6 +25,7 @@ export function FriendRequestsClient({
 	initialData: data,
 }: FriendRequestsClientProps) {
 	const router = useRouter();
+	const { toast } = useToast();
 	const [actionLoading, setActionLoading] = useState<string | null>(null);
 	const { socket } = useSocket();
 
@@ -38,27 +45,27 @@ export function FriendRequestsClient({
 	}, [socket, router]);
 
 	const performAction = useCallback(
-		async (url: string, options?: RequestInit) => {
+		async (run: () => Promise<ActionResult<unknown>>) => {
 			try {
-				const res = await fetch(url, options);
-				if (res.ok) router.refresh();
+				const res = await run();
+				if (res.ok) {
+					router.refresh();
+				} else {
+					toast(res.error, "error");
+				}
 			} catch {
-				// Network error
+				toast("Something went wrong", "error");
 			} finally {
 				setActionLoading(null);
 			}
 		},
-		[router],
+		[router, toast],
 	);
 
 	const handleAccept = useCallback(
 		(id: string) => {
 			setActionLoading(id);
-			performAction(`/api/friend-requests/${id}`, {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "accept" }),
-			});
+			performAction(() => respondFriendRequest(id, "accept"));
 		},
 		[performAction],
 	);
@@ -66,11 +73,7 @@ export function FriendRequestsClient({
 	const handleReject = useCallback(
 		(id: string) => {
 			setActionLoading(id);
-			performAction(`/api/friend-requests/${id}`, {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "reject" }),
-			});
+			performAction(() => respondFriendRequest(id, "reject"));
 		},
 		[performAction],
 	);
@@ -78,7 +81,7 @@ export function FriendRequestsClient({
 	const handleCancel = useCallback(
 		(id: string) => {
 			setActionLoading(id);
-			performAction(`/api/friend-requests/${id}`, { method: "DELETE" });
+			performAction(() => removeFriendRequest(id));
 		},
 		[performAction],
 	);
@@ -86,7 +89,7 @@ export function FriendRequestsClient({
 	const handleUnfriend = useCallback(
 		(id: string) => {
 			setActionLoading(id);
-			performAction(`/api/friend-requests/${id}`, { method: "DELETE" });
+			performAction(() => removeFriendRequest(id));
 		},
 		[performAction],
 	);

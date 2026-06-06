@@ -46,6 +46,8 @@ interface SeedConversation {
 export interface SeedSocialPayload {
 	/** Coppie di username con richiesta di amicizia accettata */
 	friendships?: [string, string][];
+	/** Coppie [mittente, destinatario] con richiesta ancora pending */
+	pendingRequests?: [string, string][];
 	conversations?: SeedConversation[];
 }
 
@@ -70,6 +72,14 @@ export function seedSocial(payload: SeedSocialPayload): null {
 		sqlite
 			.prepare(
 				"INSERT INTO friend_request (id, sender_id, receiver_id, status, created_at, updated_at) VALUES (?, ?, ?, 'accepted', ?, ?)",
+			)
+			.run(randomUUID(), userId(sender), userId(receiver), now, now);
+	}
+
+	for (const [sender, receiver] of payload.pendingRequests ?? []) {
+		sqlite
+			.prepare(
+				"INSERT INTO friend_request (id, sender_id, receiver_id, status, created_at, updated_at) VALUES (?, ?, ?, 'pending', ?, ?)",
 			)
 			.run(randomUUID(), userId(sender), userId(receiver), now, now);
 	}

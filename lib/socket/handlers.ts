@@ -9,7 +9,7 @@ import db from "@/lib/db";
 import { getFriendIds } from "@/lib/friend-helpers";
 import { rateLimit } from "@/lib/rate-limit";
 import { messageSchema } from "@/lib/validation/schemas";
-import { user } from "@/schema/auth";
+import { user } from "@/schema";
 import { socketAuthMiddleware } from "./auth";
 import { emitToUser } from "./emit";
 import { presence } from "./presence";

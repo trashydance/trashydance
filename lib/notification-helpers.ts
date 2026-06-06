@@ -1,5 +1,5 @@
 import { and, count, eq, lt, or, sql } from "drizzle-orm";
-import { conversation, friendRequest } from "@/schema/auth";
+import { conversation, friendRequest } from "@/schema";
 import db from "./db";
 
 export function getNotificationCount(userId: string): {

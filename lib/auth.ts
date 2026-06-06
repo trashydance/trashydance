@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { genericOAuth, twoFactor, username } from "better-auth/plugins";
-import * as schema from "@/schema/auth";
+import * as schema from "@/schema";
 import { PROJECT_NAME } from "./constants";
 import db from "./db";
 import { getEnv } from "./env";

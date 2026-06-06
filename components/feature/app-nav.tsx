@@ -1,15 +1,6 @@
 "use client";
 
-import {
-	Home,
-	LogOut,
-	Moon,
-	Search,
-	Settings,
-	Sun,
-	User,
-	Users,
-} from "lucide-react";
+import { Home, LogOut, Search, Settings, User, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { NotificationBadge } from "@/components/feature/notification-badge";
@@ -22,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNotificationCount } from "@/hooks/use-notification-count";
 import { useSocket } from "@/hooks/use-socket";
-import { useTheme } from "@/hooks/use-theme";
 import { authClient } from "@/lib/auth-client";
 import { cn, getInitials } from "@/lib/utils";
 
@@ -35,7 +25,6 @@ const NAV_ITEMS = [
 export function AppNav() {
 	const router = useRouter();
 	const pathname = usePathname();
-	const { theme, toggleTheme } = useTheme();
 	const { pendingRequests } = useNotificationCount();
 	const { disconnect } = useSocket();
 	const { data: session } = authClient.useSession();
@@ -79,19 +68,6 @@ export function AppNav() {
 			</nav>
 
 			<div className="ml-auto flex items-center gap-2">
-				<button
-					type="button"
-					onClick={toggleTheme}
-					aria-label={theme === "dark" ? "Light mode" : "Dark mode"}
-					className="inline-flex size-10 items-center justify-center rounded-base border-2 border-border bg-card shadow-brutal-sm transition-all hover:brutal-press-hover"
-				>
-					{theme === "dark" ? (
-						<Moon className="size-4" />
-					) : (
-						<Sun className="size-4" />
-					)}
-				</button>
-
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<button

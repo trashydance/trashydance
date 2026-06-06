@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { badRequest, requireAuth, unauthorized } from "@/lib/api-helpers";
 import db from "@/lib/db";
 import { updateProfileSchema } from "@/lib/validation/schemas";
-import { user } from "@/schema/auth";
+import { user } from "@/schema";
 
 export async function PATCH(request: Request) {
 	const auth = await requireAuth();

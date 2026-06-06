@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 :root {
 	/* palette brand — replica del design Lovable */
 	--paper: #f4f1e8;
@@ -42,32 +40,6 @@
 	--main-foreground: var(--ink);
 	--overlay: rgb(0 0 0 / 0.8);
 	--shadow: var(--shadow-brutal);
-}
-
-.dark {
-	--paper: #0b0b0b;
-	--ink: #f4f1e8;
-	--background: #0b0b0b;
-	--foreground: #f4f1e8;
-	--card: #161616;
-	--card-foreground: #f4f1e8;
-	--popover: #161616;
-	--popover-foreground: #f4f1e8;
-	--primary: #c6ff3d;
-	--primary-foreground: #0b0b0b;
-	--secondary: #3a5cff;
-	--secondary-foreground: #fff;
-	--muted: #1f1f1f;
-	--muted-foreground: #b8b3a3;
-	--accent: #ff3d8b;
-	--accent-foreground: #0b0b0b;
-	--destructive: #ff5252;
-	--destructive-foreground: #fff;
-	--border: #f4f1e8;
-	--input: #f4f1e8;
-	--ring: #c6ff3d;
-	--secondary-background: #161616;
-	--main-foreground: #0b0b0b;
 }
 
 @theme inline {

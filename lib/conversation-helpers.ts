@@ -5,7 +5,7 @@ import db from "@/lib/db";
 import { getFriendIds } from "@/lib/friend-helpers";
 import { emitNotificationCount, emitToUser } from "@/lib/socket/emit";
 import type { MessageInput } from "@/lib/validation/schemas";
-import { conversation, message, user } from "@/schema/auth";
+import { conversation, message, user } from "@/schema";
 
 export function getPartnerId(
 	conv: { userAId: string; userBId: string },

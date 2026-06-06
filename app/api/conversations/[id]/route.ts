@@ -8,7 +8,7 @@ import {
 import { getPartnerId } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
 import { getFriendRequestInfo } from "@/lib/friend-helpers";
-import { conversation, user } from "@/schema/auth";
+import { conversation, user } from "@/schema";
 
 export async function GET(
 	_request: Request,

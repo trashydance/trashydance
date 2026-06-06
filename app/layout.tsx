@@ -29,7 +29,6 @@ export default function RootLayout({
 	return (
 		<html
 			lang="en"
-			suppressHydrationWarning
 			className={cn(
 				"h-full",
 				"antialiased",
@@ -38,9 +37,6 @@ export default function RootLayout({
 				fontSans.variable,
 			)}
 		>
-			<head>
-				<script src="/theme-init.js" />
-			</head>
 			<body className="min-h-full flex flex-col font-sans">
 				<TooltipProvider>{children}</TooltipProvider>
 			</body>

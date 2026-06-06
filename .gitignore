@@ -41,18 +41,11 @@ yarn-error.log*
 next-env.d.ts
 
 # database
-*.db
-*.db-wal
-*.db-shm
+*.db*
 
 # uploads
 data/uploads/*
 !data/uploads/.gitkeep
-
-
-
-
-
 
 *.md
 .claude/

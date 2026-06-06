@@ -1,5 +1,5 @@
 import { defineConfig } from "cypress";
-import { resetDb } from "./cypress/support/db-tasks";
+import { resetDb, seedSocial } from "./cypress/support/db-tasks";
 
 export default defineConfig({
 	e2e: {
@@ -9,6 +9,7 @@ export default defineConfig({
 		setupNodeEvents(on) {
 			on("task", {
 				"db:reset": resetDb,
+				"db:seedSocial": seedSocial,
 			});
 		},
 	},

@@ -16,10 +16,10 @@ export async function PATCH(request: Request) {
 	}
 
 	const updates: Partial<{
-		image: string;
+		image: string | null;
 		name: string;
-		lastName: string;
-		bio: string;
+		lastName: string | null;
+		bio: string | null;
 	}> = {};
 	if (parsed.data.image !== undefined) {
 		updates.image = parsed.data.image;

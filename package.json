@@ -60,6 +60,7 @@
 		"happy-dom": "^20.9.0",
 		"husky": "^9.1.7",
 		"knip": "^6.15.0",
+		"otplib": "^13.4.1",
 		"start-server-and-test": "^3.0.7",
 		"tailwindcss": "^4",
 		"tsx": "^4.22.3",

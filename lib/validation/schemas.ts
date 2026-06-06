@@ -71,12 +71,12 @@ export const cursorPaginationSchema = z.object({
 	limit: z.coerce.number().min(1).max(100).default(50),
 });
 
-/** Profile update */
+/** Profile update — null azzera il campo, undefined lo lascia invariato */
 export const updateProfileSchema = z.object({
-	image: z.string().optional(),
+	image: z.string().nullable().optional(),
 	name: z.string().min(1).max(50).optional(),
-	lastName: z.string().max(50).optional(),
-	bio: z.string().max(200).optional(),
+	lastName: z.string().max(50).nullable().optional(),
+	bio: z.string().max(200).nullable().optional(),
 });
 
 export type MessageInput = z.infer<typeof messageSchema>;

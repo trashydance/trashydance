@@ -1,4 +1,5 @@
 import { defineConfig } from "cypress";
+import { generateSync } from "otplib";
 import { resetDb, seedSocial } from "./cypress/support/db-tasks";
 
 export default defineConfig({
@@ -10,6 +11,9 @@ export default defineConfig({
 			on("task", {
 				"db:reset": resetDb,
 				"db:seedSocial": seedSocial,
+				// Genera un codice TOTP valido dal secret (lato Node, come
+				// farebbe l'app di autenticazione dell'utente)
+				"totp:generate": (secret: string) => generateSync({ secret }),
 			});
 		},
 	},

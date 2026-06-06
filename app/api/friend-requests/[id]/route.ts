@@ -1,4 +1,3 @@
-import { eq } from "drizzle-orm";
 import {
 	badRequest,
 	forbidden,
@@ -7,12 +6,13 @@ import {
 	unauthorized,
 } from "@/lib/api-helpers";
 import { SocketEvent } from "@/lib/constants";
-import db from "@/lib/db";
-import { emitNotificationCount } from "@/lib/socket/handlers";
+import {
+	removeFriendRequest,
+	respondToFriendRequest,
+} from "@/lib/friend-helpers";
+import { emitNotificationCount, emitToUser } from "@/lib/socket/emit";
 import { getIO } from "@/lib/socket/io-instance";
-import { presence } from "@/lib/socket/presence";
 import { friendRequestActionSchema } from "@/lib/validation/schemas";
-import { friendRequest } from "@/schema";
 
 export async function PATCH(
 	request: Request,
@@ -31,28 +31,20 @@ export async function PATCH(
 
 	const { action } = parsed.data;
 
-	const req = db
-		.select()
-		.from(friendRequest)
-		.where(eq(friendRequest.id, id))
-		.get();
+	const result = respondToFriendRequest(id, userId, action);
 
-	if (!req) return notFound("Friend request");
-
-	if (req.receiverId !== userId) {
-		return forbidden("Only the receiver can accept or reject");
+	if ("error" in result) {
+		switch (result.error) {
+			case "not_found":
+				return notFound("Friend request");
+			case "forbidden":
+				return forbidden("Only the receiver can accept or reject");
+			case "not_pending":
+				return badRequest("Friend request is not pending");
+		}
 	}
 
-	if (req.status !== "pending") {
-		return badRequest("Friend request is not pending");
-	}
-
-	const newStatus = action === "accept" ? "accepted" : "rejected";
-
-	db.update(friendRequest)
-		.set({ status: newStatus, updatedAt: new Date() })
-		.where(eq(friendRequest.id, id))
-		.run();
+	const { request: req, newStatus } = result;
 
 	const io = getIO();
 	if (io) {
@@ -62,12 +54,13 @@ export async function PATCH(
 			receiverId: req.receiverId,
 			status: newStatus,
 		};
-		for (const sid of presence.getSocketIds(req.senderId)) {
-			io.to(sid).emit(SocketEvent.FRIEND_REQUEST_UPDATE, updatePayload);
-		}
-		for (const sid of presence.getSocketIds(userId)) {
-			io.to(sid).emit(SocketEvent.FRIEND_REQUEST_UPDATE, updatePayload);
-		}
+		emitToUser(
+			io,
+			req.senderId,
+			SocketEvent.FRIEND_REQUEST_UPDATE,
+			updatePayload,
+		);
+		emitToUser(io, userId, SocketEvent.FRIEND_REQUEST_UPDATE, updatePayload);
 		emitNotificationCount(io, req.senderId);
 		emitNotificationCount(io, userId);
 	}
@@ -84,33 +77,22 @@ export async function DELETE(
 	const { userId } = auth;
 	const { id } = await params;
 
-	const req = db
-		.select()
-		.from(friendRequest)
-		.where(eq(friendRequest.id, id))
-		.get();
+	const result = removeFriendRequest(id, userId);
 
-	if (!req) return notFound("Friend request");
-
-	if (req.status === "pending" && req.senderId !== userId) {
-		return forbidden("Only the sender can cancel a pending request");
+	if ("error" in result) {
+		switch (result.error) {
+			case "not_found":
+				return notFound("Friend request");
+			case "forbidden":
+				return result.detail ? forbidden(result.detail) : forbidden();
+			case "rejected":
+				return badRequest("Cannot delete a rejected request");
+			case "conflict":
+				return badRequest("Friend request was modified concurrently");
+		}
 	}
 
-	if (
-		req.status === "accepted" &&
-		req.senderId !== userId &&
-		req.receiverId !== userId
-	) {
-		return forbidden();
-	}
-
-	if (req.status === "rejected") {
-		return badRequest("Cannot delete a rejected request");
-	}
-
-	const otherUserId = req.senderId === userId ? req.receiverId : req.senderId;
-
-	db.delete(friendRequest).where(eq(friendRequest.id, id)).run();
+	const { request: req, otherUserId } = result;
 
 	const io = getIO();
 	if (io) {
@@ -120,12 +102,13 @@ export async function DELETE(
 			receiverId: req.receiverId,
 			status: "none",
 		};
-		for (const sid of presence.getSocketIds(otherUserId)) {
-			io.to(sid).emit(SocketEvent.FRIEND_REQUEST_UPDATE, updatePayload);
-		}
-		for (const sid of presence.getSocketIds(userId)) {
-			io.to(sid).emit(SocketEvent.FRIEND_REQUEST_UPDATE, updatePayload);
-		}
+		emitToUser(
+			io,
+			otherUserId,
+			SocketEvent.FRIEND_REQUEST_UPDATE,
+			updatePayload,
+		);
+		emitToUser(io, userId, SocketEvent.FRIEND_REQUEST_UPDATE, updatePayload);
 		emitNotificationCount(io, otherUserId);
 		emitNotificationCount(io, userId);
 	}

@@ -1,8 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { OnlineIndicator } from "./online-indicator";
+import { UserAvatar } from "./user-avatar";
 
 interface UserResultItemProps {
 	username: string | null;
@@ -11,6 +12,8 @@ interface UserResultItemProps {
 	onClick: () => void;
 	className?: string;
 	actions?: ReactNode;
+	showOnlineIndicator?: boolean;
+	isOnline?: boolean;
 }
 
 export function UserResultItem({
@@ -20,14 +23,15 @@ export function UserResultItem({
 	onClick,
 	className,
 	actions,
+	showOnlineIndicator = false,
+	isOnline = false,
 }: UserResultItemProps) {
 	const displayName = username || name;
-	const initials = displayName.slice(0, 2).toUpperCase();
 
 	return (
 		<div
 			className={cn(
-				"flex w-full items-center gap-3 rounded-md border-2 border-border bg-background p-3 shadow-[4px_4px_0px_0px] shadow-border transition-all",
+				"flex w-full items-center gap-4 rounded-base border-2 border-border bg-card p-4 shadow-shadow transition-all hover:brutal-press-hover",
 				className,
 			)}
 		>
@@ -36,16 +40,18 @@ export function UserResultItem({
 				onClick={onClick}
 				className="flex min-w-0 flex-1 items-center gap-3 text-left hover:opacity-80 transition-opacity"
 			>
-				<Avatar>
-					{image && <AvatarImage src={image} alt={displayName} />}
-					<AvatarFallback>{initials}</AvatarFallback>
-				</Avatar>
+				<div className="relative shrink-0">
+					<UserAvatar name={displayName} image={image} />
+					{showOnlineIndicator && <OnlineIndicator online={isOnline} />}
+				</div>
 				<div className="min-w-0 flex-1">
-					<span className="font-heading text-sm font-semibold">
-						{displayName}
+					<span className="block truncate text-sm font-bold uppercase tracking-wide">
+						{name !== displayName ? name : displayName}
 					</span>
-					{name !== displayName && (
-						<p className="truncate text-xs text-muted-foreground">{name}</p>
+					{username && (
+						<p className="truncate text-xs text-muted-foreground">
+							@{username}
+						</p>
 					)}
 				</div>
 			</button>

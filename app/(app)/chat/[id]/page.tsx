@@ -13,6 +13,7 @@ import type { FriendStatus } from "@/lib/types";
 interface ConversationMeta {
 	partnerId: string;
 	partnerUsername: string;
+	partnerName: string;
 	partnerImage: string | null;
 	friendStatus: FriendStatus;
 	friendRequestId?: string;
@@ -50,6 +51,7 @@ export default function ChatPage() {
 					setMeta({
 						partnerId: data.partner.id,
 						partnerUsername: data.partner.username,
+						partnerName: data.partner.name,
 						partnerImage: data.partner.image,
 						friendStatus: data.friendStatus ?? "none",
 						friendRequestId: data.friendRequestId,
@@ -155,10 +157,11 @@ export default function ChatPage() {
 	}
 
 	return (
-		<div className="flex h-[calc(100svh-8rem)] flex-col -mx-4 -my-6">
+		<div className="flex h-[calc(100svh-11.5rem)] w-full flex-col rounded-base border-4 border-border bg-card shadow-shadow">
 			<ChatHeader
 				partnerId={meta.partnerId}
 				partnerUsername={meta.partnerUsername}
+				partnerName={meta.partnerName}
 				partnerImage={meta.partnerImage}
 				friendStatus={meta.friendStatus}
 				friendRequestId={meta.friendRequestId}
@@ -180,7 +183,7 @@ export default function ChatPage() {
 					</div>
 				)}
 
-				<div className="space-y-3">
+				<div className="space-y-6">
 					{messages.map((msg) => {
 						const isSelf =
 							msg.senderId === meta.currentUserId || msg.id.startsWith("temp-");
@@ -201,6 +204,8 @@ export default function ChatPage() {
 									body={msg.body}
 									createdAt={msg.createdAt}
 									isSelf={isSelf}
+									partnerName={meta.partnerName || meta.partnerUsername}
+									partnerImage={meta.partnerImage}
 									status={isSelf ? (msg.status ?? "sent") : undefined}
 									onRetry={
 										msg.status === "error"
@@ -219,7 +224,7 @@ export default function ChatPage() {
 				<div ref={messagesEndRef} />
 			</div>
 
-			<div className="border-t-2 border-border bg-background px-4 py-3">
+			<div className="border-t-2 border-border px-4 py-3">
 				<MessageInput onSend={sendMessage} conversationId={conversationId} />
 			</div>
 		</div>

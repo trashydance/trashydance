@@ -1,24 +1,27 @@
 "use client";
 
-import { CalendarDays, ExternalLink, Pencil, Users } from "lucide-react";
-import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { FriendRequestButton } from "@/components/feature/friend-request-button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+	CalendarDays,
+	Camera,
+	ExternalLink,
+	Loader2,
+	Pencil,
+	Users,
+} from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import {
+	type ChangeEvent,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
+import { FriendRequestButton } from "@/components/feature/friend-request-button";
+import { UserAvatar } from "@/components/feature/user-avatar";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
+import { AVATAR_ACCEPT_STRING, INTRA_PROFILE_BASE_URL } from "@/lib/constants";
 import type { Profile } from "@/lib/types";
 
 export default function ProfilePage() {
@@ -27,13 +30,8 @@ export default function ProfilePage() {
 		(Profile & { isOwnProfile: boolean }) | null
 	>(null);
 	const [isLoading, setIsLoading] = useState(true);
-	const [dialogOpen, setDialogOpen] = useState(false);
-	const [saving, setSaving] = useState(false);
-
-	const [editName, setEditName] = useState("");
-	const [editLastName, setEditLastName] = useState("");
-	const [editBio, setEditBio] = useState("");
-	const [editImage, setEditImage] = useState("");
+	const [uploadingAvatar, setUploadingAvatar] = useState(false);
+	const avatarInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
 		async function fetchProfile() {
@@ -53,48 +51,29 @@ export default function ProfilePage() {
 		fetchProfile();
 	}, [params.username]);
 
-	const openEdit = useCallback(() => {
-		if (!profile) return;
-		setEditName(profile.name);
-		setEditLastName(profile.lastName ?? "");
-		setEditBio(profile.bio ?? "");
-		setEditImage(profile.image ?? "");
-		setDialogOpen(true);
-	}, [profile]);
-
-	const handleSave = useCallback(async () => {
-		setSaving(true);
-		try {
-			const res = await fetch("/api/profile", {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					name: editName,
-					lastName: editLastName || null,
-					bio: editBio || null,
-					image: editImage || null,
-				}),
-			});
-			if (res.ok) {
-				setProfile((prev) =>
-					prev
-						? {
-								...prev,
-								name: editName,
-								lastName: editLastName || null,
-								bio: editBio || null,
-								image: editImage || null,
-							}
-						: prev,
-				);
-				setDialogOpen(false);
+	const handleAvatarUpload = useCallback(
+		async (e: ChangeEvent<HTMLInputElement>) => {
+			const file = e.target.files?.[0];
+			if (!file) return;
+			setUploadingAvatar(true);
+			try {
+				const formData = new FormData();
+				formData.append("file", file);
+				const res = await fetch("/api/profile/avatar", {
+					method: "POST",
+					body: formData,
+				});
+				if (res.ok) {
+					const data = await res.json();
+					setProfile((prev) => (prev ? { ...prev, image: data.image } : prev));
+				}
+			} finally {
+				setUploadingAvatar(false);
+				if (avatarInputRef.current) avatarInputRef.current.value = "";
 			}
-		} catch {
-			// Silently fail
-		} finally {
-			setSaving(false);
-		}
-	}, [editName, editLastName, editBio, editImage]);
+		},
+		[],
+	);
 
 	if (isLoading) {
 		return (
@@ -120,152 +99,127 @@ export default function ProfilePage() {
 
 	const displayName = profile.username || profile.name;
 	const fullName = [profile.name, profile.lastName].filter(Boolean).join(" ");
-	const initials = displayName.slice(0, 2).toUpperCase();
 	const joinDate = new Date(profile.createdAt).toLocaleDateString("en-US", {
 		month: "long",
 		year: "numeric",
 	});
 
 	return (
-		<div className="flex flex-col items-center gap-6 py-8">
-			<div className="relative">
-				<Avatar
-					size="lg"
-					className="size-24 border-2 border-border shadow-[4px_4px_0px_0px] shadow-border"
-				>
-					{profile.image && (
-						<AvatarImage src={profile.image} alt={displayName} />
-					)}
-					<AvatarFallback className="text-2xl">{initials}</AvatarFallback>
-				</Avatar>
-			</div>
+		<div className="mx-auto w-full max-w-2xl py-8">
+			<div className="rounded-base border-4 border-border bg-card p-6 shadow-brutal-cobalt sm:p-8">
+				<div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+					<div className="relative w-fit shrink-0">
+						<UserAvatar
+							name={displayName}
+							image={profile.image}
+							className="size-28 shadow-shadow"
+							fallbackClassName="text-3xl"
+						/>
+						{profile.isOwnProfile && (
+							<>
+								<input
+									ref={avatarInputRef}
+									type="file"
+									accept={AVATAR_ACCEPT_STRING}
+									onChange={handleAvatarUpload}
+									className="hidden"
+									aria-label="Upload profile picture"
+								/>
+								<button
+									type="button"
+									onClick={() => avatarInputRef.current?.click()}
+									disabled={uploadingAvatar}
+									aria-label="Change profile picture"
+									className="absolute -right-2 -bottom-2 flex size-9 items-center justify-center border-2 border-border bg-card shadow-brutal-sm transition-all hover:brutal-press-hover disabled:opacity-50"
+								>
+									{uploadingAvatar ? (
+										<Loader2 className="size-4 animate-spin" />
+									) : (
+										<Camera className="size-4" />
+									)}
+								</button>
+							</>
+						)}
+					</div>
 
-			<div className="text-center">
-				<h1 className="font-heading text-2xl font-bold">{displayName}</h1>
-				{fullName !== displayName && (
-					<p className="text-muted-foreground">{fullName}</p>
-				)}
-				{profile.bio && (
-					<p className="mx-auto mt-2 max-w-sm text-sm">{profile.bio}</p>
-				)}
-			</div>
-
-			<div className="flex items-center gap-6">
-				<div className="text-center">
-					<span className="flex items-center gap-1 font-heading text-xl font-bold">
-						<Users className="size-4" />
-						{profile.friendCount}
-					</span>
-					<span className="text-xs text-muted-foreground">Friends</span>
-				</div>
-				<div className="text-center">
-					<div className="flex items-center gap-1 text-sm text-muted-foreground">
-						<CalendarDays className="size-3.5" />
-						<span>Joined {joinDate}</span>
+					<div className="min-w-0 flex-1">
+						<h1 className="font-heading text-4xl">{displayName}</h1>
+						<p className="mt-1 text-sm text-muted-foreground">
+							@{profile.username}
+						</p>
+						<div className="mt-3 flex flex-wrap items-center gap-2">
+							{profile.isOwnProfile && (
+								<>
+									<span className="border-2 border-border bg-main px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-main-foreground">
+										Online
+									</span>
+									<span className="border-2 border-border bg-secondary px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-secondary-foreground">
+										You
+									</span>
+								</>
+							)}
+							{fullName !== displayName && (
+								<span className="text-sm text-muted-foreground">
+									{fullName}
+								</span>
+							)}
+						</div>
+						{profile.bio && <p className="mt-3 text-sm">{profile.bio}</p>}
 					</div>
 				</div>
-			</div>
 
-			{profile.intraLogin && (
-				<a
-					href={`https://profile.intra.42.fr/users/${profile.intraLogin}`}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="flex items-center gap-2 rounded-md border-2 border-border bg-background px-4 py-2 text-sm font-medium shadow-shadow transition-all hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none"
-				>
-					<span>42 Intra</span>
-					<ExternalLink className="size-3.5" />
-				</a>
-			)}
+				<div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+					<div className="border-2 border-border p-4 text-center">
+						<span className="flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+							<Users className="size-3.5" />
+							Friends
+						</span>
+						<span className="mt-1 block text-xl font-bold">
+							{profile.friendCount}
+						</span>
+					</div>
+					<div className="border-2 border-border p-4 text-center">
+						<span className="flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+							<CalendarDays className="size-3.5" />
+							Since
+						</span>
+						<span className="mt-1 block text-base font-bold">{joinDate}</span>
+					</div>
+					{profile.intraLogin && (
+						<a
+							href={`${INTRA_PROFILE_BASE_URL}/${profile.intraLogin}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="col-span-2 flex flex-col items-center justify-center border-2 border-border p-4 text-center transition-colors hover:bg-muted sm:col-span-1"
+						>
+							<span className="flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+								<ExternalLink className="size-3.5" />
+								42 Intra
+							</span>
+							<span className="mt-1 block text-base font-bold uppercase">
+								{profile.intraLogin}
+							</span>
+						</a>
+					)}
+				</div>
 
-			{profile.isOwnProfile ? (
-				<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-					<DialogTrigger asChild>
-						<Button variant="outline" onClick={openEdit}>
-							<Pencil className="size-4" />
-							Edit profile
+				<div className="mt-6">
+					{profile.isOwnProfile ? (
+						<Button variant="outline" asChild>
+							<Link href="/settings">
+								<Pencil className="size-4" />
+								Edit profile
+							</Link>
 						</Button>
-					</DialogTrigger>
-					<DialogContent>
-						<DialogHeader>
-							<DialogTitle>Edit profile</DialogTitle>
-							<DialogDescription>
-								Update your profile information. Username and email cannot be
-								changed.
-							</DialogDescription>
-						</DialogHeader>
-						<div className="space-y-4">
-							<div>
-								<Label>Username</Label>
-								<Input value={profile.username} disabled className="mt-1" />
-							</div>
-							<div className="grid grid-cols-2 gap-3">
-								<div>
-									<Label htmlFor="edit-name">First name</Label>
-									<Input
-										id="edit-name"
-										value={editName}
-										onChange={(e) => setEditName(e.target.value)}
-										placeholder="Your first name"
-										className="mt-1"
-										maxLength={50}
-									/>
-								</div>
-								<div>
-									<Label htmlFor="edit-lastname">Last name</Label>
-									<Input
-										id="edit-lastname"
-										value={editLastName}
-										onChange={(e) => setEditLastName(e.target.value)}
-										placeholder="Your last name"
-										className="mt-1"
-										maxLength={50}
-									/>
-								</div>
-							</div>
-							<div>
-								<Label htmlFor="edit-bio">Bio</Label>
-								<Textarea
-									id="edit-bio"
-									value={editBio}
-									onChange={(e) => setEditBio(e.target.value)}
-									placeholder="Tell us about yourself..."
-									className="mt-1"
-									maxLength={200}
-									rows={3}
-								/>
-								<span className="mt-1 block text-right text-xs text-muted-foreground">
-									{editBio.length}/200
-								</span>
-							</div>
-							<div>
-								<Label htmlFor="edit-image">Profile picture URL</Label>
-								<Input
-									id="edit-image"
-									value={editImage}
-									onChange={(e) => setEditImage(e.target.value)}
-									placeholder="https://example.com/avatar.jpg"
-									className="mt-1"
-								/>
-							</div>
-						</div>
-						<DialogFooter>
-							<Button
-								onClick={handleSave}
-								disabled={saving || !editName.trim()}
-							>
-								{saving ? "Saving..." : "Save"}
-							</Button>
-						</DialogFooter>
-					</DialogContent>
-				</Dialog>
-			) : (
-				<FriendRequestButton
-					userId={displayName}
-					initialStatus={profile.friendStatus}
-					requestId={profile.friendRequestId}
-				/>
-			)}
+					) : (
+						<FriendRequestButton
+							userId={profile.id}
+							initialStatus={profile.friendStatus}
+							requestId={profile.friendRequestId}
+						/>
+					)}
+				</div>
+			</div>
 		</div>
 	);
 }

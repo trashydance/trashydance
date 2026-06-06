@@ -30,6 +30,39 @@ export function formatRelativeTime(input: string | number): string {
 	return new Date(date).toLocaleDateString();
 }
 
+/**
+ * Palette avatar del design Lovable: colore deterministico per utente.
+ * NB: i primi valori duplicano i token brand di app/globals.css
+ * (--pink, --cobalt, --lime, --destructive) — tenere in sync a mano.
+ */
+const AVATAR_COLORS = [
+	"#ff3d8b", // pink
+	"#2547ff", // cobalt
+	"#c6ff3d", // lime
+	"#ff8a00", // orange
+	"#8b3dff", // purple
+	"#ff3d3d", // red
+	"#00e0c8", // teal
+	"#3dff9e", // mint
+];
+
+/**
+ * Iniziali per gli avatar: prime due lettere del nome, maiuscole.
+ * NB: nav-user.tsx usa volutamente una semantica diversa (iniziali delle
+ * parole nome+cognome) e NON deve usare questa funzione.
+ */
+export function getInitials(name: string): string {
+	return name.slice(0, 2).toUpperCase();
+}
+
+export function getAvatarColor(seed: string): string {
+	let hash = 0;
+	for (let i = 0; i < seed.length; i++) {
+		hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+	}
+	return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
 export function truncateText(
 	text: string | null | undefined,
 	maxLength: number,

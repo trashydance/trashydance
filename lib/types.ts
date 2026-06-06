@@ -50,6 +50,7 @@ export interface SearchResults {
 }
 
 export interface Profile {
+	id: string;
 	username: string;
 	name: string;
 	lastName: string | null;

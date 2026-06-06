@@ -10,7 +10,7 @@ interface GroupedConversations {
 	others: Conversation[];
 }
 
-export function useChatList() {
+export function useChatList(currentUserId?: string) {
 	const [conversations, setConversations] = useState<GroupedConversations>({
 		friends: [],
 		others: [],
@@ -23,16 +23,10 @@ export function useChatList() {
 			const res = await fetch("/api/conversations");
 			if (res.ok) {
 				const data = await res.json();
-				if (Array.isArray(data)) {
-					const friends = data.filter((c: Conversation) => c.isFriend);
-					const others = data.filter((c: Conversation) => !c.isFriend);
-					setConversations({ friends, others });
-				} else {
-					setConversations({
-						friends: data.friends ?? [],
-						others: data.others ?? [],
-					});
-				}
+				setConversations({
+					friends: data.friends ?? [],
+					others: data.others ?? [],
+				});
 			}
 		} catch {
 			// Silently fail; user can reload
@@ -70,6 +64,9 @@ export function useChatList() {
 				const conv = allConvos[idx];
 				const prevUnread =
 					(conv as Conversation & { unreadCount?: number }).unreadCount ?? 0;
+				// Do not count messages sent by the current user as unread.
+				const isOwnMessage =
+					currentUserId !== undefined && data.senderId === currentUserId;
 
 				const updated = {
 					...conv,
@@ -78,7 +75,7 @@ export function useChatList() {
 						createdAt: data.createdAt,
 						senderId: data.senderId,
 					},
-					unreadCount: prevUnread + 1,
+					unreadCount: isOwnMessage ? prevUnread : prevUnread + 1,
 				};
 
 				const rest = allConvos.filter((c) => c.id !== data.conversationId);
@@ -100,7 +97,7 @@ export function useChatList() {
 			socket.off(SocketEvent.MESSAGE_NEW, handleNewMessage);
 			socket.off(SocketEvent.FRIEND_REQUEST_UPDATE, handleFriendUpdate);
 		};
-	}, [socket, fetchConversations]);
+	}, [socket, fetchConversations, currentUserId]);
 
 	return { conversations, isLoading, refetch: fetchConversations };
 }

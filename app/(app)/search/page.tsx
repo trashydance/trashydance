@@ -6,8 +6,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { EmptyState } from "@/components/feature/empty-state";
 import { FriendRequestButton } from "@/components/feature/friend-request-button";
 import { SearchBar } from "@/components/feature/search-bar";
+import { SectionHeader } from "@/components/feature/section-header";
 import { UserResultItem } from "@/components/feature/user-result-item";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePresence } from "@/hooks/use-presence";
 import type { FriendStatus } from "@/lib/types";
 
 interface SearchUser {
@@ -52,6 +54,9 @@ export default function SearchPage() {
 	useEffect(() => {
 		loadUsers();
 	}, [loadUsers]);
+
+	const userIds = useMemo(() => allUsers.map((u) => u.id), [allUsers]);
+	const presenceMap = usePresence(userIds);
 
 	const filtered = useMemo(() => {
 		if (!query.trim()) return allUsers;
@@ -105,21 +110,16 @@ export default function SearchPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="mb-2 font-heading text-2xl font-bold">Search Users</h1>
-				<p className="text-sm text-muted-foreground">
-					Find someone to chat with.
-				</p>
-			</div>
+			<h1 className="font-heading text-5xl">Find people.</h1>
 
 			<SearchBar
 				value={query}
 				onChange={setQuery}
-				placeholder="Search by username or name..."
+				placeholder="Search by name or @username..."
 			/>
 
 			{isLoading && (
-				<div className="space-y-2">
+				<div className="grid gap-4 md:grid-cols-2">
 					{Array.from({ length: 4 }).map((_, i) => (
 						<Skeleton
 							key={`search-skel-${i.toString()}`}
@@ -142,22 +142,23 @@ export default function SearchPage() {
 					<div className="space-y-6">
 						{friends.length > 0 && (
 							<section>
-								<h2 className="mb-3 font-heading text-lg font-bold">
-									Following
-								</h2>
-								<div className="space-y-2">
+								<SectionHeader title="Following" count={friends.length} />
+								<div className="grid gap-4 md:grid-cols-2">
 									{friends.map((user) => (
 										<UserResultItem
 											key={user.id}
 											username={user.username}
 											name={user.name}
 											image={user.image}
+											showOnlineIndicator
+											isOnline={presenceMap.get(user.id) ?? false}
 											onClick={() => handleUserClick(user.id)}
 											className={
 												navigating === user.id ? "opacity-50" : undefined
 											}
 											actions={
 												<FriendRequestButton
+													textOnly
 													userId={user.id}
 													initialStatus={user.friendStatus}
 													requestId={user.friendRequestId ?? undefined}
@@ -172,20 +173,23 @@ export default function SearchPage() {
 
 						{pending.length > 0 && (
 							<section>
-								<h2 className="mb-3 font-heading text-lg font-bold">Pending</h2>
-								<div className="space-y-2">
+								<SectionHeader title="Pending" count={pending.length} />
+								<div className="grid gap-4 md:grid-cols-2">
 									{pending.map((user) => (
 										<UserResultItem
 											key={user.id}
 											username={user.username}
 											name={user.name}
 											image={user.image}
+											showOnlineIndicator
+											isOnline={presenceMap.get(user.id) ?? false}
 											onClick={() => handleUserClick(user.id)}
 											className={
 												navigating === user.id ? "opacity-50" : undefined
 											}
 											actions={
 												<FriendRequestButton
+													textOnly
 													userId={user.id}
 													initialStatus={user.friendStatus}
 													requestId={user.friendRequestId ?? undefined}
@@ -200,20 +204,23 @@ export default function SearchPage() {
 
 						{others.length > 0 && (
 							<section>
-								<h2 className="mb-3 font-heading text-lg font-bold">Others</h2>
-								<div className="space-y-2">
+								<SectionHeader title="Others" count={others.length} />
+								<div className="grid gap-4 md:grid-cols-2">
 									{others.map((user) => (
 										<UserResultItem
 											key={user.id}
 											username={user.username}
 											name={user.name}
 											image={user.image}
+											showOnlineIndicator
+											isOnline={presenceMap.get(user.id) ?? false}
 											onClick={() => handleUserClick(user.id)}
 											className={
 												navigating === user.id ? "opacity-50" : undefined
 											}
 											actions={
 												<FriendRequestButton
+													textOnly
 													userId={user.id}
 													initialStatus={user.friendStatus}
 													requestId={user.friendRequestId ?? undefined}

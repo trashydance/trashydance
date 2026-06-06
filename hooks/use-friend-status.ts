@@ -55,125 +55,93 @@ export function useFriendStatus(
 		[onStatusChange],
 	);
 
-	const sendRequest = useCallback(async () => {
-		const prevStatus = friendStatus;
-		setFriendStatus("pending_sent");
-		setIsLoading(true);
+	/**
+	 * Runs an action with an optimistic status update.
+	 * Sets `nextStatus` immediately, runs `requestFn`, and rolls back to the
+	 * previous status/requestId if the request fails or throws.
+	 * `requestFn` receives the previous requestId and returns the fetch Response.
+	 */
+	const runOptimistic = useCallback(
+		async (
+			nextStatus: FriendStatus,
+			requestFn: (prevRequestId?: string) => Promise<Response>,
+			options?: { clearRequestId?: boolean },
+		) => {
+			const prevStatus = friendStatus;
+			const prevRequestId = requestId;
+			setFriendStatus(nextStatus);
+			if (options?.clearRequestId) setRequestId(undefined);
+			setIsLoading(true);
 
-		try {
-			const res = await fetch("/api/friend-requests", {
+			try {
+				const res = await requestFn(prevRequestId);
+				if (res.ok) return res;
+				setFriendStatus(prevStatus);
+				if (options?.clearRequestId) setRequestId(prevRequestId);
+				return undefined;
+			} catch {
+				setFriendStatus(prevStatus);
+				if (options?.clearRequestId) setRequestId(prevRequestId);
+				return undefined;
+			} finally {
+				setIsLoading(false);
+			}
+		},
+		[friendStatus, requestId, setFriendStatus],
+	);
+
+	const sendRequest = useCallback(async () => {
+		const res = await runOptimistic("pending_sent", () =>
+			fetch("/api/friend-requests", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ receiverId: userId }),
-			});
-			if (res.ok) {
-				const data = await res.json();
-				setRequestId(data.id);
-			} else {
-				setFriendStatus(prevStatus);
-			}
-		} catch {
-			setFriendStatus(prevStatus);
-		} finally {
-			setIsLoading(false);
+			}),
+		);
+		if (res) {
+			const data = await res.json();
+			setRequestId(data.id);
 		}
-	}, [userId, friendStatus, setFriendStatus]);
-
-	const cancelRequest = useCallback(async () => {
-		if (!requestId) return;
-		const prevStatus = friendStatus;
-		const prevRequestId = requestId;
-		setFriendStatus("none");
-		setRequestId(undefined);
-		setIsLoading(true);
-
-		try {
-			const res = await fetch(`/api/friend-requests/${prevRequestId}`, {
-				method: "DELETE",
-			});
-			if (!res.ok) {
-				setFriendStatus(prevStatus);
-				setRequestId(prevRequestId);
-			}
-		} catch {
-			setFriendStatus(prevStatus);
-			setRequestId(prevRequestId);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [requestId, friendStatus, setFriendStatus]);
+	}, [userId, runOptimistic]);
 
 	const acceptRequest = useCallback(async () => {
 		if (!requestId) return;
-		const prevStatus = friendStatus;
-		setFriendStatus("friends");
-		setIsLoading(true);
-
-		try {
-			const res = await fetch(`/api/friend-requests/${requestId}`, {
+		await runOptimistic("friends", (id) =>
+			fetch(`/api/friend-requests/${id}`, {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ action: "accept" }),
-			});
-			if (!res.ok) {
-				setFriendStatus(prevStatus);
-			}
-		} catch {
-			setFriendStatus(prevStatus);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [requestId, friendStatus, setFriendStatus]);
+			}),
+		);
+	}, [requestId, runOptimistic]);
 
 	const rejectRequest = useCallback(async () => {
 		if (!requestId) return;
-		const prevStatus = friendStatus;
-		const prevRequestId = requestId;
-		setFriendStatus("none");
-		setRequestId(undefined);
-		setIsLoading(true);
+		await runOptimistic(
+			"none",
+			(id) =>
+				fetch(`/api/friend-requests/${id}`, {
+					method: "PATCH",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ action: "reject" }),
+				}),
+			{ clearRequestId: true },
+		);
+	}, [requestId, runOptimistic]);
 
-		try {
-			const res = await fetch(`/api/friend-requests/${prevRequestId}`, {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "reject" }),
-			});
-			if (!res.ok) {
-				setFriendStatus(prevStatus);
-				setRequestId(prevRequestId);
-			}
-		} catch {
-			setFriendStatus(prevStatus);
-			setRequestId(prevRequestId);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [requestId, friendStatus, setFriendStatus]);
-
-	const unfriend = useCallback(async () => {
+	// cancelRequest and unfriend issue the same DELETE; unified internally,
+	// both names kept because different components call each.
+	const deleteRequest = useCallback(async () => {
 		if (!requestId) return;
-		const prevStatus = friendStatus;
-		const prevRequestId = requestId;
-		setFriendStatus("none");
-		setRequestId(undefined);
-		setIsLoading(true);
+		await runOptimistic(
+			"none",
+			(id) => fetch(`/api/friend-requests/${id}`, { method: "DELETE" }),
+			{ clearRequestId: true },
+		);
+	}, [requestId, runOptimistic]);
 
-		try {
-			const res = await fetch(`/api/friend-requests/${prevRequestId}`, {
-				method: "DELETE",
-			});
-			if (!res.ok) {
-				setFriendStatus(prevStatus);
-				setRequestId(prevRequestId);
-			}
-		} catch {
-			setFriendStatus(prevStatus);
-			setRequestId(prevRequestId);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [requestId, friendStatus, setFriendStatus]);
+	const cancelRequest = deleteRequest;
+	const unfriend = deleteRequest;
 
 	return {
 		friendStatus,

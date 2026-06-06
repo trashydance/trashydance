@@ -33,7 +33,7 @@ export function useToast() {
 
 const variantClasses: Record<ToastVariant, string> = {
 	success:
-		"bg-green-600 text-white border-border",
+		"bg-primary text-primary-foreground border-border",
 	error:
 		"bg-destructive text-white border-border",
 	info: "bg-primary text-primary-foreground border-border",
@@ -50,7 +50,7 @@ function ToastItem({
 		<div
 			role="alert"
 			className={cn(
-				"pointer-events-auto flex items-center gap-2 rounded-md border-2 px-4 py-3 text-sm font-medium shadow-[4px_4px_0px_0px] shadow-border animate-in slide-in-from-right-full fade-in duration-200",
+				"pointer-events-auto flex items-center gap-2 rounded-md border-2 px-4 py-3 text-sm font-medium shadow-shadow animate-in slide-in-from-right-full fade-in duration-200",
 				variantClasses[t.variant],
 			)}
 		>

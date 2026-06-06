@@ -1,5 +1,5 @@
 import type { Socket } from "socket.io";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 
 /**
  * Socket.IO authentication middleware.
@@ -21,7 +21,7 @@ export async function socketAuthMiddleware(
 		const headers = new Headers();
 		headers.set("cookie", cookieHeader);
 
-		const sessionResult = await auth.api.getSession({ headers });
+		const sessionResult = await getAuth().api.getSession({ headers });
 		if (!sessionResult?.session || !sessionResult?.user) {
 			console.log("[socket-auth] rejected: invalid session");
 			return next(new Error("Invalid session"));

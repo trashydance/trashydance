@@ -2,6 +2,8 @@ import { SearchClient } from "@/components/feature/search-client";
 import { requireUser } from "@/lib/data/session";
 import { getInitialUserList } from "@/lib/data/users";
 
+export const dynamic = "force-dynamic";
+
 export default async function SearchPage() {
 	const me = await requireUser();
 	const { friends, others } = await getInitialUserList(me.id);

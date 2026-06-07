@@ -36,12 +36,16 @@ interface GlobalSearchResults {
 
 interface HomeClientProps {
 	initialConversations: GroupedConversations;
+	currentUserId?: string;
 }
 
-export function HomeClient({ initialConversations }: HomeClientProps) {
+export function HomeClient({
+	initialConversations,
+	currentUserId,
+}: HomeClientProps) {
 	const router = useRouter();
 	const { toast } = useToast();
-	const { conversations } = useChatList(initialConversations);
+	const { conversations } = useChatList(initialConversations, currentUserId);
 	const [query, setQuery] = useState("");
 	const [searchResults, setSearchResults] =
 		useState<GlobalSearchResults | null>(null);
@@ -128,6 +132,8 @@ export function HomeClient({ initialConversations }: HomeClientProps) {
 
 	return (
 		<div className="space-y-6">
+			<h1 className="font-heading text-5xl">Inbox.</h1>
+
 			<SearchBar
 				value={query}
 				onChange={setQuery}

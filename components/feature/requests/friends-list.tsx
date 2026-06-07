@@ -1,4 +1,5 @@
 import { UserMinus } from "lucide-react";
+import { SectionHeader } from "@/components/feature/section-header";
 import { Button } from "@/components/ui/button";
 import { FriendCard } from "./friend-card";
 import type { FriendEntry } from "./types";
@@ -18,7 +19,7 @@ export function FriendsList({
 
 	return (
 		<section>
-			<h2 className="mb-3 font-heading text-lg font-bold">Following</h2>
+			<SectionHeader title="Following" count={friends.length} />
 			<div className="space-y-2">
 				{friends.map((entry) => (
 					<FriendCard key={entry.id} user={entry.friend}>

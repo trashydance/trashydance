@@ -27,7 +27,7 @@ export function EmptyState({
 				className,
 			)}
 		>
-			<div className="rounded-md border-2 border-border bg-muted p-3 shadow-[4px_4px_0px_0px] shadow-border">
+			<div className="rounded-md border-2 border-border bg-muted p-3 shadow-shadow">
 				<Icon className="size-8 text-muted-foreground" />
 			</div>
 			<div className="space-y-1">

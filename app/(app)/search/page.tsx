@@ -8,12 +8,7 @@ export default async function SearchPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="mb-2 font-heading text-2xl font-bold">Search Users</h1>
-				<p className="text-sm text-muted-foreground">
-					Find someone to chat with.
-				</p>
-			</div>
+			<h1 className="font-heading text-5xl">Find people.</h1>
 
 			<SearchClient initialUsers={[...friends, ...others]} />
 		</div>

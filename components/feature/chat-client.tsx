@@ -13,6 +13,7 @@ import type { FriendStatus, Message } from "@/lib/types";
 interface ConversationMetaProps {
 	partnerId: string;
 	partnerUsername: string;
+	partnerName?: string;
 	partnerImage: string | null;
 	friendStatus: FriendStatus;
 	friendRequestId?: string;
@@ -131,6 +132,7 @@ export function ChatClient({
 			<ChatHeader
 				partnerId={meta.partnerId}
 				partnerUsername={meta.partnerUsername}
+				partnerName={meta.partnerName}
 				partnerImage={meta.partnerImage}
 				friendStatus={meta.friendStatus}
 				friendRequestId={meta.friendRequestId}

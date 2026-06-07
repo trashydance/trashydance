@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { cn, formatFileSize, formatRelativeTime } from "@/lib/utils";
+import { cn, formatFileSize, formatRelativeTime, getAvatarColor, getInitials } from "@/lib/utils";
 
 interface MessageBubbleProps {
 	body: string;
@@ -26,6 +26,8 @@ interface MessageBubbleProps {
 	fileUrl?: string;
 	fileType?: string;
 	fileSize?: number;
+	partnerName?: string;
+	partnerImage?: string | null;
 }
 
 function getFileIcon(mimeType: string) {
@@ -58,13 +60,11 @@ function FilePreview({
 	fileUrl,
 	fileType,
 	fileSize,
-	isSelf,
 }: {
 	fileName: string;
 	fileUrl: string;
 	fileType: string;
 	fileSize: number;
-	isSelf: boolean;
 }) {
 	const [fullView, setFullView] = useState(false);
 
@@ -86,7 +86,7 @@ function FilePreview({
 						// Next image optimizer (it fetches server-side, unauthenticated)
 						unoptimized
 						className={cn(
-							"rounded-md border border-border/20",
+							"rounded-base border-2 border-border",
 							fullView
 								? "w-auto h-auto max-w-full"
 								: "max-w-[240px] max-h-[180px]",
@@ -140,15 +140,18 @@ function FilePreview({
 		<a
 			href={fileUrl}
 			download={fileName}
-			className={cn(
-				"mb-1 flex items-center gap-2 rounded-md border px-3 py-2 text-sm no-underline transition-colors hover:bg-accent/50",
-				isSelf ? "border-primary-foreground/30" : "border-border/20",
-			)}
+			className="mb-1 flex items-center gap-3 rounded-base border-2 border-border bg-card px-3 py-2 text-sm text-foreground no-underline shadow-brutal-sm transition-all hover:brutal-press-hover"
 		>
-			<Icon className="size-5 shrink-0" />
+			<span className="flex size-9 shrink-0 items-center justify-center border-2 border-border bg-secondary text-secondary-foreground">
+				<Icon className="size-4" />
+			</span>
 			<div className="flex-1 truncate">
-				<div className="truncate font-medium">{fileName}</div>
-				<div className="text-xs opacity-70">{formatFileSize(fileSize)}</div>
+				<div className="truncate text-xs font-bold uppercase tracking-wide">
+					{fileName}
+				</div>
+				<div className="text-xs text-muted-foreground">
+					{formatFileSize(fileSize)}
+				</div>
 			</div>
 			<FileDown className="size-4 shrink-0 opacity-50" />
 		</a>
@@ -165,50 +168,78 @@ export function MessageBubble({
 	fileUrl,
 	fileType,
 	fileSize,
+	partnerName,
+	partnerImage,
 }: MessageBubbleProps) {
 	const hasFile = fileName && fileUrl && fileType && fileSize;
+	const partnerInitials = getInitials(partnerName ?? "??");
 
 	return (
 		<div
-			className={cn("flex w-full", isSelf ? "justify-end" : "justify-start")}
+			className={cn(
+				"flex w-full flex-col",
+				isSelf ? "items-end" : "items-start",
+			)}
 		>
-			<div
-				className={cn(
-					"max-w-[75%] rounded-lg border-2 border-border px-3 py-2 shadow-[3px_3px_0px_0px] shadow-border",
-					isSelf
-						? "bg-primary text-primary-foreground"
-						: "bg-background text-foreground",
+			<div className={cn("flex max-w-[75%] items-start gap-2")}>
+				{!isSelf && (
+					<span
+						className="mt-0.5 flex size-7 shrink-0 items-center justify-center overflow-hidden border-2 border-border text-[9px] font-bold uppercase text-ink"
+						style={
+							partnerImage
+								? undefined
+								: { backgroundColor: getAvatarColor(partnerName ?? "??") }
+						}
+					>
+						{partnerImage ? (
+							// biome-ignore lint/performance/noImgElement: avatar minuscolo già ottimizzato altrove
+							<img
+								src={partnerImage}
+								alt={partnerName ?? ""}
+								className="size-full object-cover"
+							/>
+						) : (
+							partnerInitials
+						)}
+					</span>
 				)}
-			>
-				{hasFile && (
-					<FilePreview
-						fileName={fileName}
-						fileUrl={fileUrl}
-						fileType={fileType}
-						fileSize={fileSize}
-						isSelf={isSelf}
-					/>
-				)}
-
-				{body && (
-					<p className="whitespace-pre-wrap break-words text-sm">{body}</p>
-				)}
-
 				<div
 					className={cn(
-						"mt-1 flex items-center gap-1 text-xs",
-						isSelf ? "justify-end opacity-70" : "opacity-50",
+						"min-w-0 rounded-base border-2 border-border px-4 py-2.5 shadow-brutal-sm",
+						isSelf ? "bg-main text-main-foreground" : "bg-card text-foreground",
 					)}
 				>
-					<span>{formatRelativeTime(createdAt ?? "")}</span>
-
-					{isSelf && status === "sending" && (
-						<Loader2 className="size-3 animate-spin" />
+					{hasFile && (
+						<FilePreview
+							fileName={fileName}
+							fileUrl={fileUrl}
+							fileType={fileType}
+							fileSize={fileSize}
+						/>
 					)}
 
-					{isSelf && status === "sent" && <Check className="size-3" />}
+					{body && (
+						<p className="whitespace-pre-wrap break-words text-sm">{body}</p>
+					)}
+				</div>
+			</div>
 
-					{isSelf && status === "error" && (
+			{isSelf && (
+				<div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+					{createdAt && (
+						<>
+							<span>{formatRelativeTime(createdAt)}</span>
+							<span className="text-muted-foreground">•</span>
+						</>
+					)}
+					{status === "sending" && <Loader2 className="size-3 animate-spin" />}
+					{status === "sent" && (
+						<>
+							<Check className="size-3" />
+							<span>Sent</span>
+						</>
+					)}
+					{status === "error" && (
 						<button
 							type="button"
 							onClick={onRetry}
@@ -220,7 +251,13 @@ export function MessageBubble({
 						</button>
 					)}
 				</div>
-			</div>
+			)}
+
+			{!isSelf && createdAt && (
+				<div className="mt-1.5 ml-9 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+					<span>{formatRelativeTime(createdAt)}</span>
+				</div>
+			)}
 		</div>
 	);
 }

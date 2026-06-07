@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { getAuthSession } from "@/lib/auth-session";
 import { SocketEvent } from "@/lib/constants";
 import db from "@/lib/db";
-import { emitNotificationCount } from "@/lib/socket/handlers";
+import { emitNotificationCount } from "@/lib/socket/emit";
 import { getIO } from "@/lib/socket/io-instance";
 import { presence } from "@/lib/socket/presence";
 import {

@@ -1,4 +1,5 @@
 import { Clock } from "lucide-react";
+import { SectionHeader } from "@/components/feature/section-header";
 import { Button } from "@/components/ui/button";
 import { FriendCard } from "./friend-card";
 import type { SentRequest } from "./types";
@@ -18,10 +19,10 @@ export function SentRequests({
 
 	return (
 		<section>
-			<h2 className="mb-3 font-heading text-lg font-bold">Sent</h2>
+			<SectionHeader title="Sent requests" count={requests.length} />
 			<div className="space-y-2">
 				{requests.map((req) => (
-					<FriendCard key={req.id} user={req.receiver}>
+					<FriendCard key={req.id} user={req.receiver} subtitle="waiting">
 						<Button
 							variant="outline"
 							size="sm"

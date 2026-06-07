@@ -1,9 +1,10 @@
-import { toNextJsHandler } from "better-auth/next-js";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { RATE_LIMIT } from "@/lib/constants";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
-const { POST: authPOST, GET } = toNextJsHandler(auth);
+async function GET(request: Request) {
+	return getAuth().handler(request);
+}
 
 async function POST(request: Request) {
 	const ip =
@@ -13,7 +14,7 @@ async function POST(request: Request) {
 	) {
 		return rateLimitResponse();
 	}
-	return authPOST(request);
+	return getAuth().handler(request);
 }
 
 export { GET, POST };

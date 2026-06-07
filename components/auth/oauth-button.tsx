@@ -27,14 +27,15 @@ export function OAuthButton({ setApiError, disabled }: OAuthButtonProps) {
 	return (
 		<Field>
 			<Button
-				variant="outline"
 				type="button"
-				className="w-full"
+				className="h-14 w-full bg-secondary text-secondary-foreground"
 				onClick={handleOAuth42}
 				disabled={disabled}
 			>
-				<IntraIcon />
-				Continue with 42 Intra
+				<span className="flex size-6 shrink-0 items-center justify-center border-2 border-border bg-white text-secondary">
+					<IntraIcon className="size-3.5" />
+				</span>
+				Continue with 42
 			</Button>
 		</Field>
 	);

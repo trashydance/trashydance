@@ -191,23 +191,23 @@ export function MessageInput({
 						}
 						onInput={handleInput}
 						onKeyDown={handleKeyDown}
-						placeholder="Type a message..."
+						placeholder="Write something..."
 						disabled={disabled || isUploading}
 						rows={1}
-						className="w-full resize-none rounded-md border-2 border-border bg-transparent px-3 py-2 text-sm shadow-[4px_4px_0px_0px] shadow-border transition-all outline-none placeholder:text-muted-foreground focus:shadow-[2px_2px_0px_0px] focus:shadow-border focus:translate-x-[2px] focus:translate-y-[2px] disabled:opacity-50"
+						className="w-full resize-none rounded-base border-2 border-border bg-card px-3 py-2 pr-16 text-sm shadow-brutal-sm transition-all outline-none placeholder:text-muted-foreground focus:brutal-press-focus-sm disabled:opacity-50"
 					/>
-					{nearLimit && (
-						<span
-							className={cn(
-								"absolute right-2 bottom-1 text-xs",
-								charCount >= MAX_MESSAGE_LENGTH
-									? "text-destructive"
+					<span
+						className={cn(
+							"pointer-events-none absolute right-3 bottom-2.5 text-[10px] font-bold uppercase tracking-wider",
+							charCount >= MAX_MESSAGE_LENGTH
+								? "text-destructive"
+								: nearLimit
+									? "text-accent"
 									: "text-muted-foreground",
-							)}
-						>
-							{charCount}/{MAX_MESSAGE_LENGTH}
-						</span>
-					)}
+						)}
+					>
+						{charCount}/{MAX_MESSAGE_LENGTH}
+					</span>
 				</div>
 				<Button
 					size="icon"

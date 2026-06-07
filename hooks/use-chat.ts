@@ -5,6 +5,8 @@ import { SocketEvent } from "@/lib/constants";
 import type { Message } from "@/lib/types";
 import { useSocket } from "./use-socket";
 
+const SOCKET_ACK_TIMEOUT_MS = 10_000;
+
 export function useChat(
 	conversationId: string,
 	initialMessages?: Message[],
@@ -141,10 +143,25 @@ export function useChat(
 			};
 
 			if (socket?.connected) {
+				// Guard against a missing ack leaving the message stuck on "sending".
+				let acked = false;
+				const ackTimeout = setTimeout(() => {
+					if (acked) return;
+					acked = true;
+					setMessages((prev) =>
+						prev.map((m) =>
+							m.id === tempId ? { ...m, status: "error" as const } : m,
+						),
+					);
+				}, SOCKET_ACK_TIMEOUT_MS);
+
 				socket.emit(
 					SocketEvent.MESSAGE_SEND,
 					payload,
 					(res: { ok?: boolean; message?: Message; error?: string }) => {
+						if (acked) return;
+						acked = true;
+						clearTimeout(ackTimeout);
 						if (res?.ok && res.message) {
 							setMessages((prev) =>
 								prev.map((m) =>

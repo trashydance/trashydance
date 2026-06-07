@@ -2,24 +2,25 @@
 
 import {
 	AlertTriangle,
+	ArrowLeft,
 	Copy,
-	Shield,
 	ShieldCheck,
 	ShieldOff,
 } from "lucide-react";
 import QRCode from "qrcode";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { COPIED_FEEDBACK_MS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 type TwoFactorStep =
 	| "idle"
@@ -28,6 +29,13 @@ type TwoFactorStep =
 	| "verify-code"
 	| "show-backup-codes"
 	| "disable-confirm";
+
+const STEP_NUMBER: Partial<Record<TwoFactorStep, number>> = {
+	"enter-password": 1,
+	"show-qr": 2,
+	"verify-code": 3,
+	"show-backup-codes": 4,
+};
 
 interface TwoFactorSetupProps {
 	twoFactorEnabled: boolean;
@@ -125,222 +133,301 @@ export function TwoFactorSetup({ twoFactorEnabled }: TwoFactorSetupProps) {
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	useEffect(() => {
-		if (totpURI && canvasRef.current) {
-			QRCode.toCanvas(canvasRef.current, totpURI, { width: 200 });
+		if (totpURI && step === "show-qr" && canvasRef.current) {
+			QRCode.toCanvas(canvasRef.current, totpURI, { width: 180 });
+		}
+	}, [totpURI, step]);
+
+	// secret leggibile per inserimento manuale, a gruppi di 4
+	const manualSecret = useMemo(() => {
+		if (!totpURI) return "";
+		try {
+			const secret = new URL(totpURI).searchParams.get("secret") ?? "";
+			return secret.replace(/(.{4})/g, "$1 ").trim();
+		} catch {
+			return "";
 		}
 	}, [totpURI]);
 
+	const stepNumber = STEP_NUMBER[step];
+	const dialogTitle =
+		step === "disable-confirm"
+			? "Disable 2FA"
+			: stepNumber
+				? `Enable 2FA · Step ${stepNumber} of 4`
+				: "";
+
 	return (
-		<Card className="border-2 border-border shadow-[4px_4px_0px_0px] shadow-border">
-			<CardHeader>
-				<div className="flex items-center gap-2">
-					<Shield className="size-5" />
-					<CardTitle className="font-heading text-lg">
+		<>
+			<div className="flex items-center gap-4 rounded-base border-4 border-border bg-card p-6 shadow-shadow">
+				<span
+					className={cn(
+						"flex size-12 shrink-0 items-center justify-center border-2 border-border",
+						twoFactorEnabled
+							? "bg-main text-main-foreground"
+							: "bg-accent text-accent-foreground",
+					)}
+				>
+					{twoFactorEnabled ? (
+						<ShieldCheck className="size-5" />
+					) : (
+						<ShieldOff className="size-5" />
+					)}
+				</span>
+				<div className="min-w-0 flex-1">
+					<p className="text-sm font-bold uppercase tracking-wide">
 						Two-Factor Authentication
-					</CardTitle>
+					</p>
+					<p className="mt-1 text-sm text-muted-foreground">
+						{twoFactorEnabled
+							? "On. Your account is protected."
+							: "Off. Add a second step to protect your account."}
+					</p>
 				</div>
-				<CardDescription>
-					Add an extra layer of security to your account using a TOTP
-					authenticator app.
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<div className="flex flex-col gap-4">
-					<div className="flex items-center gap-2">
-						{twoFactorEnabled ? (
+				<div className="shrink-0">
+					{twoFactorEnabled ? (
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								setStep("disable-confirm");
+								setPassword("");
+								setError("");
+							}}
+						>
+							<ShieldOff className="size-4" />
+							Disable 2FA
+						</Button>
+					) : (
+						<Button
+							size="sm"
+							onClick={() => {
+								setStep("enter-password");
+								setPassword("");
+								setError("");
+							}}
+						>
+							<ShieldCheck className="size-4" />
+							Enable 2FA
+						</Button>
+					)}
+				</div>
+			</div>
+
+			<Dialog
+				open={step !== "idle"}
+				onOpenChange={(open) => {
+					if (!open) resetState();
+				}}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>{dialogTitle}</DialogTitle>
+					</DialogHeader>
+
+					<div className="flex flex-col gap-4 p-6">
+						{error && (
+							<div className="rounded-base border-2 border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+								{error}
+							</div>
+						)}
+
+						{step === "enter-password" && (
 							<>
-								<ShieldCheck className="size-4 text-green-600" />
-								<span className="text-sm font-medium text-green-600">
-									2FA is enabled
-								</span>
-							</>
-						) : (
-							<>
-								<ShieldOff className="size-4 text-muted-foreground" />
-								<span className="text-sm font-medium text-muted-foreground">
-									2FA is not enabled
-								</span>
+								<h2 className="font-heading text-3xl">
+									Confirm your password.
+								</h2>
+								<Input
+									type="password"
+									placeholder="Current password"
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" && password)
+											handleEnableSubmitPassword();
+									}}
+									disabled={loading}
+									className="h-12"
+								/>
 							</>
 						)}
-					</div>
 
-					{error && (
-						<div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-							{error}
-						</div>
-					)}
-
-					{step === "idle" && (
-						<div>
-							{twoFactorEnabled ? (
-								<Button
-									variant="outline"
-									onClick={() => {
-										setStep("disable-confirm");
-										setPassword("");
-										setError("");
-									}}
-								>
-									<ShieldOff className="size-4" />
-									Disable 2FA
-								</Button>
-							) : (
-								<Button
-									onClick={() => {
-										setStep("enter-password");
-										setPassword("");
-										setError("");
-									}}
-								>
-									<ShieldCheck className="size-4" />
-									Enable 2FA
-								</Button>
-							)}
-						</div>
-					)}
-
-					{step === "enter-password" && (
-						<div className="flex flex-col gap-3">
-							<p className="text-sm text-muted-foreground">
-								Enter your password to set up two-factor authentication.
-							</p>
-							<Input
-								type="password"
-								placeholder="Your password"
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-								onKeyDown={(e) => {
-									if (e.key === "Enter" && password)
-										handleEnableSubmitPassword();
-								}}
-								disabled={loading}
-							/>
-							<div className="flex gap-2">
-								<Button
-									onClick={handleEnableSubmitPassword}
-									disabled={!password || loading}
-								>
-									{loading ? "Setting up..." : "Continue"}
-								</Button>
-								<Button variant="outline" onClick={resetState}>
-									Cancel
-								</Button>
-							</div>
-						</div>
-					)}
-
-					{step === "show-qr" && (
-						<div className="flex flex-col gap-4">
-							<p className="text-sm text-muted-foreground">
-								Scan this QR code with your authenticator app (e.g., Google
-								Authenticator, Authy).
-							</p>
-							<div className="flex justify-center">
-								<div className="rounded-lg border-2 border-border bg-white p-3 shadow-[4px_4px_0px_0px] shadow-border">
-									<canvas
-										ref={canvasRef}
-										aria-label="Scan this QR code with your authenticator app"
-									/>
+						{step === "show-qr" && (
+							<>
+								<h2 className="font-heading text-3xl">Scan the QR code.</h2>
+								<p className="text-sm text-muted-foreground">
+									Use any authenticator app (Google Authenticator, 1Password,
+									Raivo…).
+								</p>
+								<div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
+									<div className="shrink-0 border-2 border-border bg-white p-2">
+										<canvas
+											ref={canvasRef}
+											aria-label="Scan this QR code with your authenticator app"
+										/>
+									</div>
+									{manualSecret && (
+										<div className="min-w-0">
+											<p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+												Or enter manually
+											</p>
+											<p className="mt-2 break-all border-2 border-border bg-background px-3 py-2 text-sm font-bold uppercase tracking-wide">
+												{manualSecret}
+											</p>
+										</div>
+									)}
 								</div>
-							</div>
-							<Button
-								onClick={() => {
-									setStep("verify-code");
-									setVerifyCode("");
-								}}
-							>
-								I have scanned the code
-							</Button>
-						</div>
-					)}
+							</>
+						)}
 
-					{step === "verify-code" && (
-						<div className="flex flex-col gap-3">
-							<p className="text-sm text-muted-foreground">
-								Enter the 6-digit code from your authenticator app to confirm
-								setup.
-							</p>
-							<Input
-								type="text"
-								inputMode="numeric"
-								autoComplete="one-time-code"
-								maxLength={6}
-								placeholder="000000"
-								value={verifyCode}
-								onChange={(e) =>
-									setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))
-								}
-								onKeyDown={(e) => {
-									if (e.key === "Enter" && verifyCode.length === 6)
-										handleVerifySetup();
-								}}
-								disabled={loading}
-								className="text-center text-lg tracking-widest"
-							/>
-							<div className="flex gap-2">
-								<Button
-									onClick={handleVerifySetup}
-									disabled={verifyCode.length !== 6 || loading}
-								>
-									{loading ? "Verifying..." : "Verify and enable"}
-								</Button>
-								<Button variant="outline" onClick={resetState}>
-									Cancel
-								</Button>
-							</div>
-						</div>
-					)}
+						{step === "verify-code" && (
+							<>
+								<h2 className="font-heading text-3xl">
+									Verify the 6-digit code.
+								</h2>
+								<Input
+									type="text"
+									inputMode="numeric"
+									autoComplete="one-time-code"
+									maxLength={6}
+									placeholder="123456"
+									value={verifyCode}
+									onChange={(e) =>
+										setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+									}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" && verifyCode.length === 6)
+											handleVerifySetup();
+									}}
+									disabled={loading}
+									className="h-14 text-center text-2xl font-bold tracking-[0.4em]"
+								/>
+							</>
+						)}
 
-					{step === "show-backup-codes" && (
-						<div className="flex flex-col gap-4">
-							<div className="flex items-start gap-2 rounded-md bg-yellow-50 p-3 text-sm text-yellow-800">
-								<AlertTriangle className="mt-0.5 size-4 shrink-0" />
-								<div>
-									<p className="font-medium">Save your backup codes now!</p>
-									<p className="mt-1">
-										These codes can be used to access your account if you lose
-										your authenticator device. Each code can only be used once.
-										Store them in a safe place.
+						{step === "show-backup-codes" && (
+							<>
+								<h2 className="font-heading text-3xl">
+									Save your backup codes.
+								</h2>
+								<div className="flex items-start gap-2 rounded-base border-2 border-accent bg-accent/10 p-3 text-sm text-accent">
+									<AlertTriangle className="mt-0.5 size-4 shrink-0" />
+									<p>
+										Each code works once. Store them somewhere safe — they are
+										the only way in if you lose your authenticator.
 									</p>
 								</div>
-							</div>
-
-							<div className="rounded-lg border-2 border-border bg-muted p-4 font-mono text-sm shadow-[4px_4px_0px_0px] shadow-border">
-								<div className="grid grid-cols-2 gap-2">
+								<div className="grid grid-cols-2 gap-2 border-2 border-border bg-background p-4 font-mono text-sm">
 									{backupCodes.map((code) => (
 										<div key={code} className="text-center">
 											{code}
 										</div>
 									))}
 								</div>
-							</div>
+							</>
+						)}
 
-							<div className="flex gap-2">
+						{step === "disable-confirm" && (
+							<>
+								<h2 className="font-heading text-3xl">
+									Confirm your password.
+								</h2>
+								<Input
+									type="password"
+									placeholder="Current password"
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" && password) handleDisableConfirm();
+									}}
+									disabled={loading}
+									className="h-12"
+								/>
+							</>
+						)}
+					</div>
+
+					<DialogFooter
+						className={cn(
+							step === "enter-password" || step === "disable-confirm"
+								? "justify-end"
+								: "justify-between",
+						)}
+					>
+						{step === "enter-password" && (
+							<>
+								<Button variant="outline" onClick={resetState}>
+									Cancel
+								</Button>
+								<Button
+									onClick={handleEnableSubmitPassword}
+									disabled={!password || loading}
+								>
+									{loading ? "Checking..." : "Continue"}
+								</Button>
+							</>
+						)}
+
+						{step === "show-qr" && (
+							<>
+								<Button
+									variant="outline"
+									onClick={() => {
+										setStep("enter-password");
+										setError("");
+									}}
+								>
+									<ArrowLeft className="size-4" />
+									Back
+								</Button>
+								<Button
+									onClick={() => {
+										setStep("verify-code");
+										setVerifyCode("");
+										setError("");
+									}}
+								>
+									Next
+								</Button>
+							</>
+						)}
+
+						{step === "verify-code" && (
+							<>
+								<Button
+									variant="outline"
+									onClick={() => {
+										setStep("show-qr");
+										setError("");
+									}}
+								>
+									<ArrowLeft className="size-4" />
+									Back
+								</Button>
+								<Button
+									onClick={handleVerifySetup}
+									disabled={verifyCode.length !== 6 || loading}
+								>
+									{loading ? "Verifying..." : "Verify"}
+								</Button>
+							</>
+						)}
+
+						{step === "show-backup-codes" && (
+							<>
 								<Button variant="outline" onClick={handleCopyBackupCodes}>
 									<Copy className="size-4" />
 									{copiedCodes ? "Copied!" : "Copy codes"}
 								</Button>
-								<Button onClick={resetState}>I have saved my codes</Button>
-							</div>
-						</div>
-					)}
+								<Button onClick={resetState}>I saved my codes</Button>
+							</>
+						)}
 
-					{step === "disable-confirm" && (
-						<div className="flex flex-col gap-3">
-							<p className="text-sm text-muted-foreground">
-								Enter your password to disable two-factor authentication.
-							</p>
-							<Input
-								type="password"
-								placeholder="Your password"
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-								onKeyDown={(e) => {
-									if (e.key === "Enter" && password) handleDisableConfirm();
-								}}
-								disabled={loading}
-							/>
-							<div className="flex gap-2">
+						{step === "disable-confirm" && (
+							<>
+								<Button variant="outline" onClick={resetState}>
+									Cancel
+								</Button>
 								<Button
 									variant="destructive"
 									onClick={handleDisableConfirm}
@@ -348,14 +435,11 @@ export function TwoFactorSetup({ twoFactorEnabled }: TwoFactorSetupProps) {
 								>
 									{loading ? "Disabling..." : "Disable 2FA"}
 								</Button>
-								<Button variant="outline" onClick={resetState}>
-									Cancel
-								</Button>
-							</div>
-						</div>
-					)}
-				</div>
-			</CardContent>
-		</Card>
+							</>
+						)}
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		</>
 	);
 }

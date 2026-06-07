@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import {
 	SOCKET_RECONNECTION_ATTEMPTS,
@@ -52,18 +52,14 @@ export function useSocket() {
 		};
 	}, []);
 
-	useEffect(() => {
-		if (!socketRef.current) return;
-		function handleDisconnect() {
-			if (globalSocket?.disconnected) {
-				globalSocket = null;
-			}
-		}
-		socketRef.current.on("disconnect", handleDisconnect);
-		return () => {
-			socketRef.current?.off("disconnect", handleDisconnect);
-		};
+	// Explicit teardown (e.g. logout). Transient/automatic disconnects must NOT
+	// destroy the singleton, otherwise the next mount creates a duplicate socket.
+	const disconnect = useCallback(() => {
+		globalSocket?.disconnect();
+		globalSocket = null;
+		socketRef.current = null;
+		setIsConnected(false);
 	}, []);
 
-	return { socket: socketRef.current, isConnected };
+	return { socket: socketRef.current, isConnected, disconnect };
 }

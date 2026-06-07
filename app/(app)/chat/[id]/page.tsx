@@ -24,6 +24,7 @@ export default async function ChatPage({ params }: Props) {
 			meta={{
 				partnerId: meta.partner.id,
 				partnerUsername: meta.partner.username,
+				partnerName: meta.partner.name,
 				partnerImage: meta.partner.image,
 				friendStatus: meta.friendStatus,
 				friendRequestId: meta.friendRequestId ?? undefined,

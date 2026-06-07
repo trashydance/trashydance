@@ -11,7 +11,7 @@ export interface GroupedConversations {
 	others: Conversation[];
 }
 
-export function useChatList(initialData: GroupedConversations) {
+export function useChatList(initialData: GroupedConversations, currentUserId?: string) {
 	const router = useRouter();
 	const [conversations, setConversations] =
 		useState<GroupedConversations>(initialData);
@@ -55,15 +55,18 @@ export function useChatList(initialData: GroupedConversations) {
 
 				const conv = allConvos[idx];
 				const prevUnread = conv.unreadCount ?? 0;
+				// Do not count messages sent by the current user as unread.
+				const isOwnMessage =
+					currentUserId !== undefined && data.senderId === currentUserId;
 
 				const updated = {
 					...conv,
 					lastMessage: {
 						body: data.body,
-						createdAt: data.createdAt,
+						createdAt: new Date(data.createdAt).getTime(),
 						senderId: data.senderId,
 					},
-					unreadCount: prevUnread + 1,
+					unreadCount: isOwnMessage ? prevUnread : prevUnread + 1,
 				};
 
 				const rest = allConvos.filter((c) => c.id !== data.conversationId);
@@ -85,7 +88,7 @@ export function useChatList(initialData: GroupedConversations) {
 			socket.off(SocketEvent.MESSAGE_NEW, handleNewMessage);
 			socket.off(SocketEvent.FRIEND_REQUEST_UPDATE, handleFriendUpdate);
 		};
-	}, [socket, refetch]);
+	}, [socket, refetch, currentUserId]);
 
 	return { conversations, refetch };
 }

@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"prepare": "husky",
-		"dev": "tsx watch server.ts",
+		"dev": "tsx watch --env-file=.env server.ts",
 		"build": "next build",
 		"start": "NODE_ENV=production tsx server.ts",
 		"lint": "biome check .",
@@ -21,7 +21,7 @@
 	"dependencies": {
 		"@hookform/resolvers": "^5.2.2",
 		"@radix-ui/react-slot": "^1.2.4",
-		"better-auth": "^1.6.9",
+		"better-auth": "^1.6.11",
 		"better-sqlite3": "^12.9.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
@@ -44,6 +44,9 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.4.16",
 		"@tailwindcss/postcss": "^4",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.3.2",
+		"@testing-library/user-event": "^14.6.1",
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/node": "^20.19.39",
 		"@types/qrcode": "^1.5.6",

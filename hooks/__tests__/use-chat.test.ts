@@ -112,7 +112,10 @@ describe("useChat", () => {
 		expect(fetchMock).toHaveBeenCalledWith(
 			"/api/conversations/c1/messages?limit=50",
 		);
-		expect(result.current.messages.map((m: Message) => m.id)).toEqual(["m1", "m2"]);
+		expect(result.current.messages.map((m: Message) => m.id)).toEqual([
+			"m1",
+			"m2",
+		]);
 		expect(result.current.hasMore).toBe(true);
 	});
 

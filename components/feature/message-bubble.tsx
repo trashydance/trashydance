@@ -13,7 +13,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { cn, formatFileSize, formatRelativeTime, getAvatarColor, getInitials } from "@/lib/utils";
+import {
+	cn,
+	formatFileSize,
+	formatRelativeTime,
+	getAvatarColor,
+	getInitials,
+} from "@/lib/utils";
 
 interface MessageBubbleProps {
 	body: string;

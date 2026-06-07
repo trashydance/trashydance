@@ -11,7 +11,10 @@ export interface GroupedConversations {
 	others: Conversation[];
 }
 
-export function useChatList(initialData: GroupedConversations, currentUserId?: string) {
+export function useChatList(
+	initialData: GroupedConversations,
+	currentUserId?: string,
+) {
 	const router = useRouter();
 	const [conversations, setConversations] =
 		useState<GroupedConversations>(initialData);

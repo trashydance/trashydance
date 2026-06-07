@@ -100,9 +100,12 @@ describe("usePresence", () => {
 	});
 
 	it("non si risottoscrive se cambia solo il riferimento dell'array", () => {
-		const { rerender } = renderHook(({ ids }: { ids: string[] }) => usePresence(ids), {
-			initialProps: { ids: ["u1", "u2"] },
-		});
+		const { rerender } = renderHook(
+			({ ids }: { ids: string[] }) => usePresence(ids),
+			{
+				initialProps: { ids: ["u1", "u2"] },
+			},
+		);
 
 		// Stesso contenuto (anche in ordine diverso), nuovo riferimento.
 		rerender({ ids: ["u2", "u1"] });

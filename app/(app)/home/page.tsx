@@ -7,9 +7,6 @@ export default async function HomePage() {
 	const conversations = await getConversationList(me.id);
 
 	return (
-		<HomeClient
-			initialConversations={conversations}
-			currentUserId={me.id}
-		/>
+		<HomeClient initialConversations={conversations} currentUserId={me.id} />
 	);
 }

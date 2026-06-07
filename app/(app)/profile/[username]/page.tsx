@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProfileActions } from "@/components/feature/profile-actions";
 import { ProfileAvatar } from "@/components/feature/profile-avatar";
+import { INTRA_PROFILE_BASE_URL } from "@/lib/constants";
 import { getProfileByUsername } from "@/lib/data/profile";
 import { getCurrentUser, requireUser } from "@/lib/data/session";
-import { INTRA_PROFILE_BASE_URL } from "@/lib/constants";
 
 type Props = { params: Promise<{ username: string }> };
 

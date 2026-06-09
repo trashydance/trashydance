@@ -7,5 +7,5 @@ export default async function SettingsPage() {
 	const me = await requireUser();
 	const twoFactorEnabled = me.twoFactorEnabled ?? false;
 
-	return <SettingsClient twoFactorEnabled={twoFactorEnabled} />;
+	return <SettingsClient twoFactorEnabled={twoFactorEnabled} user={me} />;
 }

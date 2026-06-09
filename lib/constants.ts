@@ -2,7 +2,7 @@ export const PROJECT_NAME = "trashydance";
 
 export const CONTACT_EMAIL = "trashydance@example.com";
 
-export const COPYRIGHT_NOTICE = "© 2026 Trashydance · 42 Final Project";
+export const COPYRIGHT_NOTICE = "© 2026 Trashydance";
 
 export const INTRA_PROFILE_BASE_URL = "https://profile.intra.42.fr/users";
 

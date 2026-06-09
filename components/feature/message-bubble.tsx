@@ -178,7 +178,7 @@ export function MessageBubble({
 	partnerImage,
 }: MessageBubbleProps) {
 	const hasFile = fileName && fileUrl && fileType && fileSize;
-	const partnerInitials = getInitials(partnerName ?? "??");
+	const partnerInitials = getInitials(partnerName ?? "?");
 
 	return (
 		<div
@@ -194,7 +194,7 @@ export function MessageBubble({
 						style={
 							partnerImage
 								? undefined
-								: { backgroundColor: getAvatarColor(partnerName ?? "??") }
+								: { backgroundColor: getAvatarColor(partnerName ?? "?") }
 						}
 					>
 						{partnerImage ? (

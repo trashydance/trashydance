@@ -178,6 +178,20 @@ export function ChatClient({
 		}
 	}, [hasMore, isLoading, isLoadingMore, loadMore]);
 
+	// Allow dismissing the highlight by clicking the messages container
+	const handleContainerClick = useCallback(() => {
+		if (highlightActive) setHighlightActive(false);
+	}, [highlightActive]);
+
+	// Dismiss highlight with Escape key
+	useEffect(() => {
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape" && highlightActive) setHighlightActive(false);
+		};
+		window.addEventListener("keydown", onKey);
+		return () => window.removeEventListener("keydown", onKey);
+	}, [highlightActive]);
+
 	return (
 		<div className="flex h-[calc(100svh-8rem)] flex-col -mx-4 -my-6">
 			<style>{`
@@ -224,6 +238,7 @@ export function ChatClient({
 			<div
 				ref={containerRef}
 				onScroll={handleScroll}
+				onClick={handleContainerClick}
 				className="custom-scroll flex-1 overflow-y-auto px-4 py-4"
 			>
 				{(isLoading || isLoadingMore) && (

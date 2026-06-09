@@ -37,9 +37,9 @@ export function AppNav({ initialCounts }: AppNavProps) {
 	const { data: session } = authClient.useSession();
 
 	const user = session?.user;
-	const handle =
-		(user as { username?: string | null } | undefined)?.username ?? user?.name;
-	const initials = getInitials(handle ?? "??");
+		const handle =
+			(user as { username?: string | null } | undefined)?.username ?? user?.name;
+		const initials = getInitials(handle ?? "?");
 
 	const handleLogout = async () => {
 		disconnect();

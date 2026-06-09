@@ -57,9 +57,11 @@ export function FriendRequestButton({
 				onClick={cancelRequest}
 				disabled={isLoading}
 				className={cn(!textOnly && "opacity-70", className)}
+				title={textOnly ? undefined : "Request sent — click to cancel"}
+				aria-label={textOnly ? "Cancel request" : "Request sent. Click to cancel"}
 			>
 				{!textOnly && <Clock className="size-4" />}
-				{textOnly ? "Cancel" : "Pending..."}
+				{textOnly ? "Cancel" : "Pending"}
 			</Button>
 		);
 	}

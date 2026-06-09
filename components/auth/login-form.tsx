@@ -166,7 +166,7 @@ export function LoginForm({
 			</form>
 			<FieldDescription className="text-center">
 				New here?{" "}
-				<Link href="/register" className="font-bold uppercase tracking-wide">
+				<Link href="/register" className="font-bold uppercase tracking-wide cursor-pointer underline underline-offset-2 hover:text-foreground hover:decoration-foreground">
 					Sign up
 				</Link>
 			</FieldDescription>

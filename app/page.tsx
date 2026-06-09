@@ -31,7 +31,7 @@ export default function Home() {
 			<main className="flex min-h-0 flex-1 items-center">
 				<div className="mx-auto grid w-full max-w-7xl items-center gap-8 px-5 py-6 lg:grid-cols-[minmax(0,1fr)_auto]">
 					<div className="flex flex-col items-start gap-6 lg:gap-8">
-						<h1 className="max-w-xl text-5xl sm:text-6xl lg:text-7xl xl:text-8xl">
+						<h1 className="max-w-xl text-4xl sm:text-5xl lg:text-6xl xl:text-7xl">
 							Direct chat for the people you actually{" "}
 							<span className="inline-block border-2 border-ink bg-lime px-3">
 								talk to.

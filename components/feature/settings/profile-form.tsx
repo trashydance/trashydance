@@ -5,8 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { BIO_MAX_LENGTH } from "@/lib/constants";
+import type { User } from "@/lib/types";
+import { updateProfile } from "@/lib/actions/profile";
 
-export function ProfileForm() {
+interface ProfileFormProps {
+	initialUser?: User;
+}
+
+export function ProfileForm({ initialUser }: ProfileFormProps) {
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 	const [bio, setBio] = useState("");
@@ -14,34 +20,21 @@ export function ProfileForm() {
 	const [saved, setSaved] = useState(false);
 
 	useEffect(() => {
-		async function fetchProfile() {
-			try {
-				const res = await fetch("/api/profile/me");
-				if (res.ok) {
-					const data = await res.json();
-					setFirstName(data.name ?? "");
-					setLastName(data.lastName ?? "");
-					setBio(data.bio ?? "");
-				}
-			} catch {
-				// Silently fail
-			}
+		if (initialUser) {
+			setFirstName(initialUser.name ?? "");
+			setLastName(initialUser.lastName ?? "");
+			setBio(initialUser.bio ?? "");
 		}
-		fetchProfile();
-	}, []);
+	}, [initialUser]);
 
 	const handleSave = async () => {
 		setSaving(true);
 		setSaved(false);
 		try {
-			const res = await fetch("/api/profile", {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					name: firstName,
-					lastName: lastName || null,
-					bio: bio || null,
-				}),
+			const res = await updateProfile({
+				name: firstName,
+				lastName: lastName || null,
+				bio: bio || null,
 			});
 			if (res.ok) {
 				setSaved(true);

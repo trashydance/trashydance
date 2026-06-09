@@ -2,6 +2,7 @@
 
 import { Pencil } from "lucide-react";
 import { useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
 import { FriendRequestButton } from "@/components/feature/friend-request-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { updateProfile } from "@/lib/actions/profile";
+import { createConversation } from "@/lib/actions/conversations";
 import type { Profile } from "@/lib/types";
 
 interface ProfileActionsProps {
@@ -32,13 +34,11 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 	const [editName, setEditName] = useState("");
 	const [editLastName, setEditLastName] = useState("");
 	const [editBio, setEditBio] = useState("");
-	const [editImage, setEditImage] = useState("");
 
 	const openEdit = useCallback(() => {
 		setEditName(profile.name);
 		setEditLastName(profile.lastName ?? "");
 		setEditBio(profile.bio ?? "");
-		setEditImage(profile.image ?? "");
 		setDialogOpen(true);
 	}, [profile]);
 
@@ -49,7 +49,6 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 				name: editName,
 				lastName: editLastName || null,
 				bio: editBio || null,
-				image: editImage || null,
 			});
 			if (res.ok) {
 				// revalidatePath inside the action re-renders the page
@@ -62,15 +61,35 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 		} finally {
 			setSaving(false);
 		}
-	}, [editName, editLastName, editBio, editImage, toast]);
+	}, [editName, editLastName, editBio, toast]);
+
+	const router = useRouter();
+
+	const handleStartChat = useCallback(async () => {
+		try {
+			const res = await createConversation(profile.id);
+			if (res.ok) {
+				router.push(`/chat/${res.data.id}`);
+			} else {
+				toast(res.error, "error");
+			}
+		} catch {
+			toast("Something went wrong", "error");
+		}
+	}, [profile.id, router, toast]);
 
 	if (!profile.isOwnProfile) {
 		return (
-			<FriendRequestButton
-				userId={profile.id}
-				initialStatus={profile.friendStatus}
-				requestId={profile.friendRequestId ?? undefined}
-			/>
+			<div className="flex items-center gap-3">
+				<FriendRequestButton
+					userId={profile.id}
+					initialStatus={profile.friendStatus}
+					requestId={profile.friendRequestId ?? undefined}
+				/>
+				<Button variant="neutral" onClick={handleStartChat}>
+					Chat
+				</Button>
+			</div>
 		);
 	}
 
@@ -90,7 +109,7 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 						changed.
 					</DialogDescription>
 				</DialogHeader>
-				<div className="space-y-4">
+				<div className="space-y-4 px-5 py-4">
 					<div>
 						<Label>Username</Label>
 						<Input value={profile.username} disabled className="mt-1" />
@@ -133,16 +152,6 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 						<span className="mt-1 block text-right text-xs text-muted-foreground">
 							{editBio.length}/200
 						</span>
-					</div>
-					<div>
-						<Label htmlFor="edit-image">Profile picture URL</Label>
-						<Input
-							id="edit-image"
-							value={editImage}
-							onChange={(e) => setEditImage(e.target.value)}
-							placeholder="https://example.com/avatar.jpg"
-							className="mt-1"
-						/>
 					</div>
 				</div>
 				<DialogFooter>

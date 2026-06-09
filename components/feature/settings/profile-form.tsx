@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { updateProfile } from "@/lib/actions/profile";
 import { BIO_MAX_LENGTH } from "@/lib/constants";
 import type { User } from "@/lib/types";
-import { updateProfile } from "@/lib/actions/profile";
 
 interface ProfileFormProps {
 	initialUser?: User;

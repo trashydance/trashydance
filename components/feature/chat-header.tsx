@@ -6,7 +6,6 @@ import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { usePresence } from "@/hooks/use-presence";
 import type { FriendStatus } from "@/lib/types";
-import { cn } from "@/lib/utils";
 import { FriendRequestButton } from "./friend-request-button";
 import { OnlineIndicator } from "./online-indicator";
 import { UserAvatar } from "./user-avatar";
@@ -18,8 +17,6 @@ interface ChatHeaderProps {
 	partnerImage: string | null;
 	friendStatus: FriendStatus;
 	friendRequestId?: string;
-	blackHoleActive?: boolean;
-	onToggleBlackHole?: () => void;
 }
 
 export function ChatHeader({
@@ -29,8 +26,6 @@ export function ChatHeader({
 	partnerImage,
 	friendStatus: initialFriendStatus,
 	friendRequestId,
-	blackHoleActive = false,
-	onToggleBlackHole,
 }: ChatHeaderProps) {
 	const [currentStatus, setCurrentStatus] = useState(initialFriendStatus);
 	const isFriend = currentStatus === "friends";
@@ -74,21 +69,6 @@ export function ChatHeader({
 				</div>
 			</Link>
 			<div className="ml-auto flex items-center gap-2">
-				{onToggleBlackHole && (
-					<Button
-						variant={blackHoleActive ? "destructive" : "outline"}
-						size="icon-sm"
-						onClick={onToggleBlackHole}
-						className={cn(
-							"transition-all",
-							blackHoleActive &&
-								"animate-pulse border-destructive shadow-brutal-destructive",
-						)}
-						title="Toggle Black Hole Mode"
-					>
-						<span className="text-base">🕳️</span>
-					</Button>
-				)}
 				<FriendRequestButton
 					userId={partnerId}
 					initialStatus={initialFriendStatus}

@@ -44,7 +44,7 @@ export function FriendRequestButton({
 				className={className}
 			>
 				{!textOnly && <UserPlus className="size-4" />}
-				Follow
+				Add Friend
 			</Button>
 		);
 	}
@@ -58,7 +58,9 @@ export function FriendRequestButton({
 				disabled={isLoading}
 				className={cn(!textOnly && "opacity-70", className)}
 				title={textOnly ? undefined : "Request sent — click to cancel"}
-				aria-label={textOnly ? "Cancel request" : "Request sent. Click to cancel"}
+				aria-label={
+					textOnly ? "Cancel request" : "Request sent. Click to cancel"
+				}
 			>
 				{!textOnly && <Clock className="size-4" />}
 				{textOnly ? "Cancel" : "Pending"}
@@ -101,7 +103,7 @@ export function FriendRequestButton({
 			className={className}
 		>
 			{!textOnly && <UserMinus className="size-4" />}
-			Unfollow
+			Unfriend
 		</Button>
 	);
 }

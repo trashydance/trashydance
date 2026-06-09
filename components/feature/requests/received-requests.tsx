@@ -27,7 +27,7 @@ export function ReceivedRequests({
 					<FriendCard
 						key={req.id}
 						user={req.sender}
-						subtitle="wants to follow you"
+						subtitle="wants to be friends"
 					>
 						<Button
 							variant="default"

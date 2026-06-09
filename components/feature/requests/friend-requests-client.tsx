@@ -105,7 +105,7 @@ export function FriendRequestsClient({
 				<EmptyState
 					icon={Users}
 					title="No requests yet"
-					description="When someone sends you a follow request, it will show up here."
+					description="When someone sends you a friend request, it will show up here."
 				/>
 			)}
 

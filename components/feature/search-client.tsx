@@ -96,7 +96,7 @@ export function SearchClient({ initialUsers }: SearchClientProps) {
 				<div className="space-y-6">
 					{friends.length > 0 && (
 						<section>
-							<h2 className="mb-3 font-heading text-lg font-bold">Following</h2>
+							<h2 className="mb-3 font-heading text-lg font-bold">Friends</h2>
 							<div className="space-y-2">
 								{friends.map((user) => (
 									<UserResultItem

@@ -13,9 +13,9 @@ describe("UserAvatar", () => {
 		expect(screen.getByText("BO")).toBeInTheDocument();
 	});
 
-	it("usa '?' quando nome e username mancano", () => {
+	it("usa '??' quando nome e username mancano", () => {
 		render(<UserAvatar name={null} />);
-		expect(screen.getByText("?")).toBeInTheDocument();
+		expect(screen.getByText("??")).toBeInTheDocument();
 	});
 
 	it("applica un colore di sfondo deterministico per lo stesso seed", () => {

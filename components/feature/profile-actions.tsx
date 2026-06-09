@@ -1,8 +1,8 @@
 "use client";
 
-import { Pencil } from "lucide-react";
-import { useCallback, useState } from "react";
+import { MessageSquare, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
 import { FriendRequestButton } from "@/components/feature/friend-request-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
-import { updateProfile } from "@/lib/actions/profile";
 import { createConversation } from "@/lib/actions/conversations";
+import { updateProfile } from "@/lib/actions/profile";
 import type { Profile } from "@/lib/types";
 
 interface ProfileActionsProps {
@@ -30,6 +30,7 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 	const { toast } = useToast();
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [saving, setSaving] = useState(false);
+	const [chatLoading, setChatLoading] = useState(false);
 
 	const [editName, setEditName] = useState("");
 	const [editLastName, setEditLastName] = useState("");
@@ -66,15 +67,18 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 	const router = useRouter();
 
 	const handleStartChat = useCallback(async () => {
+		setChatLoading(true);
 		try {
 			const res = await createConversation(profile.id);
 			if (res.ok) {
 				router.push(`/chat/${res.data.id}`);
 			} else {
 				toast(res.error, "error");
+				setChatLoading(false);
 			}
 		} catch {
 			toast("Something went wrong", "error");
+			setChatLoading(false);
 		}
 	}, [profile.id, router, toast]);
 
@@ -86,8 +90,13 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 					initialStatus={profile.friendStatus}
 					requestId={profile.friendRequestId ?? undefined}
 				/>
-				<Button variant="neutral" onClick={handleStartChat}>
-					Chat
+				<Button
+					variant="neutral"
+					onClick={handleStartChat}
+					disabled={chatLoading}
+				>
+					<MessageSquare className="size-4" />
+					{chatLoading ? "Loading..." : "Chat"}
 				</Button>
 			</div>
 		);

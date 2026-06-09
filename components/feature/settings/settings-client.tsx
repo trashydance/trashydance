@@ -12,7 +12,10 @@ interface SettingsClientProps {
 	user: User;
 }
 
-export function SettingsClient({ twoFactorEnabled, user }: SettingsClientProps) {
+export function SettingsClient({
+	twoFactorEnabled,
+	user,
+}: SettingsClientProps) {
 	return (
 		<div className="flex flex-col gap-8">
 			<h1 className="font-heading text-5xl">Settings.</h1>

@@ -6,11 +6,14 @@ export type FriendStatus =
 
 export interface User {
 	id: string;
-	username: string | null;
+	username?: string | null;
 	name: string;
 	email: string;
-	image: string | null;
-	createdAt: string;
+	image?: string | null;
+	createdAt: string | Date;
+	lastName?: string | null;
+	bio?: string | null;
+	twoFactorEnabled?: boolean | null;
 }
 
 export interface Conversation {

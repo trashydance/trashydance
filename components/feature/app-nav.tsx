@@ -4,6 +4,7 @@ import { Home, LogOut, Search, Settings, User, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { NotificationBadge } from "@/components/feature/notification-badge";
+import { UserAvatar } from "@/components/feature/user-avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -17,7 +18,7 @@ import {
 } from "@/hooks/use-notification-count";
 import { useSocket } from "@/hooks/use-socket";
 import { authClient } from "@/lib/auth-client";
-import { cn, getInitials } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
 	{ href: "/home", label: "Home", icon: Home },
@@ -37,9 +38,8 @@ export function AppNav({ initialCounts }: AppNavProps) {
 	const { data: session } = authClient.useSession();
 
 	const user = session?.user;
-		const handle =
-			(user as { username?: string | null } | undefined)?.username ?? user?.name;
-		const initials = getInitials(handle ?? "?");
+	const handle =
+		(user as { username?: string | null } | undefined)?.username ?? user?.name;
 
 	const handleLogout = async () => {
 		disconnect();
@@ -79,10 +79,15 @@ export function AppNav({ initialCounts }: AppNavProps) {
 					<DropdownMenuTrigger asChild>
 						<button
 							type="button"
-							className="inline-flex size-10 items-center justify-center rounded-base border-2 border-border bg-main text-xs font-bold uppercase text-main-foreground shadow-brutal-sm transition-all hover:brutal-press-hover"
+							className="inline-flex size-10 items-center justify-center rounded-base border-2 border-border bg-main text-xs font-bold uppercase text-main-foreground shadow-brutal-sm transition-all hover:brutal-press-hover overflow-hidden"
 							aria-label="Menu"
 						>
-							{initials}
+							<UserAvatar
+								name={handle ?? null}
+								image={user?.image}
+								className="size-full rounded-none border-0"
+								fallbackClassName="bg-main text-main-foreground text-xs font-bold"
+							/>
 						</button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end" className="w-56">

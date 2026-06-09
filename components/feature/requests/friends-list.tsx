@@ -19,7 +19,7 @@ export function FriendsList({
 
 	return (
 		<section>
-			<SectionHeader title="Following" count={friends.length} />
+			<SectionHeader title="Friends" count={friends.length} />
 			<div className="space-y-2">
 				{friends.map((entry) => (
 					<FriendCard key={entry.id} user={entry.friend}>
@@ -30,7 +30,7 @@ export function FriendsList({
 							disabled={loadingId === entry.id}
 						>
 							<UserMinus className="size-4" />
-							Unfollow
+							Unfriend
 						</Button>
 					</FriendCard>
 				))}

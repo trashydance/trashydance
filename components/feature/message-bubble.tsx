@@ -13,13 +13,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import {
-	cn,
-	formatFileSize,
-	formatRelativeTime,
-	getAvatarColor,
-	getInitials,
-} from "@/lib/utils";
+import { UserAvatar } from "@/components/feature/user-avatar";
+import { cn, formatFileSize, formatRelativeTime } from "@/lib/utils";
 
 interface MessageBubbleProps {
 	body: string;
@@ -178,7 +173,6 @@ export function MessageBubble({
 	partnerImage,
 }: MessageBubbleProps) {
 	const hasFile = fileName && fileUrl && fileType && fileSize;
-	const partnerInitials = getInitials(partnerName ?? "?");
 
 	return (
 		<div
@@ -189,25 +183,12 @@ export function MessageBubble({
 		>
 			<div className={cn("flex max-w-[75%] items-start gap-2")}>
 				{!isSelf && (
-					<span
-						className="mt-0.5 flex size-7 shrink-0 items-center justify-center overflow-hidden border-2 border-border text-[9px] font-bold uppercase text-ink"
-						style={
-							partnerImage
-								? undefined
-								: { backgroundColor: getAvatarColor(partnerName ?? "?") }
-						}
-					>
-						{partnerImage ? (
-							// biome-ignore lint/performance/noImgElement: avatar minuscolo già ottimizzato altrove
-							<img
-								src={partnerImage}
-								alt={partnerName ?? ""}
-								className="size-full object-cover"
-							/>
-						) : (
-							partnerInitials
-						)}
-					</span>
+					<UserAvatar
+						name={partnerName ?? null}
+						image={partnerImage}
+						className="mt-0.5 size-7 border-2 border-border"
+						fallbackClassName="text-[9px] font-bold"
+					/>
 				)}
 				<div
 					className={cn(

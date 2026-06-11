@@ -1,6 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useToast } from "@/components/ui/toast";
+import {
+	removeFriendRequest,
+	respondFriendRequest,
+	sendFriendRequest,
+} from "@/lib/actions/friends";
 import { SocketEvent } from "@/lib/constants";
 import type { FriendStatus } from "@/lib/types";
 import { useSocket } from "./use-socket";
@@ -18,6 +24,7 @@ export function useFriendStatus(
 	);
 	const [isLoading, setIsLoading] = useState(false);
 	const { socket } = useSocket();
+	const { toast } = useToast();
 
 	useEffect(() => {
 		if (!socket) return;
@@ -41,9 +48,25 @@ export function useFriendStatus(
 			}
 		}
 
+		// Incoming request from THIS user while the button is mounted:
+		// switch to Accept/Reject live (the server emits FRIEND_REQUEST_NEW
+		// only to the receiver).
+		function handleNew(data: {
+			id: string;
+			senderId: string;
+			receiverId: string;
+		}) {
+			if (data.senderId !== userId) return;
+			setFriendStatusRaw("pending_received");
+			setRequestId(data.id);
+			onStatusChange?.("pending_received");
+		}
+
 		socket.on(SocketEvent.FRIEND_REQUEST_UPDATE, handleUpdate);
+		socket.on(SocketEvent.FRIEND_REQUEST_NEW, handleNew);
 		return () => {
 			socket.off(SocketEvent.FRIEND_REQUEST_UPDATE, handleUpdate);
+			socket.off(SocketEvent.FRIEND_REQUEST_NEW, handleNew);
 		};
 	}, [socket, userId, onStatusChange]);
 
@@ -55,93 +78,118 @@ export function useFriendStatus(
 		[onStatusChange],
 	);
 
-	/**
-	 * Runs an action with an optimistic status update.
-	 * Sets `nextStatus` immediately, runs `requestFn`, and rolls back to the
-	 * previous status/requestId if the request fails or throws.
-	 * `requestFn` receives the previous requestId and returns the fetch Response.
-	 */
-	const runOptimistic = useCallback(
-		async (
-			nextStatus: FriendStatus,
-			requestFn: (prevRequestId?: string) => Promise<Response>,
-			options?: { clearRequestId?: boolean },
-		) => {
-			const prevStatus = friendStatus;
-			const prevRequestId = requestId;
-			setFriendStatus(nextStatus);
-			if (options?.clearRequestId) setRequestId(undefined);
-			setIsLoading(true);
-
-			try {
-				const res = await requestFn(prevRequestId);
-				if (res.ok) return res;
-				setFriendStatus(prevStatus);
-				if (options?.clearRequestId) setRequestId(prevRequestId);
-				return undefined;
-			} catch {
-				setFriendStatus(prevStatus);
-				if (options?.clearRequestId) setRequestId(prevRequestId);
-				return undefined;
-			} finally {
-				setIsLoading(false);
-			}
-		},
-		[friendStatus, requestId, setFriendStatus],
-	);
-
 	const sendRequest = useCallback(async () => {
-		const res = await runOptimistic("pending_sent", () =>
-			fetch("/api/friend-requests", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ receiverId: userId }),
-			}),
-		);
-		if (res) {
-			const data = await res.json();
-			setRequestId(data.id);
+		const prevStatus = friendStatus;
+		setFriendStatus("pending_sent");
+		setIsLoading(true);
+
+		try {
+			const res = await sendFriendRequest(userId);
+			if (res.ok) {
+				setRequestId(res.data.id);
+			} else {
+				toast(res.error, "error");
+				setFriendStatus(prevStatus);
+			}
+		} catch {
+			toast("Something went wrong", "error");
+			setFriendStatus(prevStatus);
+		} finally {
+			setIsLoading(false);
 		}
-	}, [userId, runOptimistic]);
+	}, [userId, friendStatus, setFriendStatus, toast]);
+
+	const cancelRequest = useCallback(async () => {
+		if (!requestId) return;
+		const prevStatus = friendStatus;
+		const prevRequestId = requestId;
+		setFriendStatus("none");
+		setRequestId(undefined);
+		setIsLoading(true);
+
+		try {
+			const res = await removeFriendRequest(prevRequestId);
+			if (!res.ok) {
+				toast(res.error, "error");
+				setFriendStatus(prevStatus);
+				setRequestId(prevRequestId);
+			}
+		} catch {
+			toast("Something went wrong", "error");
+			setFriendStatus(prevStatus);
+			setRequestId(prevRequestId);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [requestId, friendStatus, setFriendStatus, toast]);
 
 	const acceptRequest = useCallback(async () => {
 		if (!requestId) return;
-		await runOptimistic("friends", (id) =>
-			fetch(`/api/friend-requests/${id}`, {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "accept" }),
-			}),
-		);
-	}, [requestId, runOptimistic]);
+		const prevStatus = friendStatus;
+		setFriendStatus("friends");
+		setIsLoading(true);
+
+		try {
+			const res = await respondFriendRequest(requestId, "accept");
+			if (!res.ok) {
+				toast(res.error, "error");
+				setFriendStatus(prevStatus);
+			}
+		} catch {
+			toast("Something went wrong", "error");
+			setFriendStatus(prevStatus);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [requestId, friendStatus, setFriendStatus, toast]);
 
 	const rejectRequest = useCallback(async () => {
 		if (!requestId) return;
-		await runOptimistic(
-			"none",
-			(id) =>
-				fetch(`/api/friend-requests/${id}`, {
-					method: "PATCH",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ action: "reject" }),
-				}),
-			{ clearRequestId: true },
-		);
-	}, [requestId, runOptimistic]);
+		const prevStatus = friendStatus;
+		const prevRequestId = requestId;
+		setFriendStatus("none");
+		setRequestId(undefined);
+		setIsLoading(true);
 
-	// cancelRequest and unfriend issue the same DELETE; unified internally,
-	// both names kept because different components call each.
-	const deleteRequest = useCallback(async () => {
+		try {
+			const res = await respondFriendRequest(prevRequestId, "reject");
+			if (!res.ok) {
+				toast(res.error, "error");
+				setFriendStatus(prevStatus);
+				setRequestId(prevRequestId);
+			}
+		} catch {
+			toast("Something went wrong", "error");
+			setFriendStatus(prevStatus);
+			setRequestId(prevRequestId);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [requestId, friendStatus, setFriendStatus, toast]);
+
+	const unfriend = useCallback(async () => {
 		if (!requestId) return;
-		await runOptimistic(
-			"none",
-			(id) => fetch(`/api/friend-requests/${id}`, { method: "DELETE" }),
-			{ clearRequestId: true },
-		);
-	}, [requestId, runOptimistic]);
+		const prevStatus = friendStatus;
+		const prevRequestId = requestId;
+		setFriendStatus("none");
+		setRequestId(undefined);
+		setIsLoading(true);
 
-	const cancelRequest = deleteRequest;
-	const unfriend = deleteRequest;
+		try {
+			const res = await removeFriendRequest(prevRequestId);
+			if (!res.ok) {
+				toast(res.error, "error");
+				setFriendStatus(prevStatus);
+				setRequestId(prevRequestId);
+			}
+		} catch {
+			toast("Something went wrong", "error");
+			setFriendStatus(prevStatus);
+			setRequestId(prevRequestId);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [requestId, friendStatus, setFriendStatus, toast]);
 
 	return {
 		friendStatus,

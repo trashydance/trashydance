@@ -18,7 +18,7 @@ describe("useDebouncedValue", () => {
 
 	it("aggiorna il valore solo dopo il delay", () => {
 		const { result, rerender } = renderHook(
-			({ value }) => useDebouncedValue(value, 300),
+			({ value }: { value: string }) => useDebouncedValue(value, 300),
 			{ initialProps: { value: "a" } },
 		);
 
@@ -38,7 +38,7 @@ describe("useDebouncedValue", () => {
 
 	it("riavvia il timer se il valore cambia prima della scadenza", () => {
 		const { result, rerender } = renderHook(
-			({ value }) => useDebouncedValue(value, 300),
+			({ value }: { value: string }) => useDebouncedValue(value, 300),
 			{ initialProps: { value: "a" } },
 		);
 

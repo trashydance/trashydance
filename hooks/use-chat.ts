@@ -7,15 +7,25 @@ import { useSocket } from "./use-socket";
 
 const SOCKET_ACK_TIMEOUT_MS = 10_000;
 
-export function useChat(conversationId: string) {
-	const [messages, setMessages] = useState<Message[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
+export function useChat(
+	conversationId: string,
+	initialMessages?: Message[],
+	initialHasMore?: boolean,
+	initialCursor?: number | null,
+) {
+	const [messages, setMessages] = useState<Message[]>(initialMessages ?? []);
+	const [isLoading, setIsLoading] = useState(!initialMessages);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
-	const [hasMore, setHasMore] = useState(true);
-	const cursorRef = useRef<string | null>(null);
+	const [hasMore, setHasMore] = useState(initialHasMore ?? true);
+	const cursorRef = useRef<string | number | null>(initialCursor ?? null);
 	const { socket } = useSocket();
 
+	// Seeded by the server component: skip the initial fetch entirely.
+	const seededRef = useRef(Boolean(initialMessages));
+
 	useEffect(() => {
+		if (seededRef.current) return;
+
 		async function loadInitial() {
 			setIsLoading(true);
 			try {
@@ -66,7 +76,7 @@ export function useChat(conversationId: string) {
 		try {
 			const params = new URLSearchParams({ limit: "50" });
 			if (cursorRef.current) {
-				params.set("cursor", cursorRef.current);
+				params.set("cursor", String(cursorRef.current));
 			}
 			const res = await fetch(
 				`/api/conversations/${conversationId}/messages?${params.toString()}`,

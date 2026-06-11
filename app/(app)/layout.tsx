@@ -3,8 +3,13 @@ import type { ReactNode } from "react";
 import { AppNav } from "@/components/feature/app-nav";
 import { ToastProvider } from "@/components/ui/toast";
 import { COPYRIGHT_NOTICE } from "@/lib/constants";
+import { getNotificationCounts } from "@/lib/data/notifications";
+import { getCurrentUser } from "@/lib/data/session";
 
-export default function AppLayout({ children }: { children: ReactNode }) {
+export default async function AppLayout({ children }: { children: ReactNode }) {
+	const me = await getCurrentUser();
+	const counts = me ? await getNotificationCounts(me.id) : null;
+
 	return (
 		<ToastProvider>
 			<div className="flex min-h-svh flex-col">
@@ -18,7 +23,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 								Trashy<span className="text-secondary">dance</span>
 							</span>
 						</Link>
-						<AppNav />
+						<AppNav initialCounts={counts ?? undefined} />
 					</div>
 				</header>
 

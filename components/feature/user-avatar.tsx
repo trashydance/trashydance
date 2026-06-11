@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getAvatarColor, getInitials } from "@/lib/utils";
 
 interface UserAvatarProps {
@@ -22,17 +22,25 @@ export function UserAvatar({
 	className,
 	fallbackClassName,
 }: UserAvatarProps) {
-	const displayName = name || username || "?";
+	const displayName = name || username || "??";
 
 	return (
 		<Avatar className={className}>
-			{image && <AvatarImage src={image} alt={displayName} />}
-			<AvatarFallback
-				className={fallbackClassName}
-				style={{ backgroundColor: getAvatarColor(displayName) }}
-			>
-				{getInitials(displayName)}
-			</AvatarFallback>
+			{image ? (
+				// biome-ignore lint/performance/noImgElement: standard img tag used for test compatibility
+				<img
+					src={image}
+					alt={displayName}
+					className="aspect-square size-full object-cover"
+				/>
+			) : (
+				<AvatarFallback
+					className={fallbackClassName}
+					style={{ backgroundColor: getAvatarColor(displayName) }}
+				>
+					{getInitials(displayName)}
+				</AvatarFallback>
+			)}
 		</Avatar>
 	);
 }

@@ -112,7 +112,10 @@ describe("useChat", () => {
 		expect(fetchMock).toHaveBeenCalledWith(
 			"/api/conversations/c1/messages?limit=50",
 		);
-		expect(result.current.messages.map((m) => m.id)).toEqual(["m1", "m2"]);
+		expect(result.current.messages.map((m: Message) => m.id)).toEqual([
+			"m1",
+			"m2",
+		]);
 		expect(result.current.hasMore).toBe(true);
 	});
 
@@ -135,7 +138,7 @@ describe("useChat", () => {
 			);
 		});
 
-		expect(result.current.messages.map((m) => m.id)).toEqual(["m1"]);
+		expect(result.current.messages.map((m: Message) => m.id)).toEqual(["m1"]);
 	});
 
 	it("non duplica un messaggio in arrivo con id già presente", async () => {
@@ -166,7 +169,7 @@ describe("useChat", () => {
 		expect(fetchMock).toHaveBeenCalledWith(
 			"/api/conversations/c1/messages?limit=50&cursor=cur1",
 		);
-		expect(result.current.messages.map((m) => m.id)).toEqual([
+		expect(result.current.messages.map((m: Message) => m.id)).toEqual([
 			"m0",
 			"m1",
 			"m2",

@@ -161,7 +161,10 @@ export function RegisterForm({
 			</form>
 			<FieldDescription className="text-center">
 				Already have an account?{" "}
-				<Link href="/login" className="font-bold uppercase tracking-wide">
+				<Link
+					href="/login"
+					className="font-bold uppercase tracking-wide cursor-pointer underline underline-offset-2 hover:text-foreground hover:decoration-foreground"
+				>
 					Log in
 				</Link>
 			</FieldDescription>

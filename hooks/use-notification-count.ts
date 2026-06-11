@@ -4,35 +4,24 @@ import { useEffect, useState } from "react";
 import { SocketEvent } from "@/lib/constants";
 import { useSocket } from "./use-socket";
 
-interface NotificationCount {
+export interface NotificationCount {
 	pendingRequests: number;
 	unreadChats: number;
 }
 
-export function useNotificationCount() {
-	const [counts, setCounts] = useState<NotificationCount>({
-		pendingRequests: 0,
-		unreadChats: 0,
-	});
+const ZERO_COUNTS: NotificationCount = { pendingRequests: 0, unreadChats: 0 };
+
+export function useNotificationCount(initialCounts?: NotificationCount) {
+	const [counts, setCounts] = useState<NotificationCount>(
+		initialCounts ?? ZERO_COUNTS,
+	);
 	const { socket } = useSocket();
 
+	// Server-provided counts are authoritative: re-sync whenever the
+	// layout re-renders (e.g. after router.refresh()).
 	useEffect(() => {
-		async function fetchCounts() {
-			try {
-				const res = await fetch("/api/notifications/count");
-				if (res.ok) {
-					const data = await res.json();
-					setCounts({
-						pendingRequests: data.pendingRequests ?? 0,
-						unreadChats: data.unreadChats ?? 0,
-					});
-				}
-			} catch {
-				// Silently fail
-			}
-		}
-		fetchCounts();
-	}, []);
+		if (initialCounts) setCounts(initialCounts);
+	}, [initialCounts]);
 
 	useEffect(() => {
 		if (!socket) return;

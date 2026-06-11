@@ -13,11 +13,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { cn, formatFileSize, getAvatarColor, getInitials } from "@/lib/utils";
+import { UserAvatar } from "@/components/feature/user-avatar";
+import { cn, formatFileSize, formatRelativeTime } from "@/lib/utils";
 
 interface MessageBubbleProps {
 	body: string;
-	createdAt: string;
+	// number (ms) from the server, ISO string for optimistic messages
+	createdAt: string | number | null;
 	isSelf: boolean;
 	status?: "sending" | "sent" | "error";
 	onRetry?: () => void;
@@ -81,6 +83,9 @@ function FilePreview({
 						alt={fileName}
 						width={240}
 						height={180}
+						// The uploads route requires the session cookie: skip the
+						// Next image optimizer (it fetches server-side, unauthenticated)
+						unoptimized
 						className={cn(
 							"rounded-base border-2 border-border",
 							fullView
@@ -104,6 +109,7 @@ function FilePreview({
 							alt={fileName}
 							width={1200}
 							height={900}
+							unoptimized
 							className="relative z-10 max-h-[90vh] max-w-[90vw] rounded-md"
 							style={{ objectFit: "contain" }}
 						/>
@@ -155,7 +161,7 @@ function FilePreview({
 
 export function MessageBubble({
 	body,
-	createdAt: _createdAt,
+	createdAt,
 	isSelf,
 	status,
 	onRetry,
@@ -167,7 +173,6 @@ export function MessageBubble({
 	partnerImage,
 }: MessageBubbleProps) {
 	const hasFile = fileName && fileUrl && fileType && fileSize;
-	const partnerInitials = getInitials(partnerName ?? "??");
 
 	return (
 		<div
@@ -178,25 +183,12 @@ export function MessageBubble({
 		>
 			<div className={cn("flex max-w-[75%] items-start gap-2")}>
 				{!isSelf && (
-					<span
-						className="mt-0.5 flex size-7 shrink-0 items-center justify-center overflow-hidden border-2 border-border text-[9px] font-bold uppercase text-ink"
-						style={
-							partnerImage
-								? undefined
-								: { backgroundColor: getAvatarColor(partnerName ?? "??") }
-						}
-					>
-						{partnerImage ? (
-							// biome-ignore lint/performance/noImgElement: avatar minuscolo già ottimizzato altrove
-							<img
-								src={partnerImage}
-								alt={partnerName ?? ""}
-								className="size-full object-cover"
-							/>
-						) : (
-							partnerInitials
-						)}
-					</span>
+					<UserAvatar
+						name={partnerName ?? null}
+						image={partnerImage}
+						className="mt-0.5 size-7 border-2 border-border"
+						fallbackClassName="text-[9px] font-bold"
+					/>
 				)}
 				<div
 					className={cn(
@@ -220,16 +212,20 @@ export function MessageBubble({
 			</div>
 
 			{isSelf && (
-				<div className="mt-1.5 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+				<div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+					{createdAt && (
+						<>
+							<span>{formatRelativeTime(createdAt)}</span>
+							<span className="text-muted-foreground">•</span>
+						</>
+					)}
 					{status === "sending" && <Loader2 className="size-3 animate-spin" />}
-
 					{status === "sent" && (
 						<>
 							<Check className="size-3" />
 							<span>Sent</span>
 						</>
 					)}
-
 					{status === "error" && (
 						<button
 							type="button"
@@ -241,6 +237,12 @@ export function MessageBubble({
 							<span>Retry</span>
 						</button>
 					)}
+				</div>
+			)}
+
+			{!isSelf && createdAt && (
+				<div className="mt-1.5 ml-9 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+					<span>{formatRelativeTime(createdAt)}</span>
 				</div>
 			)}
 		</div>

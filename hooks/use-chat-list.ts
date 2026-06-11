@@ -1,48 +1,42 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { SocketEvent } from "@/lib/constants";
 import type { Conversation } from "@/lib/types";
 import { useSocket } from "./use-socket";
 
-interface GroupedConversations {
+export interface GroupedConversations {
 	friends: Conversation[];
 	others: Conversation[];
 }
 
-export function useChatList(currentUserId?: string) {
-	const [conversations, setConversations] = useState<GroupedConversations>({
-		friends: [],
-		others: [],
-	});
-	const [isLoading, setIsLoading] = useState(true);
+export function useChatList(
+	initialData: GroupedConversations,
+	currentUserId?: string,
+) {
+	const router = useRouter();
+	const [conversations, setConversations] =
+		useState<GroupedConversations>(initialData);
 	const { socket } = useSocket();
 
-	const fetchConversations = useCallback(async () => {
-		try {
-			const res = await fetch("/api/conversations");
-			if (res.ok) {
-				const data = await res.json();
-				setConversations({
-					friends: data.friends ?? [],
-					others: data.others ?? [],
-				});
-			}
-		} catch {
-			// Silently fail; user can reload
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
+	// Server data is authoritative: re-sync whenever the server
+	// component re-renders (router.refresh() after a socket event).
+	useEffect(() => {
+		setConversations(initialData);
+	}, [initialData]);
+
+	const refetch = useCallback(() => {
+		router.refresh();
+	}, [router]);
 
 	useEffect(() => {
-		fetchConversations();
 		function onFocus() {
-			fetchConversations();
+			refetch();
 		}
 		window.addEventListener("focus", onFocus);
 		return () => window.removeEventListener("focus", onFocus);
-	}, [fetchConversations]);
+	}, [refetch]);
 
 	useEffect(() => {
 		if (!socket) return;
@@ -57,13 +51,13 @@ export function useChatList(currentUserId?: string) {
 				const allConvos = [...prev.friends, ...prev.others];
 				const idx = allConvos.findIndex((c) => c.id === data.conversationId);
 				if (idx === -1) {
-					fetchConversations();
+					// Unknown conversation: let the server rebuild the list
+					refetch();
 					return prev;
 				}
 
 				const conv = allConvos[idx];
-				const prevUnread =
-					(conv as Conversation & { unreadCount?: number }).unreadCount ?? 0;
+				const prevUnread = conv.unreadCount ?? 0;
 				// Do not count messages sent by the current user as unread.
 				const isOwnMessage =
 					currentUserId !== undefined && data.senderId === currentUserId;
@@ -72,7 +66,7 @@ export function useChatList(currentUserId?: string) {
 					...conv,
 					lastMessage: {
 						body: data.body,
-						createdAt: data.createdAt,
+						createdAt: new Date(data.createdAt).getTime(),
 						senderId: data.senderId,
 					},
 					unreadCount: isOwnMessage ? prevUnread : prevUnread + 1,
@@ -88,7 +82,7 @@ export function useChatList(currentUserId?: string) {
 		}
 
 		function handleFriendUpdate() {
-			fetchConversations();
+			refetch();
 		}
 
 		socket.on(SocketEvent.MESSAGE_NEW, handleNewMessage);
@@ -97,7 +91,7 @@ export function useChatList(currentUserId?: string) {
 			socket.off(SocketEvent.MESSAGE_NEW, handleNewMessage);
 			socket.off(SocketEvent.FRIEND_REQUEST_UPDATE, handleFriendUpdate);
 		};
-	}, [socket, fetchConversations, currentUserId]);
+	}, [socket, refetch, currentUserId]);
 
-	return { conversations, isLoading, refetch: fetchConversations };
+	return { conversations, refetch };
 }

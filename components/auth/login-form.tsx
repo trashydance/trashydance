@@ -168,7 +168,7 @@ export function LoginForm({
 				New here?{" "}
 				<Link
 					href="/register"
-					className="font-bold uppercase tracking-wide cursor-pointer underline underline-offset-2 hover:text-foreground hover:decoration-foreground"
+					className="font-bold uppercase tracking-wide cursor-pointer underline underline-offset-2 hover:text-cobalt! hover:decoration-cobalt"
 				>
 					Sign up
 				</Link>

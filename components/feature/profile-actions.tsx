@@ -92,6 +92,7 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 				/>
 				<Button
 					variant="neutral"
+					size="sm"
 					onClick={handleStartChat}
 					disabled={chatLoading}
 				>

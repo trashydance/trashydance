@@ -76,7 +76,7 @@ function FilePreview({
 				<button
 					type="button"
 					onClick={() => setFullView(!fullView)}
-					className="block cursor-pointer"
+					className="block"
 				>
 					<Image
 						src={fileUrl}

@@ -202,7 +202,7 @@ export function HomeClient({
 				<div className="space-y-6">
 					{displayConversations.friends.length > 0 && (
 						<section>
-							<h2 className="mb-3 font-heading text-lg font-bold">Following</h2>
+							<h2 className="mb-3 font-heading text-lg font-bold">Friends</h2>
 							<div className="space-y-2">
 								{displayConversations.friends.map((c) => (
 									<ChatListItem

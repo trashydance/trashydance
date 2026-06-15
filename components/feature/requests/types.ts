@@ -9,20 +9,20 @@ export interface ReceivedRequest {
 	id: string;
 	sender: FriendRequestUser;
 	status: string;
-	createdAt: string;
+	createdAt: number | null;
 }
 
 export interface SentRequest {
 	id: string;
 	receiver: FriendRequestUser;
 	status: string;
-	createdAt: string;
+	createdAt: number | null;
 }
 
 export interface FriendEntry {
 	id: string;
 	friend: FriendRequestUser;
-	createdAt: string;
+	createdAt: number | null;
 }
 
 export interface FriendRequestsData {

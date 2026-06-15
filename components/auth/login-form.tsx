@@ -6,15 +6,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { OAuthButton } from "@/components/auth/oauth-button";
+import { OrDivider } from "@/components/auth/or-divider";
 import { TwoFactorVerify } from "@/components/auth/two-factor-verify";
-import { AppIcon } from "@/components/icons/app-icon";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
 	FieldDescription,
 	FieldGroup,
 	FieldLabel,
-	FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
@@ -86,30 +85,26 @@ export function LoginForm({
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<FieldGroup>
-					<div className="flex flex-col items-center gap-2 text-center">
-						<Link
-							href="/"
-							className="flex flex-col items-center gap-2 font-medium"
-						>
-							<div className="flex size-8 items-center justify-center rounded-md">
-								<AppIcon className="size-6" />
-							</div>
-							<span className="sr-only">ChatSimulator</span>
-						</Link>
-						<h1 className="text-xl font-bold">Sign in to ChatSimulator</h1>
-						<FieldDescription>
-							Don&apos;t have an account? <Link href="/register">Sign up</Link>
-						</FieldDescription>
+					<div>
+						<h1 className="font-heading text-5xl">Log in.</h1>
+						<p className="mt-2 text-sm text-muted-foreground">
+							Welcome back. Drop in and ping someone.
+						</p>
 					</div>
 
 					{apiError.general && (
-						<div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+						<div className="rounded-base border-2 border-destructive bg-destructive/10 p-3 text-sm text-destructive">
 							{apiError.general}
 						</div>
 					)}
 
 					<Field>
-						<FieldLabel htmlFor="username">Username</FieldLabel>
+						<FieldLabel
+							htmlFor="username"
+							className="text-xs font-bold uppercase tracking-wide"
+						>
+							Username
+						</FieldLabel>
 						<Input
 							{...register("username")}
 							id="username"
@@ -117,42 +112,53 @@ export function LoginForm({
 							placeholder="Your username"
 							autoComplete="username"
 							disabled={isSubmitting}
+							className="h-12"
 						/>
 						{(errors.username || apiError.username) && (
-							<p className="text-xs text-red-600">
+							<p className="text-xs text-destructive">
 								{errors.username?.message || apiError.username}
 							</p>
 						)}
 					</Field>
 
 					<Field>
-						<FieldLabel htmlFor="password">Password</FieldLabel>
+						<FieldLabel
+							htmlFor="password"
+							className="text-xs font-bold uppercase tracking-wide"
+						>
+							Password
+						</FieldLabel>
 						<Input
 							{...register("password")}
 							id="password"
 							type="password"
 							placeholder="Enter your password"
 							disabled={isSubmitting}
+							className="h-12"
 						/>
 						{(errors.password || apiError.password) && (
-							<p className="text-xs text-red-600">
+							<p className="text-xs text-destructive">
 								{errors.password?.message || apiError.password}
 							</p>
 						)}
 					</Field>
 
-					<Button type="submit" disabled={isSubmitting} className="w-full">
-						{isSubmitting ? "Logging in..." : "Login"}
+					<Button type="submit" disabled={isSubmitting} className="h-14 w-full">
+						{isSubmitting ? "Logging in..." : "Log in"}
 					</Button>
 
-					<FieldSeparator>Or</FieldSeparator>
+					<OrDivider />
 					<OAuthButton setApiError={setApiError} disabled={isSubmitting} />
 				</FieldGroup>
 			</form>
-			<FieldDescription className="px-6 text-center">
-				By clicking continue, you agree to our{" "}
-				<Link href="/terms">Terms of Service</Link> and{" "}
-				<Link href="/privacy">Privacy Policy</Link>.
+			<FieldDescription className="text-center">
+				New here?{" "}
+				<Link
+					href="/register"
+					className="font-bold uppercase tracking-wide cursor-pointer underline underline-offset-2 hover:text-foreground hover:decoration-foreground"
+				>
+					Sign up
+				</Link>
 			</FieldDescription>
 		</div>
 	);

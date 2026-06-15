@@ -53,3 +53,4 @@ data/uploads/*
 *.md
 .claude/
 *.pdf
+.agent/

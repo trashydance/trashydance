@@ -6,20 +6,19 @@ import {
 	requireAuth,
 	unauthorized,
 } from "@/lib/api-helpers";
-import { SocketEvent } from "@/lib/constants";
+import { RATE_LIMIT } from "@/lib/constants";
 import {
+	createAndDispatchMessage,
 	findConversationForParticipant,
-	getPartnerId,
 } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
-import { emitNotificationCount } from "@/lib/socket/handlers";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { getIO } from "@/lib/socket/io-instance";
-import { presence } from "@/lib/socket/presence";
 import {
 	cursorPaginationSchema,
 	messageSchema,
 } from "@/lib/validation/schemas";
-import { conversation, message, user } from "@/schema";
+import { message, user } from "@/schema";
 
 export async function GET(
 	request: NextRequest,
@@ -107,6 +106,17 @@ export async function POST(
 	const { userId } = auth;
 	const { id: conversationId } = await params;
 
+	// Same key as the Socket.IO path: the budget is shared across channels.
+	if (
+		!rateLimit(
+			`msg:${userId}`,
+			RATE_LIMIT.MESSAGE_MAX,
+			RATE_LIMIT.MESSAGE_WINDOW_MS,
+		)
+	) {
+		return rateLimitResponse();
+	}
+
 	const conv = findConversationForParticipant(conversationId, userId);
 	if (!conv) return notFound("Conversation");
 
@@ -116,48 +126,19 @@ export async function POST(
 		return badRequest("Invalid message");
 	}
 
-	const newId = crypto.randomUUID();
-	const now = new Date();
-
-	db.insert(message)
-		.values({
-			id: newId,
-			conversationId,
-			senderId: userId,
-			body: parsed.data.body || "",
-			fileName: parsed.data.fileName ?? null,
-			fileUrl: parsed.data.fileUrl ?? null,
-			fileType: parsed.data.fileType ?? null,
-			fileSize: parsed.data.fileSize ?? null,
-			createdAt: now,
-		})
-		.run();
-
-	db.update(conversation)
-		.set({ lastMessageAt: now })
-		.where(eq(conversation.id, conversationId))
-		.run();
-
-	const newMessage = {
-		id: newId,
-		conversationId,
-		senderId: userId,
-		body: parsed.data.body || "",
-		fileName: parsed.data.fileName,
-		fileUrl: parsed.data.fileUrl,
-		fileType: parsed.data.fileType,
-		fileSize: parsed.data.fileSize,
-		createdAt: now.getTime(),
-	};
-
-	const io = getIO();
-	if (io) {
-		const partnerId = getPartnerId(conv, userId);
-		for (const sid of presence.getSocketIds(partnerId)) {
-			io.to(sid).emit(SocketEvent.MESSAGE_NEW, newMessage);
-		}
-		emitNotificationCount(io, partnerId);
+	if (
+		parsed.data.fileUrl &&
+		!parsed.data.fileUrl.startsWith(`/api/uploads/${conversationId}/`)
+	) {
+		return badRequest("fileUrl does not belong to this conversation");
 	}
+
+	const newMessage = createAndDispatchMessage(
+		getIO(),
+		conv,
+		userId,
+		parsed.data,
+	);
 
 	return Response.json(newMessage, { status: 201 });
 }

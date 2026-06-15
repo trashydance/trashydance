@@ -2,16 +2,16 @@ import { eq } from "drizzle-orm";
 import type { Server as SocketIOServer } from "socket.io";
 import { RATE_LIMIT, SocketEvent } from "@/lib/constants";
 import {
+	createAndDispatchMessage,
 	findConversationForParticipant,
-	getPartnerId,
 } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
 import { getFriendIds } from "@/lib/friend-helpers";
-import { getNotificationCount } from "@/lib/notification-helpers";
 import { rateLimit } from "@/lib/rate-limit";
 import { messageSchema } from "@/lib/validation/schemas";
-import { conversation, message, user } from "@/schema";
+import { user } from "@/schema";
 import { socketAuthMiddleware } from "./auth";
+import { emitToUser } from "./emit";
 import { presence } from "./presence";
 
 export function setupSocketHandlers(io: SocketIOServer): void {
@@ -61,45 +61,20 @@ export function setupSocketHandlers(io: SocketIOServer): void {
 						return;
 					}
 
-					const now = new Date();
-					const messageId = crypto.randomUUID();
+					if (
+						parsed.data.fileUrl &&
+						!parsed.data.fileUrl.startsWith(`/api/uploads/${conversationId}/`)
+					) {
+						ack?.({ error: "fileUrl does not belong to this conversation" });
+						return;
+					}
 
-					db.transaction((tx) => {
-						tx.insert(message)
-							.values({
-								id: messageId,
-								conversationId,
-								senderId: userId,
-								body: parsed.data.body || "",
-								fileName: parsed.data.fileName ?? null,
-								fileUrl: parsed.data.fileUrl ?? null,
-								fileType: parsed.data.fileType ?? null,
-								fileSize: parsed.data.fileSize ?? null,
-								createdAt: now,
-							})
-							.run();
-
-						tx.update(conversation)
-							.set({ lastMessageAt: now })
-							.where(eq(conversation.id, conversationId))
-							.run();
-					});
-
-					const newMessage = {
-						id: messageId,
-						conversationId,
-						senderId: userId,
-						body: parsed.data.body || "",
-						fileName: parsed.data.fileName,
-						fileUrl: parsed.data.fileUrl,
-						fileType: parsed.data.fileType,
-						fileSize: parsed.data.fileSize,
-						createdAt: now.getTime(),
-					};
-
-					const partnerId = getPartnerId(conv, userId);
-					emitToUser(io, partnerId, SocketEvent.MESSAGE_NEW, newMessage);
-					emitNotificationCount(io, partnerId);
+					const newMessage = createAndDispatchMessage(
+						io,
+						conv,
+						userId,
+						parsed.data,
+					);
 
 					ack?.({ ok: true, message: newMessage });
 				} catch {
@@ -141,25 +116,6 @@ export function setupSocketHandlers(io: SocketIOServer): void {
 			}
 		});
 	});
-}
-
-function emitToUser(
-	io: SocketIOServer,
-	userId: string,
-	event: string,
-	data: unknown,
-): void {
-	for (const sid of presence.getSocketIds(userId)) {
-		io.to(sid).emit(event, data);
-	}
-}
-
-export function emitNotificationCount(
-	io: SocketIOServer,
-	userId: string,
-): void {
-	const counts = getNotificationCount(userId);
-	emitToUser(io, userId, SocketEvent.NOTIFICATION_COUNT, counts);
 }
 
 function broadcastPresence(

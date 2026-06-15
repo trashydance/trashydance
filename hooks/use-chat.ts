@@ -5,15 +5,27 @@ import { SocketEvent } from "@/lib/constants";
 import type { Message } from "@/lib/types";
 import { useSocket } from "./use-socket";
 
-export function useChat(conversationId: string) {
-	const [messages, setMessages] = useState<Message[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
+const SOCKET_ACK_TIMEOUT_MS = 10_000;
+
+export function useChat(
+	conversationId: string,
+	initialMessages?: Message[],
+	initialHasMore?: boolean,
+	initialCursor?: number | null,
+) {
+	const [messages, setMessages] = useState<Message[]>(initialMessages ?? []);
+	const [isLoading, setIsLoading] = useState(!initialMessages);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
-	const [hasMore, setHasMore] = useState(true);
-	const cursorRef = useRef<string | null>(null);
+	const [hasMore, setHasMore] = useState(initialHasMore ?? true);
+	const cursorRef = useRef<string | number | null>(initialCursor ?? null);
 	const { socket } = useSocket();
 
+	// Seeded by the server component: skip the initial fetch entirely.
+	const seededRef = useRef(Boolean(initialMessages));
+
 	useEffect(() => {
+		if (seededRef.current) return;
+
 		async function loadInitial() {
 			setIsLoading(true);
 			try {
@@ -64,7 +76,7 @@ export function useChat(conversationId: string) {
 		try {
 			const params = new URLSearchParams({ limit: "50" });
 			if (cursorRef.current) {
-				params.set("cursor", cursorRef.current);
+				params.set("cursor", String(cursorRef.current));
 			}
 			const res = await fetch(
 				`/api/conversations/${conversationId}/messages?${params.toString()}`,
@@ -131,10 +143,25 @@ export function useChat(conversationId: string) {
 			};
 
 			if (socket?.connected) {
+				// Guard against a missing ack leaving the message stuck on "sending".
+				let acked = false;
+				const ackTimeout = setTimeout(() => {
+					if (acked) return;
+					acked = true;
+					setMessages((prev) =>
+						prev.map((m) =>
+							m.id === tempId ? { ...m, status: "error" as const } : m,
+						),
+					);
+				}, SOCKET_ACK_TIMEOUT_MS);
+
 				socket.emit(
 					SocketEvent.MESSAGE_SEND,
 					payload,
 					(res: { ok?: boolean; message?: Message; error?: string }) => {
+						if (acked) return;
+						acked = true;
+						clearTimeout(ackTimeout);
 						if (res?.ok && res.message) {
 							setMessages((prev) =>
 								prev.map((m) =>

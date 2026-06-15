@@ -10,8 +10,13 @@ export function usePresence(userIds: string[]) {
 		new Map(),
 	);
 
+	// Stable dependency: a new `userIds` array reference on every render would
+	// otherwise force a continuous unsubscribe/resubscribe cycle.
+	const userIdsKey = [...userIds].sort().join(",");
+
 	useEffect(() => {
-		if (!socket || !isConnected || userIds.length === 0) return;
+		const ids = userIdsKey ? userIdsKey.split(",") : [];
+		if (!socket || !isConnected || ids.length === 0) return;
 
 		function handleSnapshot(data: Record<string, "online" | "offline">) {
 			setOnlineUsers(() => {
@@ -33,13 +38,13 @@ export function usePresence(userIds: string[]) {
 
 		socket.on(SocketEvent.PRESENCE_SNAPSHOT, handleSnapshot);
 		socket.on(SocketEvent.PRESENCE_UPDATE, handleUpdate);
-		socket.emit(SocketEvent.PRESENCE_SUBSCRIBE, { userIds });
+		socket.emit(SocketEvent.PRESENCE_SUBSCRIBE, { userIds: ids });
 
 		return () => {
 			socket.off(SocketEvent.PRESENCE_SNAPSHOT, handleSnapshot);
 			socket.off(SocketEvent.PRESENCE_UPDATE, handleUpdate);
 		};
-	}, [socket, isConnected, userIds.length, userIds]);
+	}, [socket, isConnected, userIdsKey]);
 
 	return onlineUsers;
 }

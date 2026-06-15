@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
-import { Caveat, Inter, VT323 } from "next/font/google";
+import { Archivo_Black, Hind } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-
-const fontHeading = VT323({
-	weight: "400",
-	variable: "--font-heading",
+const fontSans = Hind({
+	weight: ["400", "500", "600", "700"],
+	variable: "--font-hind",
 	subsets: ["latin"],
 });
 
-const fontCalligrafico = Caveat({
-	variable: "--font-calligrafic",
+const fontDisplay = Archivo_Black({
+	weight: "400",
+	variable: "--font-archivo-black",
 	subsets: ["latin"],
 });
 
@@ -33,13 +32,12 @@ export default function RootLayout({
 			className={cn(
 				"h-full",
 				"antialiased",
-				fontHeading.variable,
-				fontCalligrafico.variable,
+				fontDisplay.variable,
 				"font-sans",
-				inter.variable,
+				fontSans.variable,
 			)}
 		>
-			<body className="min-h-full flex flex-col font-[family-name:var(--font-pixel)]">
+			<body className="min-h-full flex flex-col font-sans">
 				<TooltipProvider>{children}</TooltipProvider>
 			</body>
 		</html>

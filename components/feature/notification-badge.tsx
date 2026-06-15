@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { CountBadge } from "./count-badge";
 
 interface NotificationBadgeProps {
 	count: number;
@@ -14,13 +14,8 @@ export function NotificationBadge({
 	if (count <= 0) return null;
 
 	return (
-		<span
-			className={cn(
-				"inline-flex size-5 items-center justify-center rounded-full border-2 border-border bg-destructive text-[10px] font-bold text-white shadow-[2px_2px_0px_0px] shadow-border",
-				className,
-			)}
-		>
+		<CountBadge variant="accent" className={className}>
 			{count > 99 ? "99+" : count}
-		</span>
+		</CountBadge>
 	);
 }

@@ -98,12 +98,14 @@ export const cursorPaginationSchema = z.object({
 	limit: z.coerce.number().min(1).max(100).default(50),
 });
 
-/** Profile update — null azzera il campo, undefined lo lascia invariato */
+/** Profile update — null azzera il campo, undefined lo lascia invariato.
+ * L'action converte null in "" prima del parse, quindi qui i campi sono solo
+ * optional (string | undefined): non serve nullable. */
 export const updateProfileSchema = z.object({
-	image: z.string().nullable().optional(),
+	image: z.string().optional(),
 	name: z.string().min(1).max(50).optional(),
-	lastName: z.string().max(50).nullable().optional(),
-	bio: z.string().max(BIO_MAX_LENGTH).nullable().optional(),
+	lastName: z.string().max(50).optional(),
+	bio: z.string().max(BIO_MAX_LENGTH).optional(),
 });
 
 export type MessageInput = z.infer<typeof messageSchema>;

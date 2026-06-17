@@ -8,7 +8,7 @@ const TAGS = ["Realtime · WebSocket", "2FA + 42 OAuth", "Mobile-first"];
 
 export default function Home() {
 	return (
-		<div className="flex h-svh w-full flex-col overflow-hidden bg-background">
+		<div className="flex min-h-svh w-full flex-col overflow-hidden bg-background">
 			{/* header */}
 			<header className="border-b-2 border-ink">
 				<div className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-4">

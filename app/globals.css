@@ -102,6 +102,13 @@
 	--font-weight-heading: 900;
 }
 
+@layer base {
+	button:not(:disabled),
+	[role="button"]:not(:disabled) {
+		cursor: pointer;
+	}
+}
+
 @utility brutal-press-hover {
 	box-shadow: var(--shadow-brutal-lg);
 	transform: translate(-2px, -2px);

@@ -36,7 +36,6 @@ export default function TermsPage() {
 					agree to:
 				</p>
 				<ul className="list-disc pl-6 space-y-2">
-					<li>Provide a valid email address that you have access to</li>
 					<li>
 						Choose a unique username that does not impersonate another person or
 						entity

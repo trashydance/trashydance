@@ -32,9 +32,8 @@ export default function PrivacyPage() {
 				</p>
 				<ul className="list-disc pl-6 space-y-2">
 					<li>
-						<strong>Account information</strong> &mdash; username, email
-						address, and password hash (we never store your password in plain
-						text)
+						<strong>Account information</strong> &mdash; username, and password
+						hash (we never store your password in plain text)
 					</li>
 					<li>
 						<strong>Profile data</strong> &mdash; profile image URL, display
@@ -54,7 +53,7 @@ export default function PrivacyPage() {
 					</li>
 					<li>
 						<strong>OAuth data</strong> &mdash; if you sign in via 42 Intra
-						OAuth, we receive your 42 user ID, email, and profile information as
+						OAuth, we receive your 42 user ID, and profile information as
 						provided by the 42 OAuth provider
 					</li>
 				</ul>
@@ -152,8 +151,7 @@ export default function PrivacyPage() {
 					</li>
 					<li>
 						<strong>Right to rectification</strong> &mdash; you can update your
-						username, email, profile image, and other account information at any
-						time
+						username, profile image, and other account information at any time
 					</li>
 					<li>
 						<strong>Right to erasure</strong> &mdash; you can delete your

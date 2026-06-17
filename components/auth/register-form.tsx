@@ -163,7 +163,7 @@ export function RegisterForm({
 				Already have an account?{" "}
 				<Link
 					href="/login"
-					className="font-bold uppercase tracking-wide cursor-pointer underline underline-offset-2 hover:text-foreground hover:decoration-foreground"
+					className="font-bold uppercase tracking-wide underline underline-offset-2 hover:text-foreground hover:decoration-foreground"
 				>
 					Log in
 				</Link>

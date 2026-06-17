@@ -92,6 +92,7 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 				/>
 				<Button
 					variant="neutral"
+					size="sm"
 					onClick={handleStartChat}
 					disabled={chatLoading}
 				>
@@ -114,8 +115,7 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 				<DialogHeader>
 					<DialogTitle>Edit profile</DialogTitle>
 					<DialogDescription>
-						Update your profile information. Username and email cannot be
-						changed.
+						Update your profile information. Username cannot be changed.
 					</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4 px-5 py-4">

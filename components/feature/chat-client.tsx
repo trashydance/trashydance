@@ -210,6 +210,8 @@ export function ChatClient({
 									</button>
 								)}
 								<MessageBubble
+									partnerName={meta.partnerName}
+									partnerImage={meta.partnerImage}
 									body={msg.body}
 									createdAt={msg.createdAt}
 									isSelf={isSelf}

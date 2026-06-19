@@ -25,6 +25,16 @@ function buildAuth() {
 			deleteUser: {
 				enabled: true,
 			},
+			additionalFields: {
+				lastName: {
+					type: "string",
+					required: false,
+				},
+				bio: {
+					type: "string",
+					required: false,
+				},
+			},
 		},
 
 		plugins: [

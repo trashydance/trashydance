@@ -67,6 +67,7 @@ export async function updateProfile(
 	db.update(user).set(updates).where(eq(user.id, userId)).run();
 
 	revalidatePath("/profile/[username]", "page");
+	revalidatePath("/settings");
 
 	return { ok: true, data: undefined };
 }

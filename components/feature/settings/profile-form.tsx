@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { updateProfile } from "@/lib/actions/profile";
+import { authClient } from "@/lib/auth-client";
 import { BIO_MAX_LENGTH } from "@/lib/constants";
 import type { User } from "@/lib/types";
 
@@ -37,6 +38,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
 				bio: bio || null,
 			});
 			if (res.ok) {
+				await authClient.getSession();
 				setSaved(true);
 				setTimeout(() => setSaved(false), 2000);
 			}

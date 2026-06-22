@@ -21,7 +21,7 @@ export function ReceivedRequests({
 
 	return (
 		<section>
-			<SectionHeader title="Received requests" count={requests.length} />
+			<SectionHeader title="Received friend requests" count={requests.length} />
 			<div className="space-y-2">
 				{requests.map((req) => (
 					<FriendCard

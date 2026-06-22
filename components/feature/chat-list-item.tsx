@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { RelativeTime } from "@/components/ui/relative-time";
 import type { Conversation } from "@/lib/types";
-import { cn, formatRelativeTime, truncateText } from "@/lib/utils";
+import { cn, truncateText } from "@/lib/utils";
 import { NotificationBadge } from "./notification-badge";
 import { OnlineIndicator } from "./online-indicator";
 import { UserAvatar } from "./user-avatar";
@@ -50,9 +51,10 @@ export function ChatListItem({
 			</div>
 			<div className="flex shrink-0 flex-col items-end gap-1 self-start">
 				{lastMessage && (
-					<span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-						{formatRelativeTime(lastMessage.createdAt ?? "")}
-					</span>
+					<RelativeTime
+						createdAt={lastMessage.createdAt}
+						className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+					/>
 				)}
 				{unread > 0 && <NotificationBadge count={unread} />}
 			</div>

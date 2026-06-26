@@ -19,10 +19,14 @@ export function SentRequests({
 
 	return (
 		<section>
-			<SectionHeader title="Sent requests" count={requests.length} />
+			<SectionHeader title="Sent friend requests" count={requests.length} />
 			<div className="space-y-2">
 				{requests.map((req) => (
-					<FriendCard key={req.id} user={req.receiver} subtitle="waiting">
+					<FriendCard
+						key={req.id}
+						user={req.receiver}
+						subtitle="friend request pending"
+					>
 						<Button
 							variant="outline"
 							size="sm"

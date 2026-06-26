@@ -21,11 +21,20 @@ const countBadgeVariants = cva(
 interface CountBadgeProps extends VariantProps<typeof countBadgeVariants> {
 	children: ReactNode;
 	className?: string;
+	title?: string;
 }
 
-export function CountBadge({ variant, className, children }: CountBadgeProps) {
+export function CountBadge({
+	variant,
+	className,
+	children,
+	title,
+}: CountBadgeProps) {
 	return (
-		<span className={cn(countBadgeVariants({ variant }), className)}>
+		<span
+			className={cn(countBadgeVariants({ variant }), className)}
+			title={title}
+		>
 			{children}
 		</span>
 	);

@@ -1,0 +1,31 @@
+Fix: Avoid router.refresh() during HomeClient render
+
+Problema:
+
+Ho trovato un errore console in HomeClient dovuto a una chiamata router.refresh() eseguita durante il rendering di un altro componente.
+
+Messaggio di errore:
+- Cannot update a component (Router) while rendering a different component (HomeClient).
+
+Il problema avveniva in hooks/use-chat-list.ts, perché refetch() chiamava direttamente router.refresh() all'interno di un callback invocato durante la renderizzazione del componente.
+
+Soluzione:
+
+- Introdotto uno stato locale refreshIndex in useChatList.
+- refetch() ora incrementa il contatore invece di effettuare router.refresh() direttamente.
+- Aggiunto un effetto che osserva refreshIndex e chiama router.refresh() solo dopo il render.
+- In handleNewMessage(), l'aggiornamento di refresh viene segnalato con needsRefresh e refetch() viene eseguito al di fuori dell'updater dello stato.
+
+File modificato:
+- hooks/use-chat-list.ts
+
+Test:
+- Verificato su macchina 42.
+- Nessun errore console relativo a setState durante il rendering di HomeClient.
+
+Branch:
+- fix/use-chatlist-router-refresh
+
+Note per PR:
+
+Questo fix evita update fuori fase tra componenti client e router e mantiene la sincronizzazione con i dati server.

@@ -14,7 +14,8 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 import { UserAvatar } from "@/components/feature/user-avatar";
-import { cn, formatFileSize, formatRelativeTime } from "@/lib/utils";
+import { RelativeTime } from "@/components/ui/relative-time";
+import { cn, formatFileSize } from "@/lib/utils";
 
 interface MessageBubbleProps {
 	body: string;
@@ -215,7 +216,7 @@ export function MessageBubble({
 				<div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
 					{createdAt && (
 						<>
-							<span>{formatRelativeTime(createdAt)}</span>
+							<RelativeTime createdAt={createdAt} />
 							<span className="text-muted-foreground">•</span>
 						</>
 					)}
@@ -242,7 +243,7 @@ export function MessageBubble({
 
 			{!isSelf && createdAt && (
 				<div className="mt-1.5 ml-9 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-					<span>{formatRelativeTime(createdAt)}</span>
+					<RelativeTime createdAt={createdAt} />
 				</div>
 			)}
 		</div>

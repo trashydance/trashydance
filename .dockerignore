@@ -7,5 +7,5 @@ node_modules
 .vscode
 .claude
 .agents
-local.db
+local.db*
 data/

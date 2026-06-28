@@ -6,8 +6,29 @@ import { setupSocketHandlers } from "@/lib/socket/handlers";
 import { setIO } from "@/lib/socket/io-instance";
 
 const dev = process.env.NODE_ENV !== "production";
-const hostname = "0.0.0.0";
-const port = Number.parseInt(process.env.PORT || "3000", 10);
+
+function parseHostname(value?: string): string {
+	// Use localhost by default in development so the browser origin matches
+	// Better Auth's local origin checks and avoids `Invalid origin: http://0.0.0.0:3000`.
+	if (!value) return "localhost";
+	if (value.length === 0 || value.length > 255 || /\s/.test(value)) {
+		throw new Error(`Invalid HOSTNAME environment variable: ${value}`);
+	}
+	return value;
+}
+
+const hostname = parseHostname(process.env.HOSTNAME);
+
+function parsePort(value?: string): number {
+	if (!value) return 3000;
+	const n = Number(value);
+	if (!Number.isInteger(n) || n <= 0 || n > 65535) {
+		throw new Error(`Invalid PORT environment variable: ${value}`);
+	}
+	return n;
+}
+
+const port = parsePort(process.env.PORT);
 
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();

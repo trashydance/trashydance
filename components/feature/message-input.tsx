@@ -18,6 +18,7 @@ import {
 	TEXTAREA_MAX_HEIGHT_PX,
 } from "@/lib/constants";
 import { cn, formatFileSize } from "@/lib/utils";
+import { NorminetteButton } from "./norminette-button";
 
 interface FileInfo {
 	fileName: string;
@@ -31,6 +32,7 @@ interface MessageInputProps {
 	conversationId: string;
 	disabled?: boolean;
 	className?: string;
+	isBlackHoleMode?: boolean;
 }
 
 export function MessageInput({
@@ -38,6 +40,7 @@ export function MessageInput({
 	conversationId,
 	disabled,
 	className,
+	isBlackHoleMode,
 }: MessageInputProps) {
 	const [value, setValue] = useState("");
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -194,7 +197,11 @@ export function MessageInput({
 						placeholder="Write something..."
 						disabled={disabled || isUploading}
 						rows={1}
-						className="w-full resize-none rounded-base border-2 border-border bg-card px-3 py-2 pr-16 text-sm shadow-shadow transition-all outline-none placeholder:text-muted-foreground focus:brutal-press-focus disabled:opacity-50"
+						className={cn(
+							"w-full resize-none rounded-base border-2 border-border bg-card px-3 py-2 pr-16 text-sm shadow-shadow transition-all outline-none placeholder:text-muted-foreground focus:brutal-press-focus disabled:opacity-50",
+							isBlackHoleMode &&
+								"bg-slate-900 text-white placeholder:text-slate-400 border-purple-500/50 focus:ring-1 focus:ring-purple-500 focus:border-purple-500",
+						)}
 					/>
 					<span
 						className={cn(
@@ -209,6 +216,11 @@ export function MessageInput({
 						{charCount}/{MAX_MESSAGE_LENGTH}
 					</span>
 				</div>
+				<NorminetteButton
+					currentText={value}
+					onFormat={setValue}
+					disabled={disabled || isUploading || !value.trim()}
+				/>
 				<Button
 					size="icon"
 					onClick={handleSend}

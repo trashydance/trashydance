@@ -4,12 +4,13 @@ import { RATE_LIMIT, SocketEvent } from "@/lib/constants";
 import {
 	createAndDispatchMessage,
 	findConversationForParticipant,
+	getPartnerId,
 } from "@/lib/conversation-helpers";
 import db from "@/lib/db";
 import { getFriendIds } from "@/lib/friend-helpers";
 import { rateLimit } from "@/lib/rate-limit";
 import { messageSchema } from "@/lib/validation/schemas";
-import { user } from "@/schema";
+import { message, user } from "@/schema";
 import { socketAuthMiddleware } from "./auth";
 import { emitToUser } from "./emit";
 import { presence } from "./presence";
@@ -104,6 +105,44 @@ export function setupSocketHandlers(io: SocketIOServer): void {
 			);
 			socket.emit(SocketEvent.PRESENCE_SNAPSHOT, snapshot);
 		});
+
+		socket.on(
+			"blackhole:toggle",
+			async (payload: { conversationId: string; isActive: boolean }) => {
+				const { conversationId, isActive } = payload;
+				const conv = findConversationForParticipant(conversationId, userId);
+				if (!conv) return;
+				const partnerId = getPartnerId(conv, userId);
+
+				const sender = db
+					.select({ name: user.name })
+					.from(user)
+					.where(eq(user.id, userId))
+					.get();
+
+				emitToUser(io, partnerId, "blackhole:toggle", {
+					conversationId,
+					isActive,
+					activatedBy: sender?.name || "Someone",
+				});
+			},
+		);
+
+		socket.on(
+			"blackhole:absorb",
+			async (payload: { conversationId: string }) => {
+				const { conversationId } = payload;
+				const conv = findConversationForParticipant(conversationId, userId);
+				if (!conv) return;
+
+				db.delete(message)
+					.where(eq(message.conversationId, conversationId))
+					.run();
+
+				emitToUser(io, conv.userAId, "blackhole:absorb", { conversationId });
+				emitToUser(io, conv.userBId, "blackhole:absorb", { conversationId });
+			},
+		);
 
 		socket.on("disconnect", () => {
 			const wentOffline = presence.removeSocket(userId, socket.id);

@@ -7,6 +7,38 @@ import { useSocket } from "./use-socket";
 
 const SOCKET_ACK_TIMEOUT_MS = 10_000;
 
+function generateUUID(): string {
+	try {
+		// Prefer native randomUUID when available (Node 18+ / modern browsers)
+		if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+			// biome-ignore lint/suspicious/noExplicitAny: fallback for environments without typed randomUUID
+			return (crypto as any).randomUUID();
+		}
+
+		// Fallback to Web Crypto API if present
+		if (
+			typeof window !== "undefined" &&
+			window.crypto &&
+			window.crypto.getRandomValues
+		) {
+			const buf = new Uint8Array(16);
+			window.crypto.getRandomValues(buf);
+			// Per RFC4122 v4
+			buf[6] = (buf[6] & 0x0f) | 0x40;
+			buf[8] = (buf[8] & 0x3f) | 0x80;
+			const hex = Array.from(buf)
+				.map((b) => b.toString(16).padStart(2, "0"))
+				.join("");
+			return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
+		}
+	} catch {
+		// ignore
+	}
+
+	// Last-resort fallback (not RFC-compliant but reasonably unique for temp ids)
+	return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 export function useChat(
 	conversationId: string,
 	initialMessages?: Message[],
@@ -109,7 +141,7 @@ export function useChat(
 				fileSize: number;
 			},
 		) => {
-			const tempId = `temp-${crypto.randomUUID()}`;
+			const tempId = `temp-${generateUUID()}`;
 			const optimisticMessage: Message = {
 				id: tempId,
 				conversationId,
@@ -245,5 +277,6 @@ export function useChat(
 		isLoading,
 		isLoadingMore,
 		hasMore,
+		setMessages,
 	};
 }

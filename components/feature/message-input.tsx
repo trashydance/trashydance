@@ -194,7 +194,7 @@ export function MessageInput({
 						placeholder="Write something..."
 						disabled={disabled || isUploading}
 						rows={1}
-						className="w-full resize-none rounded-base border-2 border-border bg-card px-3 py-2 pr-16 text-sm shadow-brutal-sm transition-all outline-none placeholder:text-muted-foreground focus:brutal-press-focus-sm disabled:opacity-50"
+						className="w-full resize-none rounded-base border-2 border-border bg-card px-3 py-2 pr-16 text-sm shadow-shadow transition-all outline-none placeholder:text-muted-foreground focus:brutal-press-focus disabled:opacity-50"
 					/>
 					<span
 						className={cn(

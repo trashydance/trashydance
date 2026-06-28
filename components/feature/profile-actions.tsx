@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { createConversation } from "@/lib/actions/conversations";
 import { updateProfile } from "@/lib/actions/profile";
+import { authClient } from "@/lib/auth-client";
 import type { Profile } from "@/lib/types";
 
 interface ProfileActionsProps {
@@ -52,6 +53,7 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 				bio: editBio || null,
 			});
 			if (res.ok) {
+				await authClient.getSession();
 				// revalidatePath inside the action re-renders the page
 				setDialogOpen(false);
 			} else {

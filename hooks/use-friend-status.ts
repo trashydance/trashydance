@@ -15,7 +15,7 @@ export function useFriendStatus(
 	userId: string,
 	initialStatus: FriendStatus,
 	initialRequestId?: string,
-	onStatusChange?: (status: FriendStatus) => void,
+	onStatusChange?: (status: FriendStatus, requestId?: string) => void,
 ) {
 	const [friendStatus, setFriendStatusRaw] =
 		useState<FriendStatus>(initialStatus);
@@ -71,9 +71,9 @@ export function useFriendStatus(
 	}, [socket, userId, onStatusChange]);
 
 	const setFriendStatus = useCallback(
-		(status: FriendStatus) => {
+		(status: FriendStatus, reqId?: string) => {
 			setFriendStatusRaw(status);
-			onStatusChange?.(status);
+			onStatusChange?.(status, reqId);
 		},
 		[onStatusChange],
 	);
@@ -87,6 +87,7 @@ export function useFriendStatus(
 			const res = await sendFriendRequest(userId);
 			if (res.ok) {
 				setRequestId(res.data.id);
+				setFriendStatus("pending_sent", res.data.id);
 			} else {
 				toast(res.error, "error");
 				setFriendStatus(prevStatus);

@@ -29,6 +29,16 @@ export function FriendRequestsClient({
 	const [actionLoading, setActionLoading] = useState<string | null>(null);
 	const { socket } = useSocket();
 
+	const [friends, setFriends] = useState(data.accepted);
+	const [received, setReceived] = useState(data.received);
+	const [sent, setSent] = useState(data.sent);
+
+	useEffect(() => {
+		setFriends(data.accepted);
+		setReceived(data.received);
+		setSent(data.sent);
+	}, [data]);
+
 	// Live updates: re-run the server component query so fresh data
 	// flows back in as props — no client-side refetch needed.
 	useEffect(() => {
@@ -53,8 +63,10 @@ export function FriendRequestsClient({
 				} else {
 					toast(res.error, "error");
 				}
+				return res;
 			} catch {
 				toast("Something went wrong", "error");
+				return { ok: false, error: "Something went wrong" };
 			} finally {
 				setActionLoading(null);
 			}
@@ -65,7 +77,13 @@ export function FriendRequestsClient({
 	const handleAccept = useCallback(
 		(id: string) => {
 			setActionLoading(id);
-			performAction(() => respondFriendRequest(id, "accept"));
+			performAction(async () => {
+				const res = await respondFriendRequest(id, "accept");
+				if (res.ok) {
+					setReceived((prev) => prev.filter((r) => r.id !== id));
+				}
+				return res;
+			});
 		},
 		[performAction],
 	);
@@ -73,7 +91,13 @@ export function FriendRequestsClient({
 	const handleReject = useCallback(
 		(id: string) => {
 			setActionLoading(id);
-			performAction(() => respondFriendRequest(id, "reject"));
+			performAction(async () => {
+				const res = await respondFriendRequest(id, "reject");
+				if (res.ok) {
+					setReceived((prev) => prev.filter((r) => r.id !== id));
+				}
+				return res;
+			});
 		},
 		[performAction],
 	);
@@ -83,7 +107,13 @@ export function FriendRequestsClient({
 			if (!window.confirm("Do you want to withdraw this friend request?"))
 				return;
 			setActionLoading(id);
-			performAction(() => removeFriendRequest(id));
+			performAction(async () => {
+				const res = await removeFriendRequest(id);
+				if (res.ok) {
+					setSent((prev) => prev.filter((r) => r.id !== id));
+				}
+				return res;
+			});
 		},
 		[performAction],
 	);
@@ -93,15 +123,19 @@ export function FriendRequestsClient({
 			if (!window.confirm("Are you sure you want to remove this friend?"))
 				return;
 			setActionLoading(id);
-			performAction(() => removeFriendRequest(id));
+			performAction(async () => {
+				const res = await removeFriendRequest(id);
+				if (res.ok) {
+					setFriends((prev) => prev.filter((f) => f.id !== id));
+				}
+				return res;
+			});
 		},
 		[performAction],
 	);
 
 	const isEmpty =
-		data.received.length === 0 &&
-		data.sent.length === 0 &&
-		data.accepted.length === 0;
+		received.length === 0 && sent.length === 0 && friends.length === 0;
 
 	return (
 		<>
@@ -114,18 +148,18 @@ export function FriendRequestsClient({
 			)}
 
 			<ReceivedRequests
-				requests={data.received}
+				requests={received}
 				onAccept={handleAccept}
 				onReject={handleReject}
 				loadingId={actionLoading}
 			/>
 			<SentRequests
-				requests={data.sent}
+				requests={sent}
 				onCancel={handleCancel}
 				loadingId={actionLoading}
 			/>
 			<FriendsList
-				friends={data.accepted}
+				friends={friends}
 				onUnfriend={handleUnfriend}
 				loadingId={actionLoading}
 			/>

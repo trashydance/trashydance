@@ -54,9 +54,17 @@ export function FriendRequestButton({
 			<Button
 				variant="outline"
 				size="sm"
-				onClick={cancelRequest}
+				onClick={() => {
+					if (window.confirm("Do you want to withdraw this friend request?")) {
+						cancelRequest();
+					}
+				}}
 				disabled={isLoading}
-				className={cn(!textOnly && "opacity-70", className)}
+				className={cn(
+					"group transition-all duration-200 hover:border-destructive hover:text-destructive hover:bg-destructive/10",
+					!textOnly && "opacity-70 hover:opacity-100",
+					className,
+				)}
 				title={textOnly ? undefined : "Friend request sent — click to cancel"}
 				aria-label={
 					textOnly
@@ -64,8 +72,20 @@ export function FriendRequestButton({
 						: "Friend request sent. Click to cancel"
 				}
 			>
-				{!textOnly && <Clock className="size-4" />}
-				{textOnly ? "Cancel" : "Pending"}
+				{!textOnly && (
+					<>
+						<Clock className="size-4 group-hover:hidden" />
+						<X className="size-4 hidden group-hover:inline text-destructive" />
+					</>
+				)}
+				{textOnly ? (
+					"Cancel"
+				) : (
+					<>
+						<span className="group-hover:hidden">Pending</span>
+						<span className="hidden group-hover:inline">Cancel</span>
+					</>
+				)}
 			</Button>
 		);
 	}

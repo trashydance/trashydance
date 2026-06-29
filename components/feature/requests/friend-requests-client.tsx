@@ -80,6 +80,8 @@ export function FriendRequestsClient({
 
 	const handleCancel = useCallback(
 		(id: string) => {
+			if (!window.confirm("Do you want to withdraw this friend request?"))
+				return;
 			setActionLoading(id);
 			performAction(() => removeFriendRequest(id));
 		},
@@ -88,6 +90,8 @@ export function FriendRequestsClient({
 
 	const handleUnfriend = useCallback(
 		(id: string) => {
+			if (!window.confirm("Are you sure you want to remove this friend?"))
+				return;
 			setActionLoading(id);
 			performAction(() => removeFriendRequest(id));
 		},

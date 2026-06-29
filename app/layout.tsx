@@ -17,8 +17,11 @@ const fontDisplay = Archivo_Black({
 });
 
 export const metadata: Metadata = {
-	title: "ChatSimulator (really good one)",
-	description: "Really good chat simulator, now with games too!",
+	title: {
+		default: "TrashyDance",
+		template: "%s | TrashyDance",
+	},
+	description: "A secure and fun 1-to-1 chat application, now with games too!",
 };
 
 export default function RootLayout({

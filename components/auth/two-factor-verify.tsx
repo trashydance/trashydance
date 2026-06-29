@@ -84,7 +84,7 @@ export function TwoFactorVerify({
 					<div className="flex size-8 items-center justify-center rounded-md">
 						<AppIcon className="size-6" />
 					</div>
-					<span className="sr-only">ChatSimulator</span>
+					<span className="sr-only">TrashyDance</span>
 				</Link>
 				<h1 className="text-xl font-bold">Two-Factor Authentication</h1>
 				<FieldDescription>

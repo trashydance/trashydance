@@ -1,4 +1,9 @@
+import type { Metadata } from "next";
 import { CONTACT_EMAIL } from "@/lib/constants";
+
+export const metadata: Metadata = {
+	title: "Privacy Policy",
+};
 
 export default function PrivacyPage() {
 	return (

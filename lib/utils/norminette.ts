@@ -18,6 +18,11 @@ export function formatWithNorminette(text: string): string {
 	// 3. Trim trailing/leading spaces
 	result = result.trim();
 
+	// 3.5. Aggiungi punto e virgola a fine messaggio se non presente
+	if (result.length > 0 && !result.endsWith(";")) {
+		result += ";";
+	}
+
 	// 4. Suddividi in righe a 80 char max, aggiungi warning se supera
 	const lines: string[] = [];
 	let currentLine = "";
@@ -60,6 +65,11 @@ export function formatWithNorminetteLight(text: string): string {
 
 	// Trim
 	result = result.trim();
+
+	// Aggiungi punto e virgola a fine messaggio se non presente
+	if (result.length > 0 && !result.endsWith(";")) {
+		result += ";";
+	}
 
 	return result;
 }

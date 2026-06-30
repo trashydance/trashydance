@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
+import { useI18n } from "@/lib/i18n/i18n-context";
 
 export function DeleteAccountSection() {
 	const router = useRouter();
@@ -12,6 +13,7 @@ export function DeleteAccountSection() {
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [deleting, setDeleting] = useState(false);
 	const [deleteError, setDeleteError] = useState("");
+	const { t } = useI18n();
 
 	const handleDelete = async () => {
 		setDeleting(true);
@@ -35,11 +37,9 @@ export function DeleteAccountSection() {
 			<div className="flex items-center justify-between gap-4">
 				<div>
 					<p className="text-sm font-bold uppercase tracking-wide">
-						Delete account
+						{t("deleteAccount")}
 					</p>
-					<p className="text-xs">
-						This is permanent. Removes profile, sessions, messages.
-					</p>
+					<p className="text-xs">{t("deleteAccountDesc")}</p>
 				</div>
 				<Button
 					variant="outline"
@@ -49,7 +49,7 @@ export function DeleteAccountSection() {
 						setDeleteError("");
 					}}
 				>
-					Delete
+					{t("deleteBtn")}
 				</Button>
 			</div>
 
@@ -73,7 +73,7 @@ export function DeleteAccountSection() {
 							onClick={handleDelete}
 							disabled={deleting}
 						>
-							{deleting ? "Deleting..." : "Delete forever"}
+							{deleting ? t("saving") : "Delete forever"}
 						</Button>
 					</div>
 				</div>

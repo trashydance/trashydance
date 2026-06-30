@@ -16,6 +16,7 @@ import {
 } from "@/lib/actions/friends";
 import type { ActionResult } from "@/lib/actions/types";
 import { SocketEvent } from "@/lib/constants";
+import { useI18n } from "@/lib/i18n/i18n-context";
 
 interface FriendRequestsClientProps {
 	initialData: FriendRequestsData;
@@ -28,6 +29,7 @@ export function FriendRequestsClient({
 	const { toast } = useToast();
 	const [actionLoading, setActionLoading] = useState<string | null>(null);
 	const { socket } = useSocket();
+	const { t } = useI18n();
 
 	const [friends, setFriends] = useState(data.accepted);
 	const [received, setReceived] = useState(data.received);
@@ -139,11 +141,12 @@ export function FriendRequestsClient({
 
 	return (
 		<>
+			<h1 className="font-heading text-5xl mb-8">{t("friends")}</h1>
 			{isEmpty && (
 				<EmptyState
 					icon={Users}
-					title="No friend requests yet"
-					description="When someone sends you a friend request, it will show up here."
+					title={t("noFriendRequests")}
+					description={t("noFriendRequestsDesc")}
 				/>
 			)}
 

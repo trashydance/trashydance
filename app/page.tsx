@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { GDPRCookieBanner } from "@/components/feature/gdpr-cookie-banner";
 import { Button } from "@/components/ui/button";
 import { COPYRIGHT_NOTICE } from "@/lib/constants";
 
@@ -95,6 +96,7 @@ export default function Home() {
 					</nav>
 				</div>
 			</footer>
+			<GDPRCookieBanner />
 		</div>
 	);
 }

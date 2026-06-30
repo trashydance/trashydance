@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { updateProfile } from "@/lib/actions/profile";
 import { authClient } from "@/lib/auth-client";
 import { BIO_MAX_LENGTH } from "@/lib/constants";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import type { User } from "@/lib/types";
 
 interface ProfileFormProps {
@@ -47,6 +48,8 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
 		}
 	};
 
+	const { t } = useI18n();
+
 	return (
 		<div className="flex flex-col gap-4 rounded-base border-4 border-border bg-card p-6 shadow-shadow">
 			<div className="grid gap-4 sm:grid-cols-2">
@@ -55,7 +58,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
 						htmlFor="first-name"
 						className="mb-2 block text-xs font-bold uppercase tracking-wide"
 					>
-						First name
+						{t("firstName")}
 					</label>
 					<Input
 						id="first-name"
@@ -69,7 +72,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
 						htmlFor="last-name"
 						className="mb-2 block text-xs font-bold uppercase tracking-wide"
 					>
-						Last name
+						{t("lastName")}
 					</label>
 					<Input
 						id="last-name"
@@ -84,7 +87,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
 					htmlFor="bio"
 					className="mb-2 block text-xs font-bold uppercase tracking-wide"
 				>
-					Bio
+					{t("bio")}
 				</label>
 				<Textarea
 					id="bio"
@@ -103,7 +106,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
 					disabled={saving || !firstName.trim()}
 					size="sm"
 				>
-					{saving ? "Saving..." : saved ? "Saved!" : "Save changes"}
+					{saving ? t("saving") : saved ? t("saved") : t("saveChanges")}
 				</Button>
 			</div>
 		</div>

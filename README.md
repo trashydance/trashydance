@@ -161,7 +161,9 @@
 | ✅ | User Mgmt | Standard user management | Major | 2 | Profile editing, avatar upload with default fallback, friend system with online status, profile pages with user information. |
 | ✅ | User Mgmt | OAuth 2.0 (42 Intra) | Minor | 1 | OAuth 2.0 Authorization Code flow via 42 Intra API. Automatic account linking if email exists. |
 | ✅ | User Mgmt | Two-Factor Authentication (TOTP) | Minor | 1 | Complete 2FA flow: enable with password verification, TOTP QR code (generated locally), 6-digit verification, backup codes, disable with password. Login requires TOTP when enabled. |
-| | | **Total** | | **14** | |
+| ✅ | Accessibility | Support for multiple languages (3 languages) | Minor | 1 | Client-side internationalization system (EN, IT, BG) with dynamic context-based translations, custom language switcher, and full localization. |
+| ✅ | Data/Analytics | GDPR compliance features | Minor | 1 | Data export in structured JSON format, cookie consent notification banner, and permanent account deletion mechanism. |
+| | | **Total** | | **16** | |
 
 ---
 

@@ -18,6 +18,7 @@ import { MoulinetteOverlay } from "@/components/feature/moulinette-overlay";
 import { UserAvatar } from "@/components/feature/user-avatar";
 import { RelativeTime } from "@/components/ui/relative-time";
 import { deleteMessage } from "@/lib/actions/conversations";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import { cn, formatFileSize } from "@/lib/utils";
 
 interface MessageBubbleProps {
@@ -184,6 +185,7 @@ export function MessageBubble({
 	onExpired,
 	isAbsorbActive,
 }: MessageBubbleProps) {
+	const { t } = useI18n();
 	const hasFile = fileName && fileUrl && fileType && fileSize;
 	const [isMoulinetteOpen, setIsMoulinetteOpen] = useState(false);
 
@@ -340,7 +342,7 @@ export function MessageBubble({
 						{status === "sent" && (
 							<>
 								<Check className="size-3" />
-								<span>Sent</span>
+								<span>{t("sentStatus")}</span>
 							</>
 						)}
 						{status === "error" && (
@@ -351,7 +353,7 @@ export function MessageBubble({
 								aria-label="Retry sending message"
 							>
 								<AlertCircle className="size-3" />
-								<span>Retry</span>
+								<span>{t("retry")}</span>
 							</button>
 						)}
 					</div>

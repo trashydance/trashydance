@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Archivo_Black, Hind } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { I18nProvider } from "@/lib/i18n/i18n-context";
 import { cn } from "@/lib/utils";
 
 const fontSans = Hind({
@@ -38,7 +39,9 @@ export default function RootLayout({
 			)}
 		>
 			<body className="min-h-full flex flex-col font-sans">
-				<TooltipProvider>{children}</TooltipProvider>
+				<I18nProvider>
+					<TooltipProvider>{children}</TooltipProvider>
+				</I18nProvider>
 			</body>
 		</html>
 	);

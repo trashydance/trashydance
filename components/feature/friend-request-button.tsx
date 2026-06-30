@@ -3,6 +3,7 @@
 import { Check, Clock, UserMinus, UserPlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFriendStatus } from "@/hooks/use-friend-status";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import type { FriendStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,7 @@ export function FriendRequestButton({
 		unfriend,
 		isLoading,
 	} = useFriendStatus(userId, initialStatus, initialRequestId, onStatusChange);
+	const { t } = useI18n();
 
 	if (friendStatus === "none") {
 		return (
@@ -44,7 +46,7 @@ export function FriendRequestButton({
 				className={className}
 			>
 				{!textOnly && <UserPlus className="size-4" />}
-				Add Friend
+				{t("addFriend")}
 			</Button>
 		);
 	}
@@ -54,9 +56,17 @@ export function FriendRequestButton({
 			<Button
 				variant="outline"
 				size="sm"
-				onClick={cancelRequest}
+				onClick={() => {
+					if (window.confirm(t("confirmCancelRequest"))) {
+						cancelRequest();
+					}
+				}}
 				disabled={isLoading}
-				className={cn(!textOnly && "opacity-70", className)}
+				className={cn(
+					"group transition-all duration-200 hover:border-destructive hover:text-destructive hover:bg-destructive/10",
+					!textOnly && "opacity-70 hover:opacity-100",
+					className,
+				)}
 				title={textOnly ? undefined : "Friend request sent — click to cancel"}
 				aria-label={
 					textOnly
@@ -64,8 +74,20 @@ export function FriendRequestButton({
 						: "Friend request sent. Click to cancel"
 				}
 			>
-				{!textOnly && <Clock className="size-4" />}
-				{textOnly ? "Cancel" : "Pending"}
+				{!textOnly && (
+					<>
+						<Clock className="size-4 group-hover:hidden" />
+						<X className="size-4 hidden group-hover:inline text-destructive" />
+					</>
+				)}
+				{textOnly ? (
+					t("cancel")
+				) : (
+					<>
+						<span className="group-hover:hidden">{t("pending")}</span>
+						<span className="hidden group-hover:inline">{t("cancel")}</span>
+					</>
+				)}
 			</Button>
 		);
 	}
@@ -82,7 +104,7 @@ export function FriendRequestButton({
 					aria-label="Accept friend request"
 				>
 					{!textOnly && <Check className="size-4" />}
-					Accept
+					{t("accept")}
 				</Button>
 				<Button
 					variant="destructive"
@@ -94,7 +116,7 @@ export function FriendRequestButton({
 					aria-label="Reject friend request"
 				>
 					{!textOnly && <X className="size-4" />}
-					Reject
+					{t("reject")}
 				</Button>
 			</div>
 		);
@@ -104,12 +126,16 @@ export function FriendRequestButton({
 		<Button
 			variant="outline"
 			size="sm"
-			onClick={unfriend}
+			onClick={() => {
+				if (window.confirm(t("confirmUnfriend"))) {
+					unfriend();
+				}
+			}}
 			disabled={isLoading}
 			className={className}
 		>
 			{!textOnly && <UserMinus className="size-4" />}
-			Unfriend
+			{t("unfriend")}
 		</Button>
 	);
 }

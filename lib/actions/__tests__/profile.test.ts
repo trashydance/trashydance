@@ -78,7 +78,7 @@ describe("updateProfile", () => {
 		const { updateProfile } = await import("@/lib/actions/profile");
 
 		const res = await updateProfile({
-			image: 123 as unknown as string,
+			name: 123 as unknown as string,
 		});
 
 		expect(res).toEqual({ ok: false, error: "Invalid input" });
@@ -92,17 +92,17 @@ describe("updateProfile", () => {
 
 		const res = await updateProfile({
 			name: "Alice Updated",
-			image: "https://example.com/avatar.jpg",
+			lastName: "Smith",
 		});
 
 		expect(res.ok).toBe(true);
 
 		const row = testDb
-			.select({ name: user.name, image: user.image })
+			.select({ name: user.name, lastName: user.lastName })
 			.from(user)
 			.where(eq(user.id, "user-1"))
 			.get();
 		expect(row?.name).toBe("Alice Updated");
-		expect(row?.image).toBe("https://example.com/avatar.jpg");
+		expect(row?.lastName).toBe("Smith");
 	});
 });

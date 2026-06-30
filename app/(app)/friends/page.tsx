@@ -10,8 +10,6 @@ export default async function FriendsPage() {
 
 	return (
 		<div className="space-y-8">
-			<h1 className="font-heading text-5xl">Friends.</h1>
-
 			<FriendRequestsClient initialData={data} />
 		</div>
 	);

@@ -66,10 +66,21 @@ export function SearchClient({ initialUsers }: SearchClientProps) {
 	);
 
 	const handleStatusChange = useCallback(
-		(userId: string, newStatus: FriendStatus) => {
+		(userId: string, newStatus: FriendStatus, requestId?: string) => {
 			setAllUsers((prev) =>
 				prev.map((u) =>
-					u.id === userId ? { ...u, friendStatus: newStatus } : u,
+					u.id === userId
+						? {
+								...u,
+								friendStatus: newStatus,
+								friendRequestId:
+									requestId !== undefined
+										? requestId
+										: newStatus === "none"
+											? null
+											: u.friendRequestId,
+							}
+						: u,
 				),
 			);
 		},

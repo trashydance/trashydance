@@ -252,11 +252,12 @@ describe("cursorPaginationSchema", () => {
 });
 
 describe("updateProfileSchema", () => {
-	it("accepts optional image", () => {
+	it("does not include image in parsed output", () => {
 		const result = updateProfileSchema.safeParse({
 			image: "https://example.com/avatar.jpg",
 		});
 		expect(result.success).toBe(true);
+		expect(result.data).not.toHaveProperty("image");
 	});
 
 	it("accepts empty object", () => {

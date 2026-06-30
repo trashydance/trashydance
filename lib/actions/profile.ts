@@ -11,7 +11,6 @@ import { user } from "@/schema";
 import type { ActionResult } from "./types";
 
 interface UpdateProfileInput {
-	image?: string | null;
 	name?: string | null;
 	lastName?: string | null;
 	bio?: string | null;
@@ -42,14 +41,10 @@ export async function updateProfile(
 	}
 
 	const updates: Partial<{
-		image: string;
 		name: string;
 		lastName: string;
 		bio: string;
 	}> = {};
-	if (parsed.data.image !== undefined) {
-		updates.image = parsed.data.image;
-	}
 	if (parsed.data.name !== undefined) {
 		updates.name = parsed.data.name;
 	}

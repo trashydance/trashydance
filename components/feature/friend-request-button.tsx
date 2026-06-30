@@ -3,6 +3,7 @@
 import { Check, Clock, UserMinus, UserPlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFriendStatus } from "@/hooks/use-friend-status";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import type { FriendStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,7 @@ export function FriendRequestButton({
 		unfriend,
 		isLoading,
 	} = useFriendStatus(userId, initialStatus, initialRequestId, onStatusChange);
+	const { t } = useI18n();
 
 	if (friendStatus === "none") {
 		return (
@@ -44,7 +46,7 @@ export function FriendRequestButton({
 				className={className}
 			>
 				{!textOnly && <UserPlus className="size-4" />}
-				Add Friend
+				{t("addFriend")}
 			</Button>
 		);
 	}
@@ -55,7 +57,7 @@ export function FriendRequestButton({
 				variant="outline"
 				size="sm"
 				onClick={() => {
-					if (window.confirm("Do you want to withdraw this friend request?")) {
+					if (window.confirm(t("confirmCancelRequest"))) {
 						cancelRequest();
 					}
 				}}
@@ -79,11 +81,11 @@ export function FriendRequestButton({
 					</>
 				)}
 				{textOnly ? (
-					"Cancel"
+					t("cancel")
 				) : (
 					<>
-						<span className="group-hover:hidden">Pending</span>
-						<span className="hidden group-hover:inline">Cancel</span>
+						<span className="group-hover:hidden">{t("pending")}</span>
+						<span className="hidden group-hover:inline">{t("cancel")}</span>
 					</>
 				)}
 			</Button>
@@ -102,7 +104,7 @@ export function FriendRequestButton({
 					aria-label="Accept friend request"
 				>
 					{!textOnly && <Check className="size-4" />}
-					Accept
+					{t("accept")}
 				</Button>
 				<Button
 					variant="destructive"
@@ -114,7 +116,7 @@ export function FriendRequestButton({
 					aria-label="Reject friend request"
 				>
 					{!textOnly && <X className="size-4" />}
-					Reject
+					{t("reject")}
 				</Button>
 			</div>
 		);
@@ -124,12 +126,16 @@ export function FriendRequestButton({
 		<Button
 			variant="outline"
 			size="sm"
-			onClick={unfriend}
+			onClick={() => {
+				if (window.confirm(t("confirmUnfriend"))) {
+					unfriend();
+				}
+			}}
 			disabled={isLoading}
 			className={className}
 		>
 			{!textOnly && <UserMinus className="size-4" />}
-			Unfriend
+			{t("unfriend")}
 		</Button>
 	);
 }

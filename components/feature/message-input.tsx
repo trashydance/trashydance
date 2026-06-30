@@ -17,6 +17,7 @@ import {
 	MESSAGE_LENGTH_WARNING_THRESHOLD,
 	TEXTAREA_MAX_HEIGHT_PX,
 } from "@/lib/constants";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import { cn, formatFileSize } from "@/lib/utils";
 import { NorminetteButton } from "./norminette-button";
 
@@ -48,6 +49,7 @@ export function MessageInput({
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [isUploading, setIsUploading] = useState(false);
 	const [fileError, setFileError] = useState<string | null>(null);
+	const { t } = useI18n();
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -218,7 +220,7 @@ export function MessageInput({
 						}
 						onInput={handleInput}
 						onKeyDown={handleKeyDown}
-						placeholder="Write something..."
+						placeholder={t("typeMessage")}
 						disabled={disabled || isUploading}
 						rows={1}
 						className={cn(

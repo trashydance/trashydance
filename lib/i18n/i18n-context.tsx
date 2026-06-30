@@ -59,7 +59,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 export function useI18n() {
 	const context = useContext(I18nContext);
 	if (!context) {
-		throw new Error("useI18n must be used within an I18nProvider");
+		return {
+			language: "en" as Language,
+			setLanguage: () => {},
+			t: (key: keyof typeof translations.en) => {
+				return translations.en[key] || String(key);
+			},
+		};
 	}
 	return context;
 }

@@ -51,6 +51,10 @@ export const translations = {
 		cookieDesc:
 			"TrashyDance only uses strictly necessary cookies to manage your secure authentication session. No analytics, no tracking, no ads. 100% GDPR compliant.",
 		cookieGotIt: "Got it!",
+		confirmCancelRequest: "Do you want to withdraw this friend request?",
+		confirmUnfriend: "Are you sure you want to remove this friend?",
+		sentStatus: "Sent",
+		retry: "Retry",
 	},
 	it: {
 		inbox: "Messaggi.",
@@ -101,6 +105,10 @@ export const translations = {
 		cookieDesc:
 			"TrashyDance utilizza solo cookie strettamente necessari per gestire la sessione di autenticazione sicura. Niente tracciamento o pubblicità. 100% conforme al GDPR.",
 		cookieGotIt: "Capito!",
+		confirmCancelRequest: "Vuoi annullare questa richiesta di amicizia?",
+		confirmUnfriend: "Sei sicuro di voler rimuovere questo amico?",
+		sentStatus: "Inviato",
+		retry: "Riprova",
 	},
 	bg: {
 		inbox: "Входящи.",
@@ -151,5 +159,9 @@ export const translations = {
 		cookieDesc:
 			"TrashyDance използва само строго необходими бисквитки за управление на вашата сигурна сесия за автентификация. Без анализи, без проследяване, без реклами. 100% съвместим с GDPR.",
 		cookieGotIt: "Разбрах!",
+		confirmCancelRequest: "Искате ли да оттеглите тази покана за приятелство?",
+		confirmUnfriend: "Наистина ли искате да премахнете този приятел?",
+		sentStatus: "Изпратено",
+		retry: "Повтори",
 	},
 };

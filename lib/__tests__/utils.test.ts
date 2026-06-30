@@ -54,6 +54,24 @@ describe("formatRelativeTime", () => {
 	it("returns empty string for invalid input", () => {
 		expect(formatRelativeTime("not-a-date")).toBe("");
 	});
+
+	it("supports Italian translations", () => {
+		const now = Date.now();
+		expect(formatRelativeTime(now, "it")).toBe("proprio ora");
+		expect(formatRelativeTime(now - 120_000, "it")).toBe("2m fa");
+		expect(formatRelativeTime(now - 7200_000, "it")).toBe("2h fa");
+		expect(formatRelativeTime(now - 86400_000, "it")).toBe("ieri");
+		expect(formatRelativeTime(now - 172800_000, "it")).toBe("2g fa");
+	});
+
+	it("supports Bulgarian translations", () => {
+		const now = Date.now();
+		expect(formatRelativeTime(now, "bg")).toBe("току-що");
+		expect(formatRelativeTime(now - 120_000, "bg")).toBe("преди 2м");
+		expect(formatRelativeTime(now - 7200_000, "bg")).toBe("преди 2ч");
+		expect(formatRelativeTime(now - 86400_000, "bg")).toBe("вчера");
+		expect(formatRelativeTime(now - 172800_000, "bg")).toBe("преди 2д");
+	});
 });
 
 describe("truncateText", () => {

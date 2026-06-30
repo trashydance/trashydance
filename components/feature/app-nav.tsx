@@ -117,7 +117,7 @@ export function AppNav({ initialCounts }: AppNavProps) {
 						<DropdownMenuItem asChild>
 							<Link href="/profile/me" className="flex items-center gap-2">
 								<User className="size-4" />
-								Profile
+								{t("profile")}
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />

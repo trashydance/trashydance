@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/toast";
 import { type GroupedConversations, useChatList } from "@/hooks/use-chat-list";
 import { usePresence } from "@/hooks/use-presence";
 import { createConversation } from "@/lib/actions/conversations";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import { truncateText } from "@/lib/utils";
 
 interface SearchResultMessage {
@@ -48,6 +49,7 @@ export function HomeClient({
 	const { toast } = useToast();
 	const { conversations } = useChatList(initialConversations, currentUserId);
 	const [query, setQuery] = useState("");
+	const { t } = useI18n();
 	const [searchResults, setSearchResults] =
 		useState<GlobalSearchResults | null>(null);
 	const [searching, setSearching] = useState(false);
@@ -133,12 +135,12 @@ export function HomeClient({
 
 	return (
 		<div className="space-y-6">
-			<h1 className="font-heading text-5xl">Inbox.</h1>
+			<h1 className="font-heading text-5xl">{t("inbox")}</h1>
 
 			<SearchBar
 				value={query}
 				onChange={setQuery}
-				placeholder="Search conversations & messages..."
+				placeholder={t("searchConversationsPlaceholder")}
 			/>
 
 			{searching && (
@@ -152,7 +154,9 @@ export function HomeClient({
 				<div className="space-y-4">
 					{searchResults.messages.length > 0 && (
 						<section>
-							<h2 className="mb-2 font-heading text-lg font-bold">Messages</h2>
+							<h2 className="mb-2 font-heading text-lg font-bold">
+								{t("messages")}
+							</h2>
 							<div className="space-y-2">
 								{searchResults.messages.map((msg) => (
 									<Link
@@ -187,7 +191,7 @@ export function HomeClient({
 				displayConversations.others.length === 0 && (
 					<EmptyState
 						icon={SearchIcon}
-						title="No results"
+						title={t("noResults")}
 						description={`No conversations or messages matching "${query}".`}
 					/>
 				)}
@@ -195,16 +199,18 @@ export function HomeClient({
 			{isEmpty && !query.trim() ? (
 				<EmptyState
 					icon={MessageSquare}
-					title="No conversations yet"
-					description="Start your first chat by searching for users."
-					actionLabel="Start your first chat"
+					title={t("noConversationsYet")}
+					description={t("noConversationsYetDesc")}
+					actionLabel={t("startFirstChat")}
 					actionHref="/search"
 				/>
 			) : (
 				<div className="space-y-6">
 					{displayConversations.friends.length > 0 && (
 						<section>
-							<h2 className="mb-3 font-heading text-lg font-bold">Friends</h2>
+							<h2 className="mb-3 font-heading text-lg font-bold">
+								{t("friends").replace(/\.$/, "")}
+							</h2>
 							<div className="space-y-2">
 								{displayConversations.friends.map((c) => (
 									<ChatListItem
@@ -223,7 +229,9 @@ export function HomeClient({
 
 					{displayConversations.others.length > 0 && (
 						<section>
-							<h2 className="mb-3 font-heading text-lg font-bold">Others</h2>
+							<h2 className="mb-3 font-heading text-lg font-bold">
+								{t("others")}
+							</h2>
 							<div className="space-y-2">
 								{displayConversations.others.map((c) => (
 									<ChatListItem key={c.id} conversation={c} />

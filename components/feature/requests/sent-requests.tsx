@@ -1,6 +1,7 @@
 import { Clock } from "lucide-react";
 import { SectionHeader } from "@/components/feature/section-header";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import { FriendCard } from "./friend-card";
 import type { SentRequest } from "./types";
 
@@ -15,17 +16,19 @@ export function SentRequests({
 	onCancel,
 	loadingId,
 }: SentRequestsProps) {
+	const { t } = useI18n();
+
 	if (requests.length === 0) return null;
 
 	return (
 		<section>
-			<SectionHeader title="Sent friend requests" count={requests.length} />
+			<SectionHeader title={t("sentRequests")} count={requests.length} />
 			<div className="space-y-2">
 				{requests.map((req) => (
 					<FriendCard
 						key={req.id}
 						user={req.receiver}
-						subtitle="friend request pending"
+						subtitle={t("friendRequestPending")}
 					>
 						<Button
 							variant="outline"
@@ -34,7 +37,7 @@ export function SentRequests({
 							disabled={loadingId === req.id}
 						>
 							<Clock className="size-4" />
-							Cancel
+							{t("cancel")}
 						</Button>
 					</FriendCard>
 				))}

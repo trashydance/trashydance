@@ -1,11 +1,151 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect, useState } from "react";
 import { CONTACT_EMAIL } from "@/lib/constants";
 
-export const metadata: Metadata = {
-	title: "Terms of Service",
-};
-
 export default function TermsPage() {
+	const [lang, setLang] = useState("en");
+
+	useEffect(() => {
+		const saved = localStorage.getItem("trashydance-lang");
+		if (saved && (saved === "en" || saved === "it" || saved === "bg")) {
+			setLang(saved);
+		}
+	}, []);
+
+	if (lang === "it") {
+		return (
+			<main className="container mx-auto max-w-3xl px-4 py-12">
+				<h1 className="text-3xl font-bold mb-4">Termini di Servizio</h1>
+				<p className="text-muted-foreground mb-8">
+					Ultimo aggiornamento: 30 Giugno 2026
+				</p>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						1. Accettazione dei Termini
+					</h2>
+					<p className="leading-relaxed">
+						Creando un account su trashydance, accedendo o utilizzando il
+						servizio, accetti di essere vincolato da questi Termini di Servizio.
+						Se non accetti, non utilizzare il servizio.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						2. Descrizione del Servizio
+					</h2>
+					<p className="leading-relaxed">
+						trashydance è un'applicazione di messaggistica istantanea 1-a-1
+						sviluppata come progetto didattico per scopi di dimostrazione e
+						apprendimento.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						3. Registrazione dell'Account
+					</h2>
+					<p className="mb-3 leading-relaxed">
+						Durante la registrazione, ti impegni a fornire informazioni
+						accurate, scegliere un nome utente univoco e mantenere la password
+						riservata. Sei responsabile di ogni attività effettuata con il tuo
+						account.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						4. Condotta dell'Utente
+					</h2>
+					<p className="mb-3 leading-relaxed">
+						Ti impegni a non molestare altri utenti, non inviare spam, non
+						diffondere materiale illegale e non tentare di violare la sicurezza
+						della piattaforma.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						5. Limitazione di Responsabilità
+					</h2>
+					<p className="leading-relaxed">
+						trashydance è fornito "così com'è", senza alcuna garanzia. Gli
+						sviluppatori non sono responsabili per perdite di dati o
+						interruzioni del servizio.
+					</p>
+				</section>
+			</main>
+		);
+	}
+
+	if (lang === "bg") {
+		return (
+			<main className="container mx-auto max-w-3xl px-4 py-12">
+				<h1 className="text-3xl font-bold mb-4">Условия за ползване</h1>
+				<p className="text-muted-foreground mb-8">
+					Последна промяна: 30 юни 2026 г.
+				</p>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						1. Приемане на условията
+					</h2>
+					<p className="leading-relaxed">
+						Създавайки профил в trashydance, достъпвайки или използвайки
+						услугата, вие се съгласявате да бъдете обвързани с тези Условия за
+						ползване. Ако не сте съгласни, не използвайте услугата.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						2. Описание на услугата
+					</h2>
+					<p className="leading-relaxed">
+						trashydance е уеб приложение за незабавни съобщения 1-към-1,
+						разработено като образователен проект за демонстрационни и
+						обучителни цели.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						3. Регистрация на профил
+					</h2>
+					<p className="mb-3 leading-relaxed">
+						При регистрация се съгласявате да предоставите точна информация, да
+						изберете уникално потребителско име и да пазите паролата си в тайна.
+						Вие носите пълна отговорност за дейностите под вашия профил.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						4. Правила за поведение
+					</h2>
+					<p className="mb-3 leading-relaxed">
+						Съгласявате се да не тормозите други потребители, да не изпращате
+						спам, да не разпространявате незаконно съдържание и да не се
+						опитвате да заобикаляте сигурността на платформата.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						5. Ограничаване на отговорността
+					</h2>
+					<p className="leading-relaxed">
+						trashydance се предоставя "във вида, в който е", без никакви
+						гаранции. Разработчиците не носят отговорност за загуба на данни или
+						прекъсване на услугата.
+					</p>
+				</section>
+			</main>
+		);
+	}
+
 	return (
 		<main className="container mx-auto max-w-3xl px-4 py-12">
 			<h1 className="text-3xl font-bold mb-4">Terms of Service</h1>
@@ -184,7 +324,7 @@ export default function TermsPage() {
 					material changes, we will notify users through the application. The
 					&ldquo;Last updated&rdquo; date at the top of this page indicates when
 					the terms were last revised. Continued use of trashydance after
-					changes are posted constitutes acceptance of the updated terms.
+					changes constitutes acceptance of the updated terms.
 				</p>
 			</section>
 

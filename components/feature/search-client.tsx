@@ -9,6 +9,7 @@ import { SearchBar } from "@/components/feature/search-bar";
 import { UserResultItem } from "@/components/feature/user-result-item";
 import { useToast } from "@/components/ui/toast";
 import { createConversation } from "@/lib/actions/conversations";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import type { FriendStatus, SearchUser } from "@/lib/types";
 
 interface SearchClientProps {
@@ -21,6 +22,7 @@ export function SearchClient({ initialUsers }: SearchClientProps) {
 	const [query, setQuery] = useState("");
 	const [allUsers, setAllUsers] = useState<SearchUser[]>(initialUsers);
 	const [navigating, setNavigating] = useState<string | null>(null);
+	const { t } = useI18n();
 
 	// Re-sync when the server component re-renders with fresh data.
 	useEffect(() => {
@@ -66,10 +68,21 @@ export function SearchClient({ initialUsers }: SearchClientProps) {
 	);
 
 	const handleStatusChange = useCallback(
-		(userId: string, newStatus: FriendStatus) => {
+		(userId: string, newStatus: FriendStatus, requestId?: string) => {
 			setAllUsers((prev) =>
 				prev.map((u) =>
-					u.id === userId ? { ...u, friendStatus: newStatus } : u,
+					u.id === userId
+						? {
+								...u,
+								friendStatus: newStatus,
+								friendRequestId:
+									requestId !== undefined
+										? requestId
+										: newStatus === "none"
+											? null
+											: u.friendRequestId,
+							}
+						: u,
 				),
 			);
 		},
@@ -81,13 +94,13 @@ export function SearchClient({ initialUsers }: SearchClientProps) {
 			<SearchBar
 				value={query}
 				onChange={setQuery}
-				placeholder="Search by username or name..."
+				placeholder={t("searchUserPlaceholder")}
 			/>
 
 			{filtered.length === 0 && query.trim() && (
 				<EmptyState
 					icon={SearchIcon}
-					title="No users found"
+					title={t("noUsersFound")}
 					description={`No users matching "${query}".`}
 				/>
 			)}
@@ -96,7 +109,9 @@ export function SearchClient({ initialUsers }: SearchClientProps) {
 				<div className="space-y-6">
 					{friends.length > 0 && (
 						<section>
-							<h2 className="mb-3 font-heading text-lg font-bold">Friends</h2>
+							<h2 className="mb-3 font-heading text-lg font-bold">
+								{t("friends").replace(/\.$/, "")}
+							</h2>
 							<div className="space-y-2">
 								{friends.map((user) => (
 									<UserResultItem
@@ -124,7 +139,9 @@ export function SearchClient({ initialUsers }: SearchClientProps) {
 
 					{pending.length > 0 && (
 						<section>
-							<h2 className="mb-3 font-heading text-lg font-bold">Pending</h2>
+							<h2 className="mb-3 font-heading text-lg font-bold">
+								{t("pending")}
+							</h2>
 							<div className="space-y-2">
 								{pending.map((user) => (
 									<UserResultItem
@@ -152,7 +169,9 @@ export function SearchClient({ initialUsers }: SearchClientProps) {
 
 					{others.length > 0 && (
 						<section>
-							<h2 className="mb-3 font-heading text-lg font-bold">Others</h2>
+							<h2 className="mb-3 font-heading text-lg font-bold">
+								{t("others")}
+							</h2>
 							<div className="space-y-2">
 								{others.map((user) => (
 									<UserResultItem

@@ -100,7 +100,6 @@ export const cursorPaginationSchema = z.object({
 
 /** Profile update */
 export const updateProfileSchema = z.object({
-	image: z.string().optional(),
 	name: z.string().min(1).max(50).optional(),
 	lastName: z.string().max(50).optional(),
 	bio: z.string().max(BIO_MAX_LENGTH).optional(),

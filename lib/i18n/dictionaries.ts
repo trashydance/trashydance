@@ -61,6 +61,8 @@ export const translations = {
 		noConversationsYet: "No conversations yet",
 		noConversationsYetDesc: "Start your first chat by searching for users.",
 		startFirstChat: "Start your first chat",
+		coinFlipHeads: "Coin Flip: HEADS! 🪙",
+		coinFlipTails: "Coin Flip: TAILS! 🪙",
 	},
 	it: {
 		inbox: "Messaggi.",
@@ -121,6 +123,8 @@ export const translations = {
 		noConversationsYet: "Ancora nessuna conversazione",
 		noConversationsYetDesc: "Avvia la tua prima chat cercando altri utenti.",
 		startFirstChat: "Avvia la tua prima chat",
+		coinFlipHeads: "Lancio della moneta: TESTA! 🪙",
+		coinFlipTails: "Lancio della moneta: CROCE! 🪙",
 	},
 	bg: {
 		inbox: "Входящи.",
@@ -182,5 +186,7 @@ export const translations = {
 		noConversationsYetDesc:
 			"Започнете първия си разговор, като потърсите потребители.",
 		startFirstChat: "Започнете първия си разговор",
+		coinFlipHeads: "Хвърляне на монета: ЕЗИ! 🪙",
+		coinFlipTails: "Хвърляне на монета: ТУРА! 🪙",
 	},
 };

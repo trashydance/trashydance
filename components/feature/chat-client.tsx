@@ -2,11 +2,15 @@
 
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { BlackHoleAnimation } from "@/components/feature/black-hole-animation";
 import { ChatHeader } from "@/components/feature/chat-header";
 import { MessageBubble } from "@/components/feature/message-bubble";
 import { MessageInput } from "@/components/feature/message-input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/toast";
 import { useChat } from "@/hooks/use-chat";
+import { useSocket } from "@/hooks/use-socket";
+import { deleteAllConversationMessages } from "@/lib/actions/conversations";
 import { HIGHLIGHT_DURATION_MS } from "@/lib/constants";
 import type { FriendStatus, Message } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -47,12 +51,18 @@ export function ChatClient({
 		isLoading,
 		isLoadingMore,
 		hasMore,
+		setMessages,
 	} = useChat(conversationId, initialMessages, initialHasMore, initialCursor);
 
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const highlightedRef = useRef<HTMLDivElement>(null);
 	const [highlightActive, setHighlightActive] = useState(false);
+	const [isBlackHoleMode, setIsBlackHoleMode] = useState(false);
+	const [isAbsorbing, setIsAbsorbing] = useState(false);
+
+	const { socket } = useSocket();
+	const { toast } = useToast();
 
 	useEffect(() => {
 		fetch(`/api/conversations/${conversationId}/read`, {
@@ -142,8 +152,111 @@ export function ChatClient({
 		return () => window.removeEventListener("keydown", onKey);
 	}, [highlightActive]);
 
+	const handleMessageExpired = useCallback(
+		(id: string) => {
+			setMessages((prev) => prev.filter((m) => m.id !== id));
+		},
+		[setMessages],
+	);
+
+	// WebSocket handlers for real-time Black Hole synchronization
+	useEffect(() => {
+		if (!socket) return;
+
+		function onBlackHoleToggle(data: {
+			conversationId: string;
+			isActive: boolean;
+			activatedBy: string;
+		}) {
+			if (data.conversationId === conversationId) {
+				setIsBlackHoleMode(data.isActive);
+				toast(
+					`${data.activatedBy} has ${data.isActive ? "activated" : "deactivated"} Black Hole Mode!`,
+					"info",
+				);
+				if (data.isActive) {
+					setIsAbsorbing(true);
+					setTimeout(() => {
+						setMessages([]);
+						setIsAbsorbing(false);
+					}, 1200);
+				}
+			}
+		}
+
+		function onBlackHoleAbsorb(data: { conversationId: string }) {
+			if (data.conversationId === conversationId) {
+				setIsAbsorbing(true);
+				setTimeout(() => {
+					setMessages([]);
+					setIsAbsorbing(false);
+				}, 1200);
+			}
+		}
+
+		socket.on("blackhole:toggle", onBlackHoleToggle);
+		socket.on("blackhole:absorb", onBlackHoleAbsorb);
+
+		return () => {
+			socket.off("blackhole:toggle", onBlackHoleToggle);
+			socket.off("blackhole:absorb", onBlackHoleAbsorb);
+		};
+	}, [socket, conversationId, toast, setMessages]);
+
+	const handleBlackHoleToggle = useCallback(async () => {
+		const nextState = !isBlackHoleMode;
+		setIsBlackHoleMode(nextState);
+
+		if (socket?.connected) {
+			socket.emit("blackhole:toggle", { conversationId, isActive: nextState });
+		}
+
+		if (nextState) {
+			setIsAbsorbing(true);
+			try {
+				const result = await deleteAllConversationMessages(conversationId);
+				if (result.ok && socket?.connected) {
+					socket.emit("blackhole:absorb", { conversationId });
+				}
+			} catch (err) {
+				console.error("Failed to delete existing messages on toggle:", err);
+			}
+			setTimeout(() => {
+				setMessages([]);
+				setIsAbsorbing(false);
+			}, 1200);
+		}
+	}, [isBlackHoleMode, socket, conversationId, setMessages]);
+
+	const handleBlackHoleAbsorb = useCallback(async () => {
+		if (isAbsorbing) return;
+		setIsAbsorbing(true);
+
+		if (socket?.connected) {
+			socket.emit("blackhole:absorb", { conversationId });
+		} else {
+			try {
+				const result = await deleteAllConversationMessages(conversationId);
+				if (result.ok) {
+					setTimeout(() => {
+						setMessages([]);
+						setIsAbsorbing(false);
+					}, 1200);
+				}
+			} catch (err) {
+				console.error("Failed to absorb messages:", err);
+				setIsAbsorbing(false);
+			}
+		}
+	}, [conversationId, isAbsorbing, socket, setMessages]);
+
 	return (
-		<div className="flex h-[calc(100svh-8rem)] flex-col -mx-4 -my-6">
+		<div
+			className={cn(
+				"flex h-[calc(100svh-8rem)] flex-col -mx-4 -my-6 relative transition-all duration-500",
+				isBlackHoleMode && "bg-slate-950 text-slate-100 dark",
+			)}
+		>
 			<ChatHeader
 				partnerId={meta.partnerId}
 				partnerUsername={meta.partnerUsername}
@@ -151,6 +264,15 @@ export function ChatClient({
 				partnerImage={meta.partnerImage}
 				friendStatus={meta.friendStatus}
 				friendRequestId={meta.friendRequestId}
+				isBlackHoleMode={isBlackHoleMode}
+				onBlackHoleToggle={handleBlackHoleToggle}
+			/>
+
+			<BlackHoleAnimation
+				isActive={isBlackHoleMode}
+				onAbsorb={handleBlackHoleAbsorb}
+				messageCount={messages.length}
+				isAbsorbing={isAbsorbing}
 			/>
 
 			{/* biome-ignore lint/a11y/noStaticElementInteractions: container click dismisses highlight */}
@@ -159,8 +281,26 @@ export function ChatClient({
 				ref={containerRef}
 				onScroll={handleScroll}
 				onClick={handleContainerClick}
-				className="custom-scroll flex-1 overflow-y-auto px-4 py-4"
+				className={cn(
+					"custom-scroll flex-1 overflow-y-auto px-4 py-4 relative transition-all duration-500",
+					isBlackHoleMode &&
+						"bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-purple-950/20 to-slate-950 overflow-hidden",
+				)}
 			>
+				{isBlackHoleMode && (
+					<div className="absolute inset-0 pointer-events-none overflow-hidden opacity-45">
+						<div className="absolute top-1/4 left-1/4 w-1 h-1 bg-white rounded-full animate-ping" />
+						<div className="absolute top-1/3 left-3/4 w-1.5 h-1.5 bg-purple-300 rounded-full animate-pulse" />
+						<div className="absolute top-2/3 left-1/5 w-1 h-1 bg-blue-300 rounded-full animate-pulse" />
+						<div
+							className="absolute top-3/4 left-2/3 w-1.5 h-1.5 bg-white rounded-full animate-ping"
+							style={{ animationDuration: "3s" }}
+						/>
+						<div className="absolute top-1/2 left-10 w-0.5 h-0.5 bg-white rounded-full opacity-60" />
+						<div className="absolute top-20 right-10 w-0.5 h-0.5 bg-white rounded-full opacity-80" />
+					</div>
+				)}
+
 				{(isLoading || isLoadingMore) && (
 					<div className="mb-4 space-y-2">
 						{Array.from({ length: 3 }).map((_, i) => (
@@ -225,6 +365,10 @@ export function ChatClient({
 									fileUrl={msg.fileUrl}
 									fileType={msg.fileType}
 									fileSize={msg.fileSize}
+									isBlackHoleMode={isBlackHoleMode}
+									messageId={msg.id}
+									onExpired={handleMessageExpired}
+									isAbsorbActive={isAbsorbing}
 								/>
 							</div>
 						);
@@ -233,8 +377,17 @@ export function ChatClient({
 				<div ref={messagesEndRef} />
 			</div>
 
-			<div className="border-t-2 border-border bg-background px-4 py-3">
-				<MessageInput onSend={sendMessage} conversationId={conversationId} />
+			<div
+				className={cn(
+					"border-t-2 border-border bg-background px-4 py-3 transition-colors duration-500",
+					isBlackHoleMode && "bg-slate-950 border-purple-900/50",
+				)}
+			>
+				<MessageInput
+					onSend={sendMessage}
+					conversationId={conversationId}
+					isBlackHoleMode={isBlackHoleMode}
+				/>
 			</div>
 		</div>
 	);

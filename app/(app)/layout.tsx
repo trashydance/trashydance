@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { AppNav } from "@/components/feature/app-nav";
+import { BrandLogo } from "@/components/feature/brand-logo";
+import { TetrisEasterEgg } from "@/components/feature/tetris-easter-egg";
 import { ToastProvider } from "@/components/ui/toast";
 import { COPYRIGHT_NOTICE } from "@/lib/constants";
 import { getNotificationCounts } from "@/lib/data/notifications";
@@ -12,17 +14,11 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
 	return (
 		<ToastProvider>
+			<TetrisEasterEgg />
 			<div className="flex min-h-svh flex-col">
 				<header className="sticky top-0 z-40 border-b-2 border-border bg-background">
 					<div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-4 px-4 sm:px-6">
-						<Link href="/home" className="flex shrink-0 items-center gap-2">
-							<span className="flex size-10 items-center justify-center border-2 border-border bg-main font-heading text-sm text-main-foreground">
-								TD
-							</span>
-							<span className="hidden text-xl font-bold uppercase tracking-tight sm:inline">
-								Trashy<span className="text-secondary">dance</span>
-							</span>
-						</Link>
+						<BrandLogo />
 						<AppNav initialCounts={counts ?? undefined} />
 					</div>
 				</header>

@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import { FriendRequestsClient } from "@/components/feature/requests/friend-requests-client";
 import { getFriendRequestsData } from "@/lib/data/friends";
 import { requireUser } from "@/lib/data/session";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+	title: "Friends",
+};
 
 export default async function FriendsPage() {
 	const me = await requireUser();

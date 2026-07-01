@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SocketEvent } from "@/lib/constants";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import type { Message } from "@/lib/types";
 import { useSocket } from "./use-socket";
 
@@ -51,6 +52,7 @@ export function useChat(
 	const [hasMore, setHasMore] = useState(initialHasMore ?? true);
 	const cursorRef = useRef<string | number | null>(initialCursor ?? null);
 	const { socket } = useSocket();
+	const { t } = useI18n();
 
 	// Seeded by the server component: skip the initial fetch entirely.
 	const seededRef = useRef(Boolean(initialMessages));
@@ -141,12 +143,23 @@ export function useChat(
 				fileSize: number;
 			},
 		) => {
+			let finalBody = body;
+			const trimmed = body.trim().toLowerCase();
+			if (
+				trimmed === "/flip" ||
+				trimmed === "/coin" ||
+				trimmed === "/coinflip"
+			) {
+				const isHeads = Math.random() < 0.5;
+				finalBody = isHeads ? t("coinFlipHeads") : t("coinFlipTails");
+			}
+
 			const tempId = `temp-${generateUUID()}`;
 			const optimisticMessage: Message = {
 				id: tempId,
 				conversationId,
 				senderId: "",
-				body,
+				body: finalBody,
 				createdAt: new Date().toISOString(),
 				status: "sending",
 				...(fileInfo && {
@@ -165,7 +178,7 @@ export function useChat(
 
 			const payload = {
 				conversationId,
-				body,
+				body: finalBody,
 				...(fileInfo && {
 					fileName: fileInfo.fileName,
 					fileUrl: fileInfo.fileUrl,
@@ -246,7 +259,7 @@ export function useChat(
 				);
 			}
 		},
-		[conversationId, socket],
+		[conversationId, socket, t],
 	);
 
 	const retryMessage = useCallback(

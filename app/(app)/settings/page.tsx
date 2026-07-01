@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { SettingsClient } from "@/components/feature/settings/settings-client";
 import { requireUser } from "@/lib/data/session";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+	title: "Settings",
+};
 
 export default async function SettingsPage() {
 	const me = await requireUser();

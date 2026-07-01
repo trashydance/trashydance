@@ -2,7 +2,7 @@
 set -e
 
 echo "=== TypeScript Check ==="
-npx tsc --noEmit
+pnpm exec tsc --noEmit
 
 echo "=== Lint Check ==="
 pnpm lint

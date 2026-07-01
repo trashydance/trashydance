@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import { SearchClient } from "@/components/feature/search-client";
 import { requireUser } from "@/lib/data/session";
 import { getInitialUserList } from "@/lib/data/users";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+	title: "Search",
+};
 
 export default async function SearchPage() {
 	const me = await requireUser();

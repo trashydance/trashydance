@@ -98,7 +98,9 @@ export const cursorPaginationSchema = z.object({
 	limit: z.coerce.number().min(1).max(100).default(50),
 });
 
-/** Profile update */
+/** Profile update — null azzera il campo, undefined lo lascia invariato.
+ * L'action converte null in "" prima del parse, quindi qui i campi sono solo
+ * optional (string | undefined): non serve nullable. */
 export const updateProfileSchema = z.object({
 	name: z.string().min(1).max(50).optional(),
 	lastName: z.string().max(50).optional(),

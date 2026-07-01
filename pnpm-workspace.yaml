@@ -1,5 +1,8 @@
 allowBuilds:
   better-sqlite3: true
+
+  cypress: true
   esbuild: true
+
   msw: false
   sharp: true

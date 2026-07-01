@@ -62,23 +62,10 @@ export function LoginForm({
 			return;
 		}
 
-		const errorMessage = error.message ?? "";
-
-		const userNotFoundError =
-			error.code === "USER_NOT_FOUND" ||
-			errorMessage.includes("User not found");
-		const invalidPasswordError =
-			error.code === "INVALID_PASSWORD" ||
-			error.code === "INVALID_EMAIL_OR_PASSWORD" ||
-			errorMessage.includes("invalid password");
-
-		if (userNotFoundError) {
-			setApiError({ username: "User not found" });
-		} else if (invalidPasswordError) {
-			setApiError({ password: "Invalid password" });
-		} else {
-			setApiError({ general: errorMessage || "An error occurred" });
-		}
+		// better-auth risponde sempre INVALID_USERNAME_OR_PASSWORD per
+		// credenziali errate (anti user-enumeration): non è possibile
+		// distinguere utente inesistente da password sbagliata
+		setApiError({ general: error.message || "An error occurred" });
 	};
 
 	if (twoFactorRequired) {

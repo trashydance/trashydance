@@ -34,32 +34,35 @@ export default async function ProfilePage({ params }: Props) {
 	return (
 		<div className="mx-auto w-full max-w-2xl py-8">
 			<div className="rounded-base border-4 border-border bg-card p-6 shadow-brutal-cobalt sm:p-8">
-				<div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+				<div className="flex flex-col gap-6 sm:flex-row sm:gap-10 sm:items-center">
 					<ProfileAvatar profile={profile} />
 
-					<div className="min-w-0 flex-1">
-						<h1 className="font-heading text-4xl">{displayName}</h1>
-						<p className="mt-1 text-sm text-muted-foreground">
-							@{profile.username}
-						</p>
-						<div className="mt-3 flex flex-wrap items-center gap-2">
-							{profile.isOwnProfile && (
-								<>
-									<span className="border-2 border-border bg-main px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-main-foreground">
-										Online
-									</span>
-									<span className="border-2 border-border bg-secondary px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-secondary-foreground">
-										You
-									</span>
-								</>
-							)}
-							{fullName !== displayName && (
-								<span className="text-sm text-muted-foreground">
+					<div className="min-w-0 flex-1 space-y-3">
+						<div>
+							<h1 className="font-heading text-4xl leading-tight">
+								{displayName}
+							</h1>
+							{fullName && (
+								<p className="mt-1.5 text-sm text-muted-foreground">
 									{fullName}
-								</span>
+								</p>
 							)}
 						</div>
-						{profile.bio && <p className="mt-3 text-sm">{profile.bio}</p>}
+						{profile.isOwnProfile && (
+							<div className="flex flex-wrap items-center gap-2">
+								<span className="border-2 border-border bg-main px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-main-foreground">
+									Online
+								</span>
+								<span className="border-2 border-border bg-secondary px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-secondary-foreground">
+									You
+								</span>
+							</div>
+						)}
+						{profile.bio && (
+							<p className="text-sm leading-normal break-words">
+								{profile.bio}
+							</p>
+						)}
 					</div>
 				</div>
 

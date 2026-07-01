@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { createConversation } from "@/lib/actions/conversations";
 import { updateProfile } from "@/lib/actions/profile";
+import { authClient } from "@/lib/auth-client";
 import type { Profile } from "@/lib/types";
 
 interface ProfileActionsProps {
@@ -52,6 +53,7 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 				bio: editBio || null,
 			});
 			if (res.ok) {
+				await authClient.getSession();
 				// revalidatePath inside the action re-renders the page
 				setDialogOpen(false);
 			} else {
@@ -92,6 +94,7 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 				/>
 				<Button
 					variant="neutral"
+					size="sm"
 					onClick={handleStartChat}
 					disabled={chatLoading}
 				>
@@ -114,8 +117,7 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 				<DialogHeader>
 					<DialogTitle>Edit profile</DialogTitle>
 					<DialogDescription>
-						Update your profile information. Username and email cannot be
-						changed.
+						Update your profile information. Username cannot be changed.
 					</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4 px-5 py-4">

@@ -18,6 +18,7 @@ export function useChatList(
 	const router = useRouter();
 	const [conversations, setConversations] =
 		useState<GroupedConversations>(initialData);
+	const [refreshIndex, setRefreshIndex] = useState(0);
 	const { socket } = useSocket();
 
 	// Server data is authoritative: re-sync whenever the server
@@ -27,8 +28,13 @@ export function useChatList(
 	}, [initialData]);
 
 	const refetch = useCallback(() => {
+		setRefreshIndex((value) => value + 1);
+	}, []);
+
+	useEffect(() => {
+		if (refreshIndex === 0) return;
 		router.refresh();
-	}, [router]);
+	}, [refreshIndex, router]);
 
 	useEffect(() => {
 		function onFocus() {
@@ -47,12 +53,13 @@ export function useChatList(
 			createdAt: string;
 			senderId: string;
 		}) {
+			let needsRefresh = false;
 			setConversations((prev) => {
 				const allConvos = [...prev.friends, ...prev.others];
 				const idx = allConvos.findIndex((c) => c.id === data.conversationId);
 				if (idx === -1) {
 					// Unknown conversation: let the server rebuild the list
-					refetch();
+					needsRefresh = true;
 					return prev;
 				}
 
@@ -79,6 +86,10 @@ export function useChatList(
 					others: all.filter((c) => !c.isFriend),
 				};
 			});
+
+			if (needsRefresh) {
+				refetch();
+			}
 		}
 
 		function handleFriendUpdate() {

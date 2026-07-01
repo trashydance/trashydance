@@ -7,12 +7,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatListItem } from "@/components/feature/chat-list-item";
 import { EmptyState } from "@/components/feature/empty-state";
 import { SearchBar } from "@/components/feature/search-bar";
+import { RelativeTime } from "@/components/ui/relative-time";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/toast";
 import { type GroupedConversations, useChatList } from "@/hooks/use-chat-list";
 import { usePresence } from "@/hooks/use-presence";
 import { createConversation } from "@/lib/actions/conversations";
-import { formatRelativeTime, truncateText } from "@/lib/utils";
+import { truncateText } from "@/lib/utils";
 
 interface SearchResultMessage {
 	id: string;
@@ -164,9 +165,10 @@ export function HomeClient({
 												{msg.sender.username ?? msg.sender.name}
 											</span>
 											{msg.createdAt && (
-												<span className="text-xs text-muted-foreground">
-													{formatRelativeTime(msg.createdAt.toString())}
-												</span>
+												<RelativeTime
+													createdAt={msg.createdAt}
+													className="text-xs text-muted-foreground"
+												/>
 											)}
 										</div>
 										<p className="mt-1 text-sm">{truncateText(msg.body, 80)}</p>
@@ -202,7 +204,7 @@ export function HomeClient({
 				<div className="space-y-6">
 					{displayConversations.friends.length > 0 && (
 						<section>
-							<h2 className="mb-3 font-heading text-lg font-bold">Following</h2>
+							<h2 className="mb-3 font-heading text-lg font-bold">Friends</h2>
 							<div className="space-y-2">
 								{displayConversations.friends.map((c) => (
 									<ChatListItem

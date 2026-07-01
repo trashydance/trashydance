@@ -57,9 +57,11 @@ export function FriendRequestButton({
 				onClick={cancelRequest}
 				disabled={isLoading}
 				className={cn(!textOnly && "opacity-70", className)}
-				title={textOnly ? undefined : "Request sent — click to cancel"}
+				title={textOnly ? undefined : "Friend request sent — click to cancel"}
 				aria-label={
-					textOnly ? "Cancel request" : "Request sent. Click to cancel"
+					textOnly
+						? "Cancel friend request"
+						: "Friend request sent. Click to cancel"
 				}
 			>
 				{!textOnly && <Clock className="size-4" />}
@@ -76,6 +78,8 @@ export function FriendRequestButton({
 					size="sm"
 					onClick={acceptRequest}
 					disabled={isLoading}
+					title="Accept friend request"
+					aria-label="Accept friend request"
 				>
 					{!textOnly && <Check className="size-4" />}
 					Accept
@@ -86,6 +90,8 @@ export function FriendRequestButton({
 					onClick={rejectRequest}
 					disabled={isLoading}
 					className="bg-accent text-accent-foreground"
+					title="Reject friend request"
+					aria-label="Reject friend request"
 				>
 					{!textOnly && <X className="size-4" />}
 					Reject

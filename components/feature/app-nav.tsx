@@ -60,6 +60,11 @@ export function AppNav({ initialCounts }: AppNavProps) {
 								"relative inline-flex items-center gap-1.5 rounded-base border-2 border-border px-4 py-2 text-xs font-bold uppercase tracking-wide shadow-brutal-sm transition-all hover:brutal-press-hover",
 								active ? "bg-main text-main-foreground" : "bg-card",
 							)}
+							aria-label={
+								href === "/friends" && pendingRequests > 0
+									? `Friends, ${pendingRequests} pending friend requests`
+									: label
+							}
 						>
 							<Icon className="size-4" />
 							<span className="hidden sm:inline">{label}</span>
@@ -67,6 +72,7 @@ export function AppNav({ initialCounts }: AppNavProps) {
 								<NotificationBadge
 									count={pendingRequests}
 									className="absolute -right-3 -top-3 z-10"
+									title={`${pendingRequests} pending friend requests`}
 								/>
 							)}
 						</Link>

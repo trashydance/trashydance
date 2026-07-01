@@ -1,6 +1,7 @@
 import { Check, X } from "lucide-react";
 import { SectionHeader } from "@/components/feature/section-header";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import { FriendCard } from "./friend-card";
 import type { ReceivedRequest } from "./types";
 
@@ -17,17 +18,19 @@ export function ReceivedRequests({
 	onReject,
 	loadingId,
 }: ReceivedRequestsProps) {
+	const { t } = useI18n();
+
 	if (requests.length === 0) return null;
 
 	return (
 		<section>
-			<SectionHeader title="Received friend requests" count={requests.length} />
+			<SectionHeader title={t("receivedRequests")} count={requests.length} />
 			<div className="space-y-2">
 				{requests.map((req) => (
 					<FriendCard
 						key={req.id}
 						user={req.sender}
-						subtitle="wants to be friends"
+						subtitle={t("wantsToBeFriends")}
 					>
 						<Button
 							variant="default"
@@ -36,7 +39,7 @@ export function ReceivedRequests({
 							disabled={loadingId === req.id}
 						>
 							<Check className="size-4" />
-							Accept
+							{t("accept")}
 						</Button>
 						<Button
 							variant="destructive"
@@ -46,7 +49,7 @@ export function ReceivedRequests({
 							className="bg-accent text-accent-foreground"
 						>
 							<X className="size-4" />
-							Reject
+							{t("reject")}
 						</Button>
 					</FriendCard>
 				))}

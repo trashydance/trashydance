@@ -102,7 +102,6 @@ export const cursorPaginationSchema = z.object({
  * L'action converte null in "" prima del parse, quindi qui i campi sono solo
  * optional (string | undefined): non serve nullable. */
 export const updateProfileSchema = z.object({
-	image: z.string().optional(),
 	name: z.string().min(1).max(50).optional(),
 	lastName: z.string().max(50).optional(),
 	bio: z.string().max(BIO_MAX_LENGTH).optional(),

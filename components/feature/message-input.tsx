@@ -1,6 +1,6 @@
 "use client";
 
-import { Paperclip, Send, X } from "lucide-react";
+import { Paperclip, Send, Smile, X } from "lucide-react";
 import {
 	type ChangeEvent,
 	type KeyboardEvent,
@@ -17,7 +17,11 @@ import {
 	MESSAGE_LENGTH_WARNING_THRESHOLD,
 	TEXTAREA_MAX_HEIGHT_PX,
 } from "@/lib/constants";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import { cn, formatFileSize } from "@/lib/utils";
+import { NorminetteButton } from "./norminette-button";
+
+const EMOJIS = ["👾", "🤖", "🛸", "🚀", "🕳️", "💻", "🧠", "☕", "📝", "⚠️"];
 
 interface FileInfo {
 	fileName: string;
@@ -31,6 +35,7 @@ interface MessageInputProps {
 	conversationId: string;
 	disabled?: boolean;
 	className?: string;
+	isBlackHoleMode?: boolean;
 }
 
 export function MessageInput({
@@ -38,13 +43,37 @@ export function MessageInput({
 	conversationId,
 	disabled,
 	className,
+	isBlackHoleMode,
 }: MessageInputProps) {
 	const [value, setValue] = useState("");
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [isUploading, setIsUploading] = useState(false);
 	const [fileError, setFileError] = useState<string | null>(null);
+	const { t } = useI18n();
+	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	const insertEmoji = useCallback((emoji: string) => {
+		const textarea = textareaRef.current;
+		if (!textarea) {
+			setValue((prev) => prev + emoji);
+			return;
+		}
+		const start = textarea.selectionStart;
+		const end = textarea.selectionEnd;
+		const text = textarea.value;
+		const before = text.substring(0, start);
+		const after = text.substring(end, text.length);
+		setValue(before + emoji + after);
+
+		// Focus and position cursor right after the inserted emoji
+		setTimeout(() => {
+			textarea.focus();
+			textarea.setSelectionRange(start + emoji.length, start + emoji.length);
+		}, 0);
+		setShowEmojiPicker(false);
+	}, []);
 
 	const handleInput = useCallback(() => {
 		const el = textareaRef.current;
@@ -191,10 +220,14 @@ export function MessageInput({
 						}
 						onInput={handleInput}
 						onKeyDown={handleKeyDown}
-						placeholder="Write something..."
+						placeholder={t("typeMessage")}
 						disabled={disabled || isUploading}
 						rows={1}
-						className="w-full resize-none rounded-base border-2 border-border bg-card px-3 py-2 pr-16 text-sm shadow-shadow transition-all outline-none placeholder:text-muted-foreground focus:brutal-press-focus disabled:opacity-50"
+						className={cn(
+							"w-full resize-none rounded-base border-2 border-border bg-card px-3 py-2 pr-16 text-sm shadow-shadow transition-all outline-none placeholder:text-muted-foreground focus:brutal-press-focus disabled:opacity-50",
+							isBlackHoleMode &&
+								"bg-slate-900 text-white placeholder:text-slate-400 border-purple-500/50 focus:ring-1 focus:ring-purple-500 focus:border-purple-500",
+						)}
 					/>
 					<span
 						className={cn(
@@ -208,6 +241,37 @@ export function MessageInput({
 					>
 						{charCount}/{MAX_MESSAGE_LENGTH}
 					</span>
+				</div>
+				<NorminetteButton
+					currentText={value}
+					onFormat={setValue}
+					disabled={disabled || isUploading || !value.trim()}
+				/>
+				<div className="relative">
+					<Button
+						size="icon"
+						variant="outline"
+						onClick={() => setShowEmojiPicker((v) => !v)}
+						disabled={disabled || isUploading}
+						aria-label="Insert emoji"
+						type="button"
+					>
+						<Smile className="size-4" />
+					</Button>
+					{showEmojiPicker && (
+						<div className="absolute bottom-12 right-0 z-50 w-48 rounded-base border-4 border-border bg-card p-2 shadow-shadow grid grid-cols-5 gap-2">
+							{EMOJIS.map((emoji) => (
+								<button
+									key={emoji}
+									type="button"
+									onClick={() => insertEmoji(emoji)}
+									className="flex size-7 items-center justify-center rounded-sm text-lg hover:bg-accent transition-all animate-in zoom-in-75 duration-100"
+								>
+									{emoji}
+								</button>
+							))}
+						</div>
+					)}
 				</div>
 				<Button
 					size="icon"

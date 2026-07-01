@@ -54,3 +54,4 @@ data/uploads/*
 .claude/
 *.pdf
 .agent/
+prompt.txt

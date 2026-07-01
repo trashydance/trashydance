@@ -18,13 +18,9 @@ import {
 } from "@/hooks/use-notification-count";
 import { useSocket } from "@/hooks/use-socket";
 import { authClient } from "@/lib/auth-client";
+import type { Language } from "@/lib/i18n/dictionaries";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import { cn } from "@/lib/utils";
-
-const NAV_ITEMS = [
-	{ href: "/home", label: "Home", icon: Home },
-	{ href: "/search", label: "Search", icon: Search },
-	{ href: "/friends", label: "Friends", icon: Users },
-] as const;
 
 interface AppNavProps {
 	initialCounts?: NotificationCount;
@@ -36,6 +32,7 @@ export function AppNav({ initialCounts }: AppNavProps) {
 	const { pendingRequests } = useNotificationCount(initialCounts);
 	const { disconnect } = useSocket();
 	const { data: session } = authClient.useSession();
+	const { language, setLanguage, t } = useI18n();
 
 	const user = session?.user;
 	const handle =
@@ -47,10 +44,20 @@ export function AppNav({ initialCounts }: AppNavProps) {
 		router.push("/login");
 	};
 
+	const navItems = [
+		{ href: "/home", label: t("inbox").replace(/\.$/, ""), icon: Home },
+		{
+			href: "/search",
+			label: t("findPeople").replace(/\.$/, ""),
+			icon: Search,
+		},
+		{ href: "/friends", label: t("friends").replace(/\.$/, ""), icon: Users },
+	];
+
 	return (
 		<div className="flex flex-1 items-center">
 			<nav className="ml-6 flex items-center gap-2">
-				{NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+				{navItems.map(({ href, label, icon: Icon }) => {
 					const active = pathname.startsWith(href);
 					return (
 						<Link
@@ -62,7 +69,7 @@ export function AppNav({ initialCounts }: AppNavProps) {
 							)}
 							aria-label={
 								href === "/friends" && pendingRequests > 0
-									? `Friends, ${pendingRequests} pending friend requests`
+									? `${label}, ${pendingRequests} pending friend requests`
 									: label
 							}
 						>
@@ -110,16 +117,29 @@ export function AppNav({ initialCounts }: AppNavProps) {
 						<DropdownMenuItem asChild>
 							<Link href="/profile/me" className="flex items-center gap-2">
 								<User className="size-4" />
-								Profile
+								{t("profile")}
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem asChild>
 							<Link href="/settings" className="flex items-center gap-2">
 								<Settings className="size-4" />
-								Settings
+								{t("settings").replace(/\.$/, "")}
 							</Link>
 						</DropdownMenuItem>
+						<DropdownMenuSeparator />
+						<div className="px-2 py-1.5 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground border-b border-border">
+							<span>{t("language")}:</span>
+							<select
+								value={language}
+								onChange={(e) => setLanguage(e.target.value as Language)}
+								className="ml-auto bg-card border border-border p-1 rounded-sm text-xs font-bold text-foreground focus:outline-none"
+							>
+								<option value="en">EN</option>
+								<option value="it">IT</option>
+								<option value="bg">BG</option>
+							</select>
+						</div>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
 							variant="destructive"
@@ -127,7 +147,7 @@ export function AppNav({ initialCounts }: AppNavProps) {
 							className="flex items-center gap-2"
 						>
 							<LogOut className="size-4" />
-							Log out
+							{t("logout")}
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>

@@ -1,6 +1,224 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { CONTACT_EMAIL } from "@/lib/constants";
 
 export default function PrivacyPage() {
+	const [lang, setLang] = useState("en");
+
+	useEffect(() => {
+		const saved = localStorage.getItem("trashydance-lang");
+		if (saved && (saved === "en" || saved === "it" || saved === "bg")) {
+			setLang(saved);
+		}
+	}, []);
+
+	if (lang === "it") {
+		return (
+			<main className="container mx-auto max-w-3xl px-4 py-12">
+				<h1 className="text-3xl font-bold mb-4">Informativa sulla Privacy</h1>
+				<p className="text-muted-foreground mb-8">
+					Ultimo aggiornamento: 30 Giugno 2026
+				</p>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">1. Introduzione</h2>
+					<p className="mb-3 leading-relaxed">
+						Benvenuto su trashydance. Rispettiamo la tua privacy e ci impegniamo
+						a proteggere i dati personali che condividi con noi. Questa
+						Informativa sulla Privacy spiega quali informazioni raccogliamo,
+						come le usiamo e quali diritti hai in relazione ad esse.
+					</p>
+					<p className="leading-relaxed">
+						trashydance è un'applicazione web di messaggistica 1-a-1 in tempo
+						reale sviluppata come progetto didattico. Utilizzando il nostro
+						servizio, accetti la raccolta e l'uso delle informazioni in
+						conformità con questa policy.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						2. Dati che raccogliamo
+					</h2>
+					<ul className="list-disc pl-6 space-y-2">
+						<li>
+							<strong>Informazioni sull'account</strong> &mdash; nome utente e
+							hash della password.
+						</li>
+						<li>
+							<strong>Dati del profilo</strong> &mdash; immagine del profilo,
+							nome visualizzato, biografia.
+						</li>
+						<li>
+							<strong>Messaggi</strong> &mdash; il contenuto testuale dei
+							messaggi che invii e ricevi.
+						</li>
+						<li>
+							<strong>Dati tecnici</strong> &mdash; indirizzo IP, user agent
+							(browser e sistema operativo).
+						</li>
+						<li>
+							<strong>Dati di sessione</strong> &mdash; cookie di autenticazione
+							per mantenerti connesso.
+						</li>
+						<li>
+							<strong>Dati OAuth</strong> &mdash; se accedi tramite 42 Intra,
+							riceviamo il tuo ID utente 42.
+						</li>
+					</ul>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						3. Scopo della raccolta
+					</h2>
+					<p className="mb-3 leading-relaxed">
+						Utilizziamo i tuoi dati per la gestione dell'account, la
+						messaggistica in tempo reale, le funzionalità di amicizia e la
+						sicurezza della piattaforma.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						4. Conservazione dei dati
+					</h2>
+					<p className="mb-3 leading-relaxed">
+						Conserviamo i tuoi dati fino alla cancellazione del tuo account.
+						Quando elimini l'account, tutti i tuoi messaggi, relazioni e dati
+						personali vengono rimossi definitivamente dal database.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						5. I tuoi diritti (GDPR)
+					</h2>
+					<p className="mb-3 leading-relaxed">
+						Hai il diritto di accedere ai tuoi dati (scaricando il file JSON
+						dalle Impostazioni), di rettificarli, di richiederne la
+						cancellazione totale (diritto all'oblio) e di revocare il consenso.
+						Per domande, scrivici a:{" "}
+						<a href={`mailto:${CONTACT_EMAIL}`} className="underline">
+							{CONTACT_EMAIL}
+						</a>
+						.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">6. Cookies</h2>
+					<p className="leading-relaxed">
+						trashydance utilizza esclusivamente cookie tecnici essenziali di
+						sessione (HttpOnly, Secure, SameSite=Lax). Non utilizziamo cookie di
+						tracciamento, profilazione o pubblicità.
+					</p>
+				</section>
+			</main>
+		);
+	}
+
+	if (lang === "bg") {
+		return (
+			<main className="container mx-auto max-w-3xl px-4 py-12">
+				<h1 className="text-3xl font-bold mb-4">Политика за поверителност</h1>
+				<p className="text-muted-foreground mb-8">
+					Последна промяна: 30 юни 2026 г.
+				</p>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">1. Въведение</h2>
+					<p className="mb-3 leading-relaxed">
+						Добре дошли в trashydance. Ние уважаваме вашата поверителност и се
+						ангажираме да защитаваме личните данни, които споделяте с нас. Тази
+						Политика за поверителност обяснява каква информация събираме и какви
+						права имате.
+					</p>
+					<p className="leading-relaxed">
+						trashydance е уеб приложение за съобщения 1-към-1 в реално време,
+						разработено като образователен проект. Като използвате нашата
+						услуга, вие се съгласявате с събирането и използването на информация
+						в съответствие с тази политика.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						2. Данни, които събираме
+					</h2>
+					<ul className="list-disc pl-6 space-y-2">
+						<li>
+							<strong>Информация за профила</strong> &mdash; потребителско име и
+							хеш на парола.
+						</li>
+						<li>
+							<strong>Данни за профила</strong> &mdash; снимка, показвано име,
+							биография.
+						</li>
+						<li>
+							<strong>Съобщения</strong> &mdash; текстовото съдържание на
+							съобщенията, които изпращате и получавате.
+						</li>
+						<li>
+							<strong>Технически данни</strong> &mdash; IP адрес, информация за
+							браузъра и операционната система.
+						</li>
+						<li>
+							<strong>Данни за сесията</strong> &mdash; бисквитки за
+							автентификация.
+						</li>
+						<li>
+							<strong>OAuth данни</strong> &mdash; ако влизате чрез 42 Intra,
+							получаваме вашия 42 потребителски ID.
+						</li>
+					</ul>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">3. Цел на събирането</h2>
+					<p className="mb-3 leading-relaxed">
+						Използваме вашите данни за управление на профила, изпращане на
+						съобщения в реално време, социални връзки (приятелства) и сигурност
+						на платформата.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">
+						4. Съхранение на данните
+					</h2>
+					<p className="mb-3 leading-relaxed">
+						Пазим данните ви до изтриване на профила. При изтриване всички ваши
+						съобщения и лични данни се изтриват трайно от базата данни.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">5. Вашите права (GDPR)</h2>
+					<p className="mb-3 leading-relaxed">
+						Имате право на достъп (сваляне на JSON архив от Настройките),
+						коригиране, изтриване (право да бъдете забравени) и оттегляне на
+						съгласието. За контакти:{" "}
+						<a href={`mailto:${CONTACT_EMAIL}`} className="underline">
+							{CONTACT_EMAIL}
+						</a>
+						.
+					</p>
+				</section>
+
+				<section className="mb-8">
+					<h2 className="text-xl font-semibold mb-3">6. Бисквитки</h2>
+					<p className="leading-relaxed">
+						trashydance използва само строго необходими сесийни бисквитки
+						(HttpOnly, Secure, SameSite=Lax). Не използваме бисквитки за
+						проследяване, анализи или реклами.
+					</p>
+				</section>
+			</main>
+		);
+	}
+
 	return (
 		<main className="container mx-auto max-w-3xl px-4 py-12">
 			<h1 className="text-3xl font-bold mb-4">Privacy Policy</h1>

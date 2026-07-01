@@ -5,7 +5,10 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export function formatRelativeTime(input: string | number): string {
+export function formatRelativeTime(
+	input: string | number,
+	lang = "en",
+): string {
 	const now = Date.now();
 	const date =
 		typeof input === "number"
@@ -21,6 +24,20 @@ export function formatRelativeTime(input: string | number): string {
 	const diffMin = Math.floor(diffSec / 60);
 	const diffHour = Math.floor(diffMin / 60);
 	const diffDay = Math.floor(diffHour / 24);
+
+	if (lang === "it") {
+		if (diffSec < 60) return "proprio ora";
+		if (diffMin < 60) return `${diffMin}m fa`;
+		if (diffHour < 24) return `${diffHour}h fa`;
+		if (diffDay === 1) return "ieri";
+		if (diffDay < 7) return `${diffDay}g fa`;
+	} else if (lang === "bg") {
+		if (diffSec < 60) return "току-що";
+		if (diffMin < 60) return `преди ${diffMin}м`;
+		if (diffHour < 24) return `преди ${diffHour}ч`;
+		if (diffDay === 1) return "вчера";
+		if (diffDay < 7) return `преди ${diffDay}д`;
+	}
 
 	if (diffSec < 60) return "just now";
 	if (diffMin < 60) return `${diffMin}m ago`;

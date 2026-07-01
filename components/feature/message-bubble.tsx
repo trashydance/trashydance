@@ -10,11 +10,15 @@ import {
 	Loader2,
 	Presentation,
 	Video,
+	Zap,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { MoulinetteOverlay } from "@/components/feature/moulinette-overlay";
 import { UserAvatar } from "@/components/feature/user-avatar";
 import { RelativeTime } from "@/components/ui/relative-time";
+import { deleteMessage } from "@/lib/actions/conversations";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import { cn, formatFileSize } from "@/lib/utils";
 
 interface MessageBubbleProps {
@@ -30,6 +34,10 @@ interface MessageBubbleProps {
 	fileSize?: number;
 	partnerName?: string;
 	partnerImage?: string | null;
+	isBlackHoleMode?: boolean;
+	messageId?: string;
+	onExpired?: (id: string) => void;
+	isAbsorbActive?: boolean;
 }
 
 function getFileIcon(mimeType: string) {
@@ -172,80 +180,197 @@ export function MessageBubble({
 	fileSize,
 	partnerName,
 	partnerImage,
+	isBlackHoleMode,
+	messageId,
+	onExpired,
+	isAbsorbActive,
 }: MessageBubbleProps) {
+	const { t } = useI18n();
 	const hasFile = fileName && fileUrl && fileType && fileSize;
+	const [isMoulinetteOpen, setIsMoulinetteOpen] = useState(false);
+
+	const bubbleRef = useRef<HTMLDivElement>(null);
+	const [translation, setTranslation] = useState({ x: 0, y: 0 });
+
+	useEffect(() => {
+		if (isAbsorbActive && bubbleRef.current) {
+			const bubbleEl = bubbleRef.current;
+			const bhEl = document.querySelector(".black-hole-singularity");
+			if (bhEl) {
+				const bubbleRect = bubbleEl.getBoundingClientRect();
+				const bhRect = bhEl.getBoundingClientRect();
+
+				const bubbleCenterX = bubbleRect.left + bubbleRect.width / 2;
+				const bubbleCenterY = bubbleRect.top + bubbleRect.height / 2;
+
+				const bhCenterX = bhRect.left + bhRect.width / 2;
+				const bhCenterY = bhRect.top + bhRect.height / 2;
+
+				setTranslation({
+					x: bhCenterX - bubbleCenterX,
+					y: bhCenterY - bubbleCenterY,
+				});
+			}
+		}
+	}, [isAbsorbActive]);
+
+	const [timeLeft, setTimeLeft] = useState(() => {
+		if (!isBlackHoleMode) return 30;
+		const createdTime =
+			typeof createdAt === "string"
+				? new Date(createdAt).getTime()
+				: typeof createdAt === "number"
+					? createdAt
+					: Date.now();
+		return Math.max(0, 30 - Math.floor((Date.now() - createdTime) / 1000));
+	});
+
+	useEffect(() => {
+		if (!isBlackHoleMode || timeLeft <= 0) return;
+
+		const timer = setInterval(() => {
+			setTimeLeft((prev) => {
+				if (prev <= 1) {
+					clearInterval(timer);
+					return 0;
+				}
+				return prev - 1;
+			});
+		}, 1000);
+
+		return () => clearInterval(timer);
+	}, [isBlackHoleMode, timeLeft]);
+
+	useEffect(() => {
+		if (isBlackHoleMode && timeLeft === 0 && messageId) {
+			if (!messageId.startsWith("temp-")) {
+				deleteMessage(messageId).catch((err) => {
+					console.error("Failed to delete expired message:", err);
+				});
+			}
+			if (onExpired) {
+				onExpired(messageId);
+			}
+		}
+	}, [isBlackHoleMode, timeLeft, messageId, onExpired]);
+
+	if (isBlackHoleMode && timeLeft <= 0) return null;
 
 	return (
-		<div
-			className={cn(
-				"flex w-full flex-col",
-				isSelf ? "items-end" : "items-start",
-			)}
-		>
-			<div className={cn("flex max-w-[75%] items-start gap-2")}>
-				{!isSelf && (
-					<UserAvatar
-						name={partnerName ?? null}
-						image={partnerImage}
-						className="mt-0.5 size-7 border-2 border-border"
-						fallbackClassName="text-[9px] font-bold"
-					/>
+		<>
+			<MoulinetteOverlay
+				isOpen={isMoulinetteOpen}
+				onClose={() => setIsMoulinetteOpen(false)}
+			/>
+
+			<div
+				ref={bubbleRef}
+				className={cn(
+					"flex w-full flex-col group transition-all duration-1000 ease-in-out origin-center",
+					isSelf ? "items-end" : "items-start",
+					isAbsorbActive && "scale-0 opacity-0 pointer-events-none",
 				)}
-				<div
-					className={cn(
-						"min-w-0 rounded-base border-2 border-border px-4 py-2.5 shadow-brutal-sm",
-						isSelf ? "bg-main text-main-foreground" : "bg-card text-foreground",
-					)}
-				>
-					{hasFile && (
-						<FilePreview
-							fileName={fileName}
-							fileUrl={fileUrl}
-							fileType={fileType}
-							fileSize={fileSize}
+				style={
+					isAbsorbActive
+						? {
+								transform: `translate(${translation.x}px, ${translation.y}px) scale(0)`,
+								opacity: 0,
+							}
+						: undefined
+				}
+			>
+				<div className={cn("flex max-w-[75%] items-start gap-2 relative")}>
+					{!isSelf && (
+						<UserAvatar
+							name={partnerName ?? null}
+							image={partnerImage}
+							className="mt-0.5 size-7 border-2 border-border"
+							fallbackClassName="text-[9px] font-bold"
 						/>
 					)}
+					<div
+						className={cn(
+							"min-w-0 rounded-base border-2 border-border px-4 py-2.5 shadow-brutal-sm",
+							isSelf
+								? "bg-main text-main-foreground"
+								: "bg-card text-foreground",
+						)}
+					>
+						{hasFile && (
+							<FilePreview
+								fileName={fileName}
+								fileUrl={fileUrl}
+								fileType={fileType}
+								fileSize={fileSize}
+							/>
+						)}
 
-					{body && (
-						<p className="whitespace-pre-wrap break-words text-sm">{body}</p>
-					)}
+						{body && (
+							<p className="whitespace-pre-wrap break-words text-sm">{body}</p>
+						)}
+					</div>
+
+					{/* Moulinette button on hover */}
+					<button
+						type="button"
+						onClick={() => setIsMoulinetteOpen(true)}
+						className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 p-1.5 rounded-md bg-card border-2 border-border hover:bg-accent/20 active:scale-95"
+						title="Run through Moulinette"
+						aria-label="Evaluate message with Moulinette"
+					>
+						<Zap className="size-4 text-accent" />
+					</button>
 				</div>
-			</div>
 
-			{isSelf && (
-				<div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-					{createdAt && (
-						<>
+				{isSelf && (
+					<div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+						{createdAt && (
+							<>
+								{isBlackHoleMode ? (
+									<span className="text-destructive font-mono animate-pulse">
+										🕳️ {timeLeft}s
+									</span>
+								) : (
+									<RelativeTime createdAt={createdAt} />
+								)}
+								<span className="text-muted-foreground">•</span>
+							</>
+						)}
+						{status === "sending" && (
+							<Loader2 className="size-3 animate-spin" />
+						)}
+						{status === "sent" && (
+							<>
+								<Check className="size-3" />
+								<span>{t("sentStatus")}</span>
+							</>
+						)}
+						{status === "error" && (
+							<button
+								type="button"
+								onClick={onRetry}
+								className="inline-flex items-center gap-0.5 text-destructive hover:underline"
+								aria-label="Retry sending message"
+							>
+								<AlertCircle className="size-3" />
+								<span>{t("retry")}</span>
+							</button>
+						)}
+					</div>
+				)}
+
+				{(!isSelf || isBlackHoleMode) && !isSelf && createdAt && (
+					<div className="mt-1.5 ml-9 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+						{isBlackHoleMode ? (
+							<span className="text-destructive font-mono animate-pulse">
+								🕳️ {timeLeft}s
+							</span>
+						) : (
 							<RelativeTime createdAt={createdAt} />
-							<span className="text-muted-foreground">•</span>
-						</>
-					)}
-					{status === "sending" && <Loader2 className="size-3 animate-spin" />}
-					{status === "sent" && (
-						<>
-							<Check className="size-3" />
-							<span>Sent</span>
-						</>
-					)}
-					{status === "error" && (
-						<button
-							type="button"
-							onClick={onRetry}
-							className="inline-flex items-center gap-0.5 text-destructive hover:underline"
-							aria-label="Retry sending message"
-						>
-							<AlertCircle className="size-3" />
-							<span>Retry</span>
-						</button>
-					)}
-				</div>
-			)}
-
-			{!isSelf && createdAt && (
-				<div className="mt-1.5 ml-9 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-					<RelativeTime createdAt={createdAt} />
-				</div>
-			)}
-		</div>
+						)}
+					</div>
+				)}
+			</div>
+		</>
 	);
 }

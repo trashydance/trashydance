@@ -16,6 +16,16 @@ const envSchema = z.object({
 	FORTYTWO_CLIENT_SECRET: z
 		.string()
 		.min(1, "FORTYTWO_CLIENT_SECRET is required"),
+	DATABASE_URL: z
+		.string()
+		.min(1, "DATABASE_URL is required in production")
+		.optional(),
+	PORT: z
+		.string()
+		.regex(/^[0-9]+$/, "PORT must be a numeric string")
+		.optional(),
+	NODE_ENV: z.enum(["development", "production", "test"]).optional(),
+	HOSTNAME: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

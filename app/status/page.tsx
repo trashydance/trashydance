@@ -1,19 +1,33 @@
+"use client";
+
 import { Activity, Database, Network } from "lucide-react";
 import Link from "next/link";
-import db from "@/lib/db";
-import { user } from "@/schema";
+import { useEffect, useState } from "react";
+import { useI18n } from "@/lib/i18n/i18n-context";
 
-export const dynamic = "force-dynamic";
+export default function StatusPage() {
+	const { t } = useI18n();
+	const [dbHealthy, setDbHealthy] = useState<boolean | null>(null);
+	const [errorMsg, setErrorMsg] = useState("");
 
-export default async function StatusPage() {
-	let dbHealthy = false;
-	let errorMsg = "";
-	try {
-		db.select({ id: user.id }).from(user).limit(1).all();
-		dbHealthy = true;
-	} catch (e) {
-		errorMsg = e instanceof Error ? e.message : String(e);
-	}
+	useEffect(() => {
+		fetch("/api/health")
+			.then((res) => {
+				if (!res.ok) {
+					return res.json().then((data) => {
+						setDbHealthy(false);
+						setErrorMsg(data.error || "Database connection error");
+					});
+				}
+				return res.json().then(() => {
+					setDbHealthy(true);
+				});
+			})
+			.catch((err) => {
+				setDbHealthy(false);
+				setErrorMsg(err instanceof Error ? err.message : String(err));
+			});
+	}, []);
 
 	const uptimeDays = Array.from({ length: 30 }, (_, i) => ({
 		day: i,
@@ -22,15 +36,22 @@ export default async function StatusPage() {
 
 	return (
 		<div className="min-h-screen bg-background p-4 sm:p-8 flex flex-col items-center justify-center">
-			<div className="w-full max-w-2xl rounded-base border-4 border-border bg-main p-6 shadow-shadow mb-6">
+			<div className="w-full max-w-2xl rounded-base border-4 border-border bg-main p-6 shadow-shadow mb-6 text-main-foreground">
 				<div className="flex items-center justify-between mb-6">
-					<h1 className="text-3xl font-black uppercase tracking-tight text-main-foreground">
-						System Status
+					<h1 className="text-3xl font-black uppercase tracking-tight">
+						{t("systemStatus")}
 					</h1>
-					<span className="inline-flex items-center gap-1.5 rounded-full border-2 border-border bg-green-400 px-3 py-1 text-xs font-bold text-black">
-						<span className="h-2 w-2 rounded-full bg-black animate-pulse" />
-						All Systems Operational
-					</span>
+					{dbHealthy !== false ? (
+						<span className="inline-flex items-center gap-1.5 rounded-full border-2 border-border bg-green-400 px-3 py-1 text-xs font-bold text-black">
+							<span className="h-2 w-2 rounded-full bg-black animate-pulse" />
+							{t("allSystemsOperational")}
+						</span>
+					) : (
+						<span className="inline-flex items-center gap-1.5 rounded-full border-2 border-border bg-destructive px-3 py-1 text-xs font-bold text-destructive-foreground">
+							<span className="h-2 w-2 rounded-full bg-destructive-foreground animate-ping" />
+							{t("outage")}
+						</span>
+					)}
 				</div>
 
 				<div className="space-y-4 rounded-base border-4 border-border bg-card p-6 text-card-foreground shadow-shadow">
@@ -39,14 +60,14 @@ export default async function StatusPage() {
 						<div className="flex items-center gap-3">
 							<Activity className="size-5 text-main-foreground" />
 							<div>
-								<p className="font-bold text-sm uppercase">Web Application</p>
+								<p className="font-bold text-sm uppercase">{t("webApp")}</p>
 								<p className="text-xs text-muted-foreground">
-									HTTP Server & Next.js App Router
+									{t("webAppDesc")}
 								</p>
 							</div>
 						</div>
-						<span className="text-xs font-bold uppercase border-2 border-border bg-green-400 px-2.5 py-0.5 rounded-base">
-							Operational
+						<span className="text-xs font-bold uppercase border-2 border-border bg-green-400 px-2.5 py-0.5 rounded-base text-black">
+							{t("operational")}
 						</span>
 					</div>
 
@@ -55,19 +76,23 @@ export default async function StatusPage() {
 						<div className="flex items-center gap-3">
 							<Database className="size-5 text-main-foreground" />
 							<div>
-								<p className="font-bold text-sm uppercase">Database Engine</p>
+								<p className="font-bold text-sm uppercase">{t("dbEngine")}</p>
 								<p className="text-xs text-muted-foreground">
-									SQLite via Drizzle ORM
+									{t("dbEngineDesc")}
 								</p>
 							</div>
 						</div>
-						{dbHealthy ? (
-							<span className="text-xs font-bold uppercase border-2 border-border bg-green-400 px-2.5 py-0.5 rounded-base">
-								Operational
+						{dbHealthy === null ? (
+							<span className="text-xs font-bold uppercase border-2 border-border bg-yellow-400 px-2.5 py-0.5 rounded-base text-black animate-pulse">
+								...
+							</span>
+						) : dbHealthy ? (
+							<span className="text-xs font-bold uppercase border-2 border-border bg-green-400 px-2.5 py-0.5 rounded-base text-black">
+								{t("operational")}
 							</span>
 						) : (
 							<span className="text-xs font-bold uppercase border-2 border-border bg-destructive text-destructive-foreground px-2.5 py-0.5 rounded-base">
-								Outage
+								{t("outage")}
 							</span>
 						)}
 					</div>
@@ -77,42 +102,44 @@ export default async function StatusPage() {
 						<div className="flex items-center gap-3">
 							<Network className="size-5 text-main-foreground" />
 							<div>
-								<p className="font-bold text-sm uppercase">Real-time Gateway</p>
+								<p className="font-bold text-sm uppercase">
+									{t("realtimeGateway")}
+								</p>
 								<p className="text-xs text-muted-foreground">
-									Socket.IO Server
+									{t("realtimeGatewayDesc")}
 								</p>
 							</div>
 						</div>
-						<span className="text-xs font-bold uppercase border-2 border-border bg-green-400 px-2.5 py-0.5 rounded-base">
-							Operational
+						<span className="text-xs font-bold uppercase border-2 border-border bg-green-400 px-2.5 py-0.5 rounded-base text-black">
+							{t("operational")}
 						</span>
 					</div>
 				</div>
 
 				{/* Uptime History Graph */}
 				<div className="mt-6">
-					<p className="text-xs font-bold uppercase tracking-wide text-main-foreground mb-2">
-						System Uptime (Last 30 Days)
+					<p className="text-xs font-bold uppercase tracking-wide mb-2">
+						{t("systemUptime")}
 					</p>
 					<div className="flex gap-1">
 						{uptimeDays.map((d) => (
 							<div
 								key={d.day}
 								className="h-8 flex-1 rounded-sm border-2 border-border bg-green-400 hover:bg-black transition-colors"
-								title={`Day -${30 - d.day}: 100% Uptime`}
+								title={`${t("today")}: 100% Uptime`}
 							/>
 						))}
 					</div>
-					<div className="flex justify-between text-[10px] font-bold text-main-foreground mt-2">
-						<span>30 days ago</span>
-						<span>100.0% uptime</span>
-						<span>Today</span>
+					<div className="flex justify-between text-[10px] font-bold mt-2">
+						<span>{t("daysAgo30")}</span>
+						<span>{t("uptimePercentage")}</span>
+						<span>{t("today")}</span>
 					</div>
 				</div>
 
-				{!dbHealthy && (
+				{dbHealthy === false && (
 					<div className="mt-4 p-3 border-2 border-border bg-destructive/10 text-destructive text-xs rounded-base font-mono">
-						<strong>Outage details:</strong> {errorMsg}
+						<strong>{t("outageDetails")}:</strong> {errorMsg}
 					</div>
 				)}
 			</div>
@@ -121,7 +148,7 @@ export default async function StatusPage() {
 				href="/"
 				className="text-sm font-bold uppercase tracking-wide border-2 border-border bg-card hover:bg-main hover:text-main-foreground transition-colors px-4 py-2 rounded-base shadow-shadow"
 			>
-				← Back to trashydance
+				{t("backToTrashy")}
 			</Link>
 		</div>
 	);

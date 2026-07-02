@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useToast } from "@/components/ui/toast";
 import {
 	removeFriendRequest,
@@ -19,9 +19,22 @@ export function useFriendStatus(
 ) {
 	const [friendStatus, setFriendStatusRaw] =
 		useState<FriendStatus>(initialStatus);
-	const [requestId, setRequestId] = useState<string | undefined>(
+	const [requestId, setRequestIdRaw] = useState<string | undefined>(
 		initialRequestId,
 	);
+	const requestIdRef = useRef<string | undefined>(initialRequestId);
+
+	const setRequestId = useCallback((id: string | undefined) => {
+		requestIdRef.current = id;
+		setRequestIdRaw(id);
+	}, []);
+
+	// Synchronize state and ref with initialRequestId prop changes
+	useEffect(() => {
+		requestIdRef.current = initialRequestId;
+		setRequestIdRaw(initialRequestId);
+	}, [initialRequestId]);
+
 	const [isLoading, setIsLoading] = useState(false);
 	const { socket } = useSocket();
 	const { toast } = useToast();
@@ -68,7 +81,7 @@ export function useFriendStatus(
 			socket.off(SocketEvent.FRIEND_REQUEST_UPDATE, handleUpdate);
 			socket.off(SocketEvent.FRIEND_REQUEST_NEW, handleNew);
 		};
-	}, [socket, userId, onStatusChange]);
+	}, [socket, userId, onStatusChange, setRequestId]);
 
 	const setFriendStatus = useCallback(
 		(status: FriendStatus, reqId?: string) => {
@@ -98,12 +111,13 @@ export function useFriendStatus(
 		} finally {
 			setIsLoading(false);
 		}
-	}, [userId, friendStatus, setFriendStatus, toast]);
+	}, [userId, friendStatus, setFriendStatus, toast, setRequestId]);
 
 	const cancelRequest = useCallback(async () => {
-		if (!requestId) return;
+		const currentId = requestIdRef.current;
+		if (!currentId) return;
 		const prevStatus = friendStatus;
-		const prevRequestId = requestId;
+		const prevRequestId = currentId;
 		setFriendStatus("none");
 		setRequestId(undefined);
 		setIsLoading(true);
@@ -122,16 +136,17 @@ export function useFriendStatus(
 		} finally {
 			setIsLoading(false);
 		}
-	}, [requestId, friendStatus, setFriendStatus, toast]);
+	}, [friendStatus, setFriendStatus, setRequestId, toast]);
 
 	const acceptRequest = useCallback(async () => {
-		if (!requestId) return;
+		const currentId = requestIdRef.current;
+		if (!currentId) return;
 		const prevStatus = friendStatus;
 		setFriendStatus("friends");
 		setIsLoading(true);
 
 		try {
-			const res = await respondFriendRequest(requestId, "accept");
+			const res = await respondFriendRequest(currentId, "accept");
 			if (!res.ok) {
 				toast(res.error, "error");
 				setFriendStatus(prevStatus);
@@ -142,12 +157,13 @@ export function useFriendStatus(
 		} finally {
 			setIsLoading(false);
 		}
-	}, [requestId, friendStatus, setFriendStatus, toast]);
+	}, [friendStatus, setFriendStatus, toast]);
 
 	const rejectRequest = useCallback(async () => {
-		if (!requestId) return;
+		const currentId = requestIdRef.current;
+		if (!currentId) return;
 		const prevStatus = friendStatus;
-		const prevRequestId = requestId;
+		const prevRequestId = currentId;
 		setFriendStatus("none");
 		setRequestId(undefined);
 		setIsLoading(true);
@@ -166,12 +182,13 @@ export function useFriendStatus(
 		} finally {
 			setIsLoading(false);
 		}
-	}, [requestId, friendStatus, setFriendStatus, toast]);
+	}, [friendStatus, setFriendStatus, setRequestId, toast]);
 
 	const unfriend = useCallback(async () => {
-		if (!requestId) return;
+		const currentId = requestIdRef.current;
+		if (!currentId) return;
 		const prevStatus = friendStatus;
-		const prevRequestId = requestId;
+		const prevRequestId = currentId;
 		setFriendStatus("none");
 		setRequestId(undefined);
 		setIsLoading(true);
@@ -190,7 +207,7 @@ export function useFriendStatus(
 		} finally {
 			setIsLoading(false);
 		}
-	}, [requestId, friendStatus, setFriendStatus, toast]);
+	}, [friendStatus, setFriendStatus, setRequestId, toast]);
 
 	return {
 		friendStatus,

@@ -47,6 +47,10 @@ next-env.d.ts
 data/uploads/*
 !data/uploads/.gitkeep
 
+# backups
+data/backups/*
+!data/backups/.gitkeep
+
 *.md
 .claude/
 *.pdf

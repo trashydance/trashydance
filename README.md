@@ -164,9 +164,10 @@
 | ✅ | Web | Notification System | Minor | 1 | Complete real-time notification badge system for messages and friend requests (creates, accepts, cancels, reads). |
 | ✅ | Accessibility | Support for multiple languages (3 languages) | Minor | 1 | Client-side internationalization system (EN, IT, BG) with dynamic context-based translations, custom language switcher, and full localization. |
 | ✅ | Accessibility | Support for additional browsers (Firefox, Safari, Edge) | Minor | 1 | Fully tested and compatible with modern rendering engines (Gecko/Firefox, WebKit/Safari, Chromium/Edge) using standard CSS grid/flexbox and stable React features. |
+| ✅ | Gaming/UX | Gamification system | Minor | 1 | Custom persistent badges & achievements system on the profile page tracking message counts, 2FA setup, and friend counts with visual feedback and localized info. |
 | ✅ | Devops | Health check & backups | Minor | 1 | Custom API health check endpoint (/api/health) and automated shell script backup scheduler (scripts/backup.sh) packaging DB state & user uploads. |
 | ✅ | Data/Analytics | GDPR compliance features | Minor | 1 | Data export in structured JSON format, cookie consent notification banner, and permanent account deletion mechanism. |
-| | | **Total** | | **19** | |
+| | | **Total** | | **20** | |
 
 ---
 

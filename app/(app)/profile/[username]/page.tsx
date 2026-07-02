@@ -1,11 +1,15 @@
+import { count, eq } from "drizzle-orm";
 import { CalendarDays, ExternalLink, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ProfileAchievements } from "@/components/feature/profile-achievements";
 import { ProfileActions } from "@/components/feature/profile-actions";
 import { ProfileAvatar } from "@/components/feature/profile-avatar";
 import { INTRA_PROFILE_BASE_URL } from "@/lib/constants";
 import { getProfileByUsername } from "@/lib/data/profile";
 import { getCurrentUser, requireUser } from "@/lib/data/session";
+import db from "@/lib/db";
+import { message, user } from "@/schema";
 
 type Props = { params: Promise<{ username: string }> };
 
@@ -23,6 +27,20 @@ export default async function ProfilePage({ params }: Props) {
 	const me = await requireUser();
 	const profile = await getProfileByUsername(me.id, username);
 	if (!profile) notFound();
+
+	const profileUserObj = db
+		.select({ twoFactorEnabled: user.twoFactorEnabled })
+		.from(user)
+		.where(eq(user.id, profile.id))
+		.get();
+	const twoFactorEnabled = profileUserObj?.twoFactorEnabled ?? false;
+
+	const messageCountResult = db
+		.select({ value: count() })
+		.from(message)
+		.where(eq(message.senderId, profile.id))
+		.get();
+	const messageCount = messageCountResult?.value ?? 0;
 
 	const displayName = profile.username || profile.name;
 	const fullName = [profile.name, profile.lastName].filter(Boolean).join(" ");
@@ -104,6 +122,12 @@ export default async function ProfilePage({ params }: Props) {
 				<div className="mt-6">
 					<ProfileActions profile={profile} />
 				</div>
+
+				<ProfileAchievements
+					messageCount={messageCount}
+					friendCount={profile.friendCount}
+					twoFactorEnabled={twoFactorEnabled}
+				/>
 			</div>
 		</div>
 	);

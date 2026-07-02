@@ -21,6 +21,7 @@ import { useToast } from "@/components/ui/toast";
 import { createConversation } from "@/lib/actions/conversations";
 import { updateProfile } from "@/lib/actions/profile";
 import { authClient } from "@/lib/auth-client";
+import { useI18n } from "@/lib/i18n/i18n-context";
 import type { Profile } from "@/lib/types";
 
 interface ProfileActionsProps {
@@ -28,6 +29,7 @@ interface ProfileActionsProps {
 }
 
 export function ProfileActions({ profile }: ProfileActionsProps) {
+	const { t } = useI18n();
 	const { toast } = useToast();
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [saving, setSaving] = useState(false);
@@ -99,7 +101,7 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 					disabled={chatLoading}
 				>
 					<MessageSquare className="size-4" />
-					{chatLoading ? "Loading..." : "Chat"}
+					{chatLoading ? t("loading") : t("chat")}
 				</Button>
 			</div>
 		);
@@ -110,52 +112,50 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 			<DialogTrigger asChild>
 				<Button variant="outline" onClick={openEdit}>
 					<Pencil className="size-4" />
-					Edit profile
+					{t("editProfile")}
 				</Button>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Edit profile</DialogTitle>
-					<DialogDescription>
-						Update your profile information. Username cannot be changed.
-					</DialogDescription>
+					<DialogTitle>{t("editProfile")}</DialogTitle>
+					<DialogDescription>{t("editProfileDesc")}</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4 px-5 py-4">
 					<div>
-						<Label>Username</Label>
+						<Label>{t("username")}</Label>
 						<Input value={profile.username} disabled className="mt-1" />
 					</div>
 					<div className="grid grid-cols-2 gap-3">
 						<div>
-							<Label htmlFor="edit-name">First name</Label>
+							<Label htmlFor="edit-name">{t("firstName")}</Label>
 							<Input
 								id="edit-name"
 								value={editName}
 								onChange={(e) => setEditName(e.target.value)}
-								placeholder="Your first name"
+								placeholder={t("placeholderFirstName")}
 								className="mt-1"
 								maxLength={50}
 							/>
 						</div>
 						<div>
-							<Label htmlFor="edit-lastname">Last name</Label>
+							<Label htmlFor="edit-lastname">{t("lastName")}</Label>
 							<Input
 								id="edit-lastname"
 								value={editLastName}
 								onChange={(e) => setEditLastName(e.target.value)}
-								placeholder="Your last name"
+								placeholder={t("placeholderLastName")}
 								className="mt-1"
 								maxLength={50}
 							/>
 						</div>
 					</div>
 					<div>
-						<Label htmlFor="edit-bio">Bio</Label>
+						<Label htmlFor="edit-bio">{t("bio")}</Label>
 						<Textarea
 							id="edit-bio"
 							value={editBio}
 							onChange={(e) => setEditBio(e.target.value)}
-							placeholder="Tell us about yourself..."
+							placeholder={t("placeholderBio")}
 							className="mt-1"
 							maxLength={200}
 							rows={3}
@@ -167,7 +167,7 @@ export function ProfileActions({ profile }: ProfileActionsProps) {
 				</div>
 				<DialogFooter>
 					<Button onClick={handleSave} disabled={saving || !editName.trim()}>
-						{saving ? "Saving..." : "Save"}
+						{saving ? t("saving") : t("save")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

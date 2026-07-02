@@ -91,6 +91,7 @@ export function SearchClient({ initialUsers }: SearchClientProps) {
 
 	return (
 		<>
+			<h1 className="font-heading text-5xl mb-6">{t("findPeople")}</h1>
 			<SearchBar
 				value={query}
 				onChange={setQuery}

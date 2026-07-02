@@ -63,6 +63,9 @@ export const translations = {
 		startFirstChat: "Start your first chat",
 		coinFlipHeads: "Coin Flip: HEADS! 🪙",
 		coinFlipTails: "Coin Flip: TAILS! 🪙",
+		privacy: "Privacy",
+		terms: "Terms",
+		backToTrashy: "← Back to trashydance",
 	},
 	it: {
 		inbox: "Messaggi.",
@@ -125,6 +128,9 @@ export const translations = {
 		startFirstChat: "Avvia la tua prima chat",
 		coinFlipHeads: "Lancio della moneta: TESTA! 🪙",
 		coinFlipTails: "Lancio della moneta: CROCE! 🪙",
+		privacy: "Privacy",
+		terms: "Termini",
+		backToTrashy: "← Torna a trashydance",
 	},
 	bg: {
 		inbox: "Входящи.",
@@ -188,5 +194,8 @@ export const translations = {
 		startFirstChat: "Започнете първия си разговор",
 		coinFlipHeads: "Хвърляне на монета: ЕЗИ! 🪙",
 		coinFlipTails: "Хвърляне на монета: ТУРА! 🪙",
+		privacy: "Поверителност",
+		terms: "Условия",
+		backToTrashy: "← Назад към trashydance",
 	},
 };

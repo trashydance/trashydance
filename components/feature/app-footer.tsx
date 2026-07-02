@@ -14,6 +14,12 @@ export function AppFooter() {
 				</p>
 				<div className="flex items-center gap-4">
 					<Link
+						href="/status"
+						className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+					>
+						{t("status")}
+					</Link>
+					<Link
 						href="/privacy"
 						className="text-xs text-muted-foreground hover:text-foreground hover:underline"
 					>

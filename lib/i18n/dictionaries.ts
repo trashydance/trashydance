@@ -66,6 +66,7 @@ export const translations = {
 		privacy: "Privacy",
 		terms: "Terms",
 		backToTrashy: "← Back to trashydance",
+		status: "Status",
 	},
 	it: {
 		inbox: "Messaggi.",
@@ -131,6 +132,7 @@ export const translations = {
 		privacy: "Privacy",
 		terms: "Termini",
 		backToTrashy: "← Torna a trashydance",
+		status: "Stato",
 	},
 	bg: {
 		inbox: "Входящи.",
@@ -197,5 +199,6 @@ export const translations = {
 		privacy: "Поверителност",
 		terms: "Условия",
 		backToTrashy: "← Назад към trashydance",
+		status: "Статус",
 	},
 };

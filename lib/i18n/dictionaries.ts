@@ -89,6 +89,9 @@ export const translations = {
 		achievementSocializerDesc: "Add at least one friend",
 		achievement2fa: "Ironclad",
 		achievement2faDesc: "Enable Two-Factor Authentication (2FA)",
+		online: "Online",
+		you: "You",
+		since: "Since",
 	},
 	it: {
 		inbox: "Messaggi.",
@@ -177,6 +180,9 @@ export const translations = {
 		achievementSocializerDesc: "Aggiungi almeno un amico",
 		achievement2fa: "Inviolabile",
 		achievement2faDesc: "Abilita l'autenticazione a due fattori (2FA)",
+		online: "Online",
+		you: "Tu",
+		since: "Dal",
 	},
 	bg: {
 		inbox: "Входящи.",
@@ -266,5 +272,8 @@ export const translations = {
 		achievementSocializerDesc: "Добави поне един приятел",
 		achievement2fa: "Железен щит",
 		achievement2faDesc: "Активирай двуфакторно удостоверяване (2FA)",
+		online: "На линия",
+		you: "Ти",
+		since: "От",
 	},
 };

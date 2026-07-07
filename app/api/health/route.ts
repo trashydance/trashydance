@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
 	try {
 		// Verify database connection is alive
-		db.select({ id: user.id }).from(user).limit(1).all();
+		db.select({ id: user.id }).from(user).limit(1).get();
 		return NextResponse.json({
 			status: "healthy",
 			database: "connected",

@@ -102,6 +102,7 @@ export const translations = {
 		save: "Save",
 		chat: "Chat",
 		loading: "Loading...",
+		dbConnectionError: "Database connection error",
 	},
 	it: {
 		inbox: "Messaggi.",
@@ -203,6 +204,7 @@ export const translations = {
 		save: "Salva",
 		chat: "Chat",
 		loading: "Caricamento...",
+		dbConnectionError: "Errore di connessione al database",
 	},
 	bg: {
 		inbox: "Входящи.",
@@ -305,5 +307,6 @@ export const translations = {
 		save: "Запази",
 		chat: "Чат",
 		loading: "Зареждане...",
+		dbConnectionError: "Грешка при връзката с базата данни",
 	},
 };

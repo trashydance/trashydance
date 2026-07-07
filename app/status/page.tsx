@@ -16,7 +16,7 @@ export default function StatusPage() {
 				if (!res.ok) {
 					return res.json().then((data) => {
 						setDbHealthy(false);
-						setErrorMsg(data.error || "Database connection error");
+						setErrorMsg(data.error || t("dbConnectionError"));
 					});
 				}
 				return res.json().then(() => {
@@ -27,7 +27,7 @@ export default function StatusPage() {
 				setDbHealthy(false);
 				setErrorMsg(err instanceof Error ? err.message : String(err));
 			});
-	}, []);
+	}, [t]);
 
 	const uptimeDays = Array.from({ length: 30 }, (_, i) => ({
 		day: i,
@@ -41,7 +41,12 @@ export default function StatusPage() {
 					<h1 className="text-3xl font-black uppercase tracking-tight">
 						{t("systemStatus")}
 					</h1>
-					{dbHealthy !== false ? (
+					{dbHealthy === null ? (
+						<span className="inline-flex items-center gap-1.5 rounded-full border-2 border-border bg-yellow-400 px-3 py-1 text-xs font-bold text-black animate-pulse">
+							<span className="h-2 w-2 rounded-full bg-black" />
+							{t("loading")}
+						</span>
+					) : dbHealthy ? (
 						<span className="inline-flex items-center gap-1.5 rounded-full border-2 border-border bg-green-400 px-3 py-1 text-xs font-bold text-black">
 							<span className="h-2 w-2 rounded-full bg-black animate-pulse" />
 							{t("allSystemsOperational")}
@@ -125,8 +130,10 @@ export default function StatusPage() {
 						{uptimeDays.map((d) => (
 							<div
 								key={d.day}
+								role="img"
+								aria-label={`${t("today")}: ${t("uptimePercentage")}`}
 								className="h-8 flex-1 rounded-sm border-2 border-border bg-green-400 hover:bg-black transition-colors"
-								title={`${t("today")}: 100% Uptime`}
+								title={`${t("today")}: ${t("uptimePercentage")}`}
 							/>
 						))}
 					</div>

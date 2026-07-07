@@ -296,6 +296,15 @@ pnpm test:coverage # Run tests with coverage report
 - [Caddy](https://caddyserver.com/) — HTTP/2 web server with automatic HTTPS
 - [Biome](https://biomejs.dev/) — Fast linter and formatter
 
+### AI Usage Disclosure
+
+As required by the ft_transcendence project subject, we disclose the use of AI tools (ChatGPT, Claude, GitHub Copilot) during the development process:
+- **Code Assistance & Boilerplate**: AI was used to generate initial boilerplate code for standard UI components (shadcn/ui variants) and Tailwind CSS utility class combinations.
+- **Debugging & TypeScript**: AI assistants helped in resolving complex TypeScript generic errors and optimizing Drizzle ORM queries.
+- **Documentation & Legal**: AI was used to assist in formatting Markdown tables in this README, creating the Architecture ASCII diagram, and drafting the initial structure for the Privacy Policy and Terms of Service.
+- **Design Inspiration**: AI helped suggest color palettes and structural ideas for the neobrutalist aesthetic.
+- *Note: All core logic, Socket.IO architecture, security implementations, and final code integrations were written, reviewed, and deeply understood by the team.*
+
 ---
 
 ## Architecture

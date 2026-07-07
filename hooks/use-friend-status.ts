@@ -23,11 +23,17 @@ export function useFriendStatus(
 		initialRequestId,
 	);
 	const requestIdRef = useRef<string | undefined>(initialRequestId);
+	const onStatusChangeRef = useRef(onStatusChange);
 
 	const setRequestId = useCallback((id: string | undefined) => {
 		requestIdRef.current = id;
 		setRequestIdRaw(id);
 	}, []);
+
+	// Keep onStatusChange callback reference in sync
+	useEffect(() => {
+		onStatusChangeRef.current = onStatusChange;
+	}, [onStatusChange]);
 
 	// Synchronize state and ref with initialRequestId prop changes
 	useEffect(() => {
@@ -53,11 +59,11 @@ export function useFriendStatus(
 			if (data.status === "accepted") {
 				setFriendStatusRaw("friends");
 				setRequestId(data.id);
-				onStatusChange?.("friends");
+				onStatusChangeRef.current?.("friends");
 			} else if (data.status === "rejected" || data.status === "none") {
 				setFriendStatusRaw("none");
 				setRequestId(undefined);
-				onStatusChange?.("none");
+				onStatusChangeRef.current?.("none");
 			}
 		}
 
@@ -72,7 +78,7 @@ export function useFriendStatus(
 			if (data.senderId !== userId) return;
 			setFriendStatusRaw("pending_received");
 			setRequestId(data.id);
-			onStatusChange?.("pending_received");
+			onStatusChangeRef.current?.("pending_received");
 		}
 
 		socket.on(SocketEvent.FRIEND_REQUEST_UPDATE, handleUpdate);
@@ -81,14 +87,14 @@ export function useFriendStatus(
 			socket.off(SocketEvent.FRIEND_REQUEST_UPDATE, handleUpdate);
 			socket.off(SocketEvent.FRIEND_REQUEST_NEW, handleNew);
 		};
-	}, [socket, userId, onStatusChange, setRequestId]);
+	}, [socket, userId, setRequestId]);
 
 	const setFriendStatus = useCallback(
 		(status: FriendStatus, reqId?: string) => {
 			setFriendStatusRaw(status);
-			onStatusChange?.(status, reqId);
+			onStatusChangeRef.current?.(status, reqId);
 		},
-		[onStatusChange],
+		[],
 	);
 
 	const sendRequest = useCallback(async () => {

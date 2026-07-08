@@ -1,19 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { CONTACT_EMAIL } from "@/lib/constants";
+import { useI18n } from "@/lib/i18n/i18n-context";
 
 export default function PrivacyPage() {
-	const [lang, setLang] = useState("en");
+	const { language } = useI18n();
 
-	useEffect(() => {
-		const saved = localStorage.getItem("trashydance-lang");
-		if (saved && (saved === "en" || saved === "it" || saved === "bg")) {
-			setLang(saved);
-		}
-	}, []);
-
-	if (lang === "it") {
+	if (language === "it") {
 		return (
 			<main className="container mx-auto max-w-3xl px-4 py-12">
 				<h1 className="text-3xl font-bold mb-4">Informativa sulla Privacy</h1>
@@ -119,7 +112,7 @@ export default function PrivacyPage() {
 		);
 	}
 
-	if (lang === "bg") {
+	if (language === "bg") {
 		return (
 			<main className="container mx-auto max-w-3xl px-4 py-12">
 				<h1 className="text-3xl font-bold mb-4">Политика за поверителност</h1>

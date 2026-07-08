@@ -39,13 +39,28 @@ export function SearchClient({ initialUsers }: SearchClientProps) {
 		);
 	}, [query, allUsers]);
 
-	const friends = filtered.filter((u) => u.friendStatus === "friends");
-	const pending = filtered.filter(
-		(u) =>
-			u.friendStatus === "pending_sent" ||
-			u.friendStatus === "pending_received",
-	);
-	const others = filtered.filter((u) => u.friendStatus === "none");
+	const { friends, pending, others } = useMemo(() => {
+		const friendsList: SearchUser[] = [];
+		const pendingList: SearchUser[] = [];
+		const othersList: SearchUser[] = [];
+		for (const u of filtered) {
+			if (u.friendStatus === "friends") {
+				friendsList.push(u);
+			} else if (
+				u.friendStatus === "pending_sent" ||
+				u.friendStatus === "pending_received"
+			) {
+				pendingList.push(u);
+			} else if (u.friendStatus === "none") {
+				othersList.push(u);
+			}
+		}
+		return {
+			friends: friendsList,
+			pending: pendingList,
+			others: othersList,
+		};
+	}, [filtered]);
 
 	const handleUserClick = useCallback(
 		async (userId: string) => {
@@ -91,6 +106,7 @@ export function SearchClient({ initialUsers }: SearchClientProps) {
 
 	return (
 		<>
+			<h1 className="font-heading text-5xl mb-6">{t("findPeople")}</h1>
 			<SearchBar
 				value={query}
 				onChange={setQuery}

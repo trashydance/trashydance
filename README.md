@@ -161,7 +161,13 @@
 | ✅ | User Mgmt | Standard user management | Major | 2 | Profile editing, avatar upload with default fallback, friend system with online status, profile pages with user information. |
 | ✅ | User Mgmt | OAuth 2.0 (42 Intra) | Minor | 1 | OAuth 2.0 Authorization Code flow via 42 Intra API. Automatic account linking if email exists. |
 | ✅ | User Mgmt | Two-Factor Authentication (TOTP) | Minor | 1 | Complete 2FA flow: enable with password verification, TOTP QR code (generated locally), 6-digit verification, backup codes, disable with password. Login requires TOTP when enabled. |
-| | | **Total** | | **14** | |
+| ✅ | Web | Notification System | Minor | 1 | Complete real-time notification badge system for messages and friend requests (creates, accepts, cancels, reads). |
+| ✅ | Accessibility | Support for multiple languages (3 languages) | Minor | 1 | Client-side internationalization system (EN, IT, BG) with dynamic context-based translations, custom language switcher, and full localization. |
+| ✅ | Accessibility | Support for additional browsers (Firefox, Safari, Edge) | Minor | 1 | Fully tested and compatible with modern rendering engines (Gecko/Firefox, WebKit/Safari, Chromium/Edge) using standard CSS grid/flexbox and stable React features. |
+| ✅ | Gaming/UX | Gamification system | Minor | 1 | Custom persistent badges & achievements system on the profile page tracking message counts, 2FA setup, and friend counts with visual feedback and localized info. |
+| ✅ | Devops | Health check & backups | Minor | 1 | Custom API health check endpoint (/api/health) and automated shell script backup scheduler (scripts/backup.sh) packaging DB state & user uploads. |
+| ✅ | Data/Analytics | GDPR compliance features | Minor | 1 | Data export in structured JSON format, cookie consent notification banner, and permanent account deletion mechanism. |
+| | | **Total** | | **20** | |
 
 ---
 
@@ -289,6 +295,15 @@ pnpm test:coverage # Run tests with coverage report
 - [Zod](https://zod.dev/) — TypeScript-first schema validation
 - [Caddy](https://caddyserver.com/) — HTTP/2 web server with automatic HTTPS
 - [Biome](https://biomejs.dev/) — Fast linter and formatter
+
+### AI Usage Disclosure
+
+As required by the ft_transcendence project subject, we disclose the use of AI tools (ChatGPT, Claude, GitHub Copilot) during the development process:
+- **Code Assistance & Boilerplate**: AI was used to generate initial boilerplate code for standard UI components (shadcn/ui variants) and Tailwind CSS utility class combinations.
+- **Debugging & TypeScript**: AI assistants helped in resolving complex TypeScript generic errors and optimizing Drizzle ORM queries.
+- **Documentation & Legal**: AI was used to assist in formatting Markdown tables in this README, creating the Architecture ASCII diagram, and drafting the initial structure for the Privacy Policy and Terms of Service.
+- **Design Inspiration**: AI helped suggest color palettes and structural ideas for the neobrutalist aesthetic.
+- *Note: All core logic, Socket.IO architecture, security implementations, and final code integrations were written, reviewed, and deeply understood by the team.*
 
 ---
 

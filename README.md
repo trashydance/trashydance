@@ -19,7 +19,7 @@
 - **User profiles** — Public profiles with avatar, friend count, and status
 - **Search** — Global search across users and message history
 - **Privacy & Terms** — Complete legal pages with real content
-- **Responsive design** — Mobile-first neobrutalist UI with dark mode support
+- **Responsive design** — Mobile-first responsive neobrutalist UI
 
 ---
 
@@ -138,7 +138,6 @@
 | Online presence | Real-time online/offline indicators | vzashev |
 | Notifications | Unread count badges for messages and requests | lrocca |
 | Read receipts | Track last read timestamp per conversation | vzashev |
-| Dark mode | Light/dark theme toggle | fmartusc |
 | Design system | 19+ reusable neobrutalist components | fmartusc |
 | Privacy Policy | Legal page with real content | fmartusc |
 | Terms of Service | Legal page with real content | fmartusc |
@@ -178,7 +177,6 @@
 - Implemented the landing page (`app/page.tsx`) and global layout
 - Created the design system: 19+ shadcn/ui components customized for neobrutalism (`components/ui/`)
 - Built Privacy Policy and Terms of Service pages with real content (`app/(legal)/`)
-- Implemented dark mode support with theme toggle
 - Defined product backlog and feature priorities
 
 ### edforte (Technical Lead)

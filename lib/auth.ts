@@ -34,6 +34,10 @@ function buildAuth() {
 					type: "string",
 					required: false,
 				},
+				intraLogin: {
+					type: "string",
+					required: false,
+				},
 			},
 		},
 

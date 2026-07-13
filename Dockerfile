@@ -44,24 +44,24 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # Copy package files
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --chown=nextjs:nodejs --from=builder /app/package.json ./package.json
+COPY --chown=nextjs:nodejs --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 
 # Copy node_modules (needed because custom server is incompatible with standalone output)
-COPY --from=builder /app/node_modules ./node_modules
+COPY --chown=nextjs:nodejs --from=builder /app/node_modules ./node_modules
 
 # Copy built Next.js output
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+COPY --chown=nextjs:nodejs --from=builder /app/.next ./.next
+COPY --chown=nextjs:nodejs --from=builder /app/public ./public
 
 # Copy custom server
-COPY --from=builder /app/server.ts ./server.ts
+COPY --chown=nextjs:nodejs --from=builder /app/server.ts ./server.ts
 
 # Copy database schema and migrations
-COPY --from=builder /app/drizzle ./drizzle
-COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
-COPY --from=builder /app/schema ./schema
-COPY --from=builder /app/lib ./lib
+COPY --chown=nextjs:nodejs --from=builder /app/drizzle ./drizzle
+COPY --chown=nextjs:nodejs --from=builder /app/drizzle.config.ts ./drizzle.config.ts
+COPY --chown=nextjs:nodejs --from=builder /app/schema ./schema
+COPY --chown=nextjs:nodejs --from=builder /app/lib ./lib
 
 # Copy config files needed at runtime
 COPY --from=builder /app/tsconfig.json ./tsconfig.json

@@ -231,7 +231,8 @@ cp .env.example .env
 docker compose up
 ```
 
-The app will be available at **https://localhost** (accept the self-signed certificate warning in your browser).
+The app will be available at **https://localhost:8443** (accept the self-signed certificate warning in your browser).
+*Note: If running on a local machine with root privileges where ports 80/443 can be mapped, you can edit `compose.yaml` to bind `443:443` and access via `https://localhost`.*
 
 ### Local Development
 
@@ -263,7 +264,7 @@ pnpm test:coverage # Run tests with coverage report
 ### 42 OAuth Setup
 
 1. Create an OAuth application in the 42 Intra admin panel.
-2. Set the callback URL to: `https://localhost/api/auth/oauth2/callback/42`
+2. Set the callback URL to: `https://localhost:8443/api/auth/oauth2/callback/42`
 3. Set `FORTYTWO_CLIENT_ID` and `FORTYTWO_CLIENT_SECRET` in your `.env` file.
 
 ### Environment Variables
@@ -272,7 +273,7 @@ pnpm test:coverage # Run tests with coverage report
 |----------|-------------|----------|
 | `DATABASE_URL` | Path to SQLite database file | Yes |
 | `BETTER_AUTH_SECRET` | Secret key for session encryption (min 32 chars) | Yes |
-| `BETTER_AUTH_URL` | Base URL of the application (`https://localhost`) | Yes |
+| `BETTER_AUTH_URL` | Base URL of the application (`https://localhost:8443`) | Yes |
 | `FORTYTWO_CLIENT_ID` | 42 OAuth client ID | For OAuth |
 | `FORTYTWO_CLIENT_SECRET` | 42 OAuth client secret | For OAuth |
 | `PORT` | Internal server port (default: 3000) | No |

@@ -19,7 +19,7 @@
 - **User profiles** — Public profiles with avatar, friend count, and status
 - **Search** — Global search across users and message history
 - **Privacy & Terms** — Complete legal pages with real content
-- **Responsive design** — Mobile-first neobrutalist UI with dark mode support
+- **Responsive design** — Mobile-first responsive neobrutalist UI
 
 ---
 
@@ -27,10 +27,10 @@
 
 | Member | Role(s) | Responsibilities |
 |--------|---------|-----------------|
-| **fmartusc** | Product Owner + Developer + Designer | Defines product vision, prioritizes features, validates completed work. Designed the neobrutalist UI/UX, implemented landing page, legal pages, and design system components. |
-| **edforte** | Technical Lead + Developer | Defines technical architecture, makes technology stack decisions, ensures code quality. Implemented authentication system (better-auth + OAuth + 2FA), database schema, and API layer. |
-| **vzashev** | Technical Lead + Developer | Reviews critical code changes, ensures best practices. Implemented real-time messaging (Socket.IO), presence system, chat interface, and file upload system. |
-| **lrocca** | Project Manager + Developer | Facilitates team coordination, tracks progress and deadlines. Implemented friend request system, notification system, search functionality, and user profiles. |
+| **fmartusc** | Product Owner + Designer + Fullstack Developer | Defines product vision, prioritizes features. Designed and built the custom neobrutalist component library from scratch using Tailwind CSS. Collaborated on frontend integration, landing page, and legal pages. |
+| **edforte** | Technical Lead + Fullstack Developer | Defines technical architecture, ensures code quality. Led authentication system (better-auth + OAuth + 2FA), database schema, and DevOps, collaborating heavily on fullstack API routes. |
+| **vzashev** | Technical Lead + Fullstack Developer | Ensures system best practices. Led Socket.IO real-time infrastructure, presence system, and file upload system, collaborating on frontend chat and database operations. |
+| **lrocca** | Project Manager + Fullstack Developer | Coordinates team workflow and timelines. Led friend requests, search engine, notification system, and user profiles, collaborating across real-time hooks and DB logic. |
 
 ---
 
@@ -98,18 +98,18 @@
        │               │ created_at         │
        │               └────────────────────┘
        │
-       │  ┌──────────────────┐        ┌──────────────────┐
-       │  │   conversation   │        │     message      │
-       │  ├──────────────────┤        ├──────────────────┤
-       ├──│ user_a_id (FK)   │◄───────│ conversation_id  │
-       └──│ user_b_id (FK)   │    ┌───│ sender_id (FK)   │
-          │ last_message_at  │    │   │ body             │
-          │ user_a_last_read │    │   │ file_name        │
-          │ user_b_last_read │    │   │ file_url         │
-          └──────────────────┘    │   │ file_type        │
-                                  │   │ file_size        │
-                                  │   │ created_at       │
-                                  │   └──────────────────┘
+       │  ┌─────────────────────┐        ┌──────────────────┐
+       │  │    conversation     │        │     message      │
+       ├──├─────────────────────┤        ├──────────────────┤
+       ├──│ user_a_id (FK)      │◄───────│ conversation_id  │
+       └──│ user_b_id (FK)      │    ┌───│ sender_id (FK)   │
+          │ last_message_at     │    │   │ body             │
+          │ user_a_last_read_at │    │   │ file_name        │
+          │ user_b_last_read_at │    │   │ file_url         │
+          └─────────────────────┘    │   │ file_type        │
+                                     │   │ file_size        │
+                                     │   │ created_at       │
+                                     │   └──────────────────┘
 ```
 
 **Key design decisions:**
@@ -138,7 +138,6 @@
 | Online presence | Real-time online/offline indicators | vzashev |
 | Notifications | Unread count badges for messages and requests | lrocca |
 | Read receipts | Track last read timestamp per conversation | vzashev |
-| Dark mode | Light/dark theme toggle | fmartusc |
 | Design system | 19+ reusable neobrutalist components | fmartusc |
 | Privacy Policy | Legal page with real content | fmartusc |
 | Terms of Service | Legal page with real content | fmartusc |
@@ -155,7 +154,7 @@
 | ✅ | Web | Real-time features (Socket.IO) | Major | 2 | Socket.IO handles real-time messaging, presence tracking, and notification broadcasts. Graceful reconnection with exponential backoff. |
 | ✅ | Web | User interactions (chat + profile + friends) | Major | 2 | Complete chat system (text + files), user profiles with avatar/friend count, mutual friend request system with accept/reject flow. |
 | ✅ | Web | ORM (Drizzle) | Minor | 1 | Drizzle ORM provides type-safe database access with migration support. Schema defined in TypeScript with relations. |
-| ✅ | Web | Custom design system (19+ components) | Minor | 1 | Neobrutalist design system built on shadcn/ui: Button, Input, Avatar, Card, Dialog, Toast, Sidebar, Badge, Skeleton, and 10+ more. |
+| ✅ | Web | Custom design system (19+ components) | Minor | 1 | Custom-built neobrutalist component library styled from scratch using Tailwind CSS, inspired by shadcn/ui structures for semantic HTML and accessibility: Button, Input, Avatar, Card, Dialog, Toast, Sidebar, Badge, Skeleton, and 10+ more. |
 | ✅ | Web | Server-Side Rendering (SSR) | Minor | 1 | Next.js App Router uses React Server Components by default. Layouts, legal pages, and the route proxy are server-rendered for performance and SEO. |
 | ✅ | Web | File upload and management | Minor | 1 | Upload images, documents, and videos. Server-side validation (MIME type + magic bytes), secure storage, file preview in chat, access control per conversation. |
 | ✅ | User Mgmt | Standard user management | Major | 2 | Profile editing, avatar upload with default fallback, friend system with online status, profile pages with user information. |
@@ -173,17 +172,18 @@
 
 ## Individual Contributions
 
+*While each member was designated as the lead for specific modules to ensure clear ownership, the project was developed in a highly collaborative and cross-functional environment. All team members actively participated in code reviews, UI layout adjustments, backend logic debugging, and integration testing across all layers of the codebase.*
+
 ### fmartusc (Product Owner + Designer)
 - Designed the neobrutalist visual identity and UI/UX
 - Implemented the landing page (`app/page.tsx`) and global layout
-- Created the design system: 19+ shadcn/ui components customized for neobrutalism (`components/ui/`)
+- Designed and built the custom neobrutalist component library from scratch using Tailwind CSS (19+ components in `components/ui/`)
 - Built Privacy Policy and Terms of Service pages with real content (`app/(legal)/`)
-- Implemented dark mode support with theme toggle
 - Defined product backlog and feature priorities
 
 ### edforte (Technical Lead)
 - Defined the technical architecture: Next.js custom server + Socket.IO single-process design
-- Designed and implemented the database schema with Drizzle ORM (`schema/auth.ts`, migrations)
+- Designed and implemented the database schema with Drizzle ORM (`schema/index.ts`, migrations)
 - Implemented authentication: better-auth configuration, email/password, OAuth 42 integration (`lib/auth.ts`)
 - Implemented Two-Factor Authentication: TOTP enable/disable/verify flow (`components/feature/settings/`)
 - Set up Docker deployment with multi-stage build, Caddy HTTPS reverse proxy
@@ -233,7 +233,8 @@ cp .env.example .env
 docker compose up
 ```
 
-The app will be available at **https://localhost** (accept the self-signed certificate warning in your browser).
+The app will be available at **https://localhost:8443** (accept the self-signed certificate warning in your browser).
+*Note: If running on a local machine with root privileges where ports 80/443 can be mapped, you can edit `compose.yaml` to bind `443:443` and access via `https://localhost`.*
 
 ### Local Development
 
@@ -265,7 +266,7 @@ pnpm test:coverage # Run tests with coverage report
 ### 42 OAuth Setup
 
 1. Create an OAuth application in the 42 Intra admin panel.
-2. Set the callback URL to: `https://localhost/api/auth/oauth2/callback/42`
+2. Set the callback URL to: `https://localhost:8443/api/auth/oauth2/callback/42`
 3. Set `FORTYTWO_CLIENT_ID` and `FORTYTWO_CLIENT_SECRET` in your `.env` file.
 
 ### Environment Variables
@@ -274,7 +275,7 @@ pnpm test:coverage # Run tests with coverage report
 |----------|-------------|----------|
 | `DATABASE_URL` | Path to SQLite database file | Yes |
 | `BETTER_AUTH_SECRET` | Secret key for session encryption (min 32 chars) | Yes |
-| `BETTER_AUTH_URL` | Base URL of the application (`https://localhost`) | Yes |
+| `BETTER_AUTH_URL` | Base URL of the application (`https://localhost:8443`) | Yes |
 | `FORTYTWO_CLIENT_ID` | 42 OAuth client ID | For OAuth |
 | `FORTYTWO_CLIENT_SECRET` | 42 OAuth client secret | For OAuth |
 | `PORT` | Internal server port (default: 3000) | No |
